@@ -1,0 +1,19 @@
+pathInfo:
+  inputPdb: "/home/esp/scriptDevelopment/drMD/00_inputs/cvFAP_WT_PLM_FAD.pdb"
+  outputDir: "/home/esp/scriptDevelopment/drMD/01_outputs"
+  outputName: "cvFAP_FAD_PLM"
+proteinInfo:
+  nProteins: 1
+  proteins:
+    - proteinName: "cvFAP_WT"
+      protons: False
+ligandInfo:
+  nLigands: 2
+  ligands:
+    - ligandName: "PLM"
+      protons: False
+      charge: -1
+    - ligandName: "FAD"
+      protons: False
+      charge: -2
+
