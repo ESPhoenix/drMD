@@ -17,7 +17,10 @@ def df2Pdb(df, outFile):
             pdbLine += f"{row['Y']:>8.3f}"
             pdbLine += f"{row['Z']:>8.3f}"
             pdbLine += f"{row['OCCUPANCY']:>6.2f}"
-            pdbLine += f"{row['BETAFACTOR']:>6.2f}"
+            try:
+                pdbLine += f"{row['BETAFACTOR']:>6.2f}"
+            except:
+                pdbLine += row["BETAFACTOR"]
             pdbLine += "\n"
             #pdbLine += f"{row['ELEMENT']:>12}\n"
             f.write(pdbLine)
@@ -40,7 +43,10 @@ def pdb2df(protPdb):
                 y = float(line[38:46].strip())
                 z = float(line[46:54].strip())
                 occupancy = float(line[54:60].strip())
-                temp_factor = float(line[60:66].strip())
+                try:
+                    temp_factor = float(line[60:66].strip())
+                except:
+                    temp_factor = " "*6
                 element = line[76:78].strip()
 
                 data.append([atom_type, atom_id, atom_name, res_name, chain_id, res_id, x, y, z, occupancy, temp_factor, element])
