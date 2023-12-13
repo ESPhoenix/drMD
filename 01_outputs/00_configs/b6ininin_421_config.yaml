@@ -1,0 +1,15 @@
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/00_inputs
+  inputPdb: /home/esp/scriptDevelopment/drMD/00_inputs/b6ininin_421.pdb
+  outputDir: /home/esp/scriptDevelopment/drMD/01_outputs/b6ininin_421
+  outputName: b6ininin_421
+proteinInfo:
+  nProteins: 1
+  proteins:
+  - proteinName: b6ininin_421
+    protons: false
+simulationInfo:
+- gpu: true
+  stepName: 01_energy_minimisation
+  temp: 300
+  type: EM

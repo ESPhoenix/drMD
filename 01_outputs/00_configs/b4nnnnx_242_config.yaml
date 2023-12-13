@@ -1,0 +1,15 @@
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/00_inputs
+  inputPdb: /home/esp/scriptDevelopment/drMD/00_inputs/b4nnnnx_242.pdb
+  outputDir: /home/esp/scriptDevelopment/drMD/01_outputs/b4nnnnx_242
+  outputName: b4nnnnx_242
+proteinInfo:
+  nProteins: 1
+  proteins:
+  - proteinName: b4nnnnx_242
+    protons: false
+simulationInfo:
+- gpu: true
+  stepName: 01_energy_minimisation
+  temp: 300
+  type: EM

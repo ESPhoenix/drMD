@@ -1,0 +1,15 @@
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/00_inputs
+  inputPdb: /home/esp/scriptDevelopment/drMD/00_inputs/b3iii_1_unrelaxed_rank_003_alphafold2_ptm_model_3_seed_000.pdb
+  outputDir: /home/esp/scriptDevelopment/drMD/01_outputs/b3iii_1_unrelaxed_rank_003_alphafold2_ptm_model_3_seed_000
+  outputName: b3iii_1_unrelaxed_rank_003_alphafold2_ptm_model_3_seed_000
+proteinInfo:
+  nProteins: 1
+  proteins:
+  - proteinName: b3iii_1_unrelaxed_rank_003_alphafold2_ptm_model_3_seed_000
+    protons: false
+simulationInfo:
+- gpu: true
+  stepName: 01_energy_minimisation
+  temp: 300
+  type: EM

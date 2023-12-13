@@ -7,6 +7,41 @@ import string
 from shutil import copy
 ## drMD UTILS
 from pdbUtils import *
+#####################################################################################
+def find_ligand_charge(ligDf,ligName,outDir,pH):
+    ## uses propka to identify charges on a ligand
+    #make a temportaty pdb file from the ligand dataframe
+    os.chdir(outDir)
+    tmpPdb = p.join(outDir,f"{ligName}.pdb")
+    df2Pdb(ligDf,tmpPdb,chain=False)
+    # run propka 
+    proPkaCommand = f"propka3 {tmpPdb}"
+    run(proPkaCommand,shell=True)
+    proPkaFile = f"{ligName}.pka"
+    # read propka output to extract charge at specified pH
+    with open(proPkaFile,"r") as f:
+        pkaPredictions = []
+        extract = False
+        for line in f:
+            if line.startswith("SUMMARY OF THIS PREDICTION"):
+                extract = True
+            if extract and line.startswith("-"):
+                break
+            if extract and not line =="\n":
+                pkaPredictions.append(line.split())
+        pkaPredictions = pkaPredictions[2:]
+        totalCharge = 0
+        for pred in pkaPredictions:
+            if pred[-1][0] == "O":
+                if float(pred[-2]) < pH:
+                    totalCharge += -1
+            elif pred[-1][0] == "N":
+                if float(pred[-2]) > pH:
+                    totalCharge += 1
+    # clean up
+    os.remove(tmpPdb)
+    os.remove(proPkaFile)
+    return totalCharge
 
 #####################################################################################
 def split_input_pdb(inputPdb,config,outDir):

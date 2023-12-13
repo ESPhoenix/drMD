@@ -4,14 +4,18 @@ from os import path as p
 import pandas as pd
 
 ########################## write pdb dataframe to pdb file
-def df2Pdb(df, outFile):
+def df2Pdb(df, outFile,
+           chain=True):
     with open(outFile,"w") as f:
         for _, row in df.iterrows():
             pdbLine = f"{row['ATOM']:<6}"
             pdbLine += f"{row['ATOM_ID']:>5}{' '*2}"
             pdbLine += f"{row['ATOM_NAME']:<4}"
             pdbLine += f"{row['RES_NAME']:<4}"
-            pdbLine += f"{row['CHAIN_ID']:<1}{' '*1}"
+            if chain:
+                pdbLine += f"{row['CHAIN_ID']:<1}{' '*1}"
+            else:
+                pdbLine += ' '*2
             pdbLine += f"{row['RES_ID']:<7}"
             pdbLine += f"{row['X']:>8.3f}"
             pdbLine += f"{row['Y']:>8.3f}"
@@ -21,8 +25,11 @@ def df2Pdb(df, outFile):
                 pdbLine += f"{row['BETAFACTOR']:>6.2f}"
             except:
                 pdbLine += row["BETAFACTOR"]
-            pdbLine += "\n"
-            #pdbLine += f"{row['ELEMENT']:>12}\n"
+            try:
+                pdbLine += f"{row['ELEMENT']:>12}\n"
+            except:
+                element = row["ATOM_NAME"][0]
+                pdbLine += f"{element:>12}\n"
             f.write(pdbLine)
 ############################### read pdb file as pdb dataframe
 def pdb2df(protPdb):

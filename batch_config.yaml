@@ -1,18 +1,13 @@
 ########################################################################
 pathInfo:
   inputDir: "/home/esp/scriptDevelopment/drMD/00_inputs"
-  inputPdb: "/home/esp/scriptDevelopment/drMD/00_inputs/b4innn_0.pdb"
   outputDir: "/home/esp/scriptDevelopment/drMD/01_outputs"
-  outputName: "cvFAP_FAD_PLM"
-########################################################################
-proteinInfo:
-  nProteins: 1
-  proteins:
-    - proteinName: "b4innn_0"
-      protons: False
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
+    gpu: True
 ########################################################################
+cleanUpInfo:
+  pdbOnly: True
