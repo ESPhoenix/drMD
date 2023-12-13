@@ -1,0 +1,15 @@
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/00_inputs
+  inputPdb: /home/esp/scriptDevelopment/drMD/00_inputs/b5ininn_364.pdb
+  outputDir: /home/esp/scriptDevelopment/drMD/01_outputs/b5ininn_364
+  outputName: b5ininn_364
+proteinInfo:
+  nProteins: 1
+  proteins:
+  - proteinName: b5ininn_364
+    protons: false
+simulationInfo:
+- gpu: true
+  stepName: 01_energy_minimisation
+  temp: 300
+  type: EM

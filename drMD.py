@@ -26,7 +26,7 @@ def check_inputs(config):
     if not config["proteinInfo"]["nProteins"] == len(config["proteinInfo"]["proteins"]):
         print("Number of proteins in config does not match nProteins")
         exit()
-    if "ligandInfo" in config:
+    if "ligandInfo" in config and not "ligandInfo" == None:
         if not config["ligandInfo"]["nLigands"] == len(config["ligandInfo"]["ligands"]):
             print("Number of ligands in config does not match nLigands")
             exit()
@@ -36,9 +36,9 @@ def check_inputs(config):
 
 #####################################################################################
 #####################################################################################
-def main():
+def drMD_protocol():
     config = read_inputs()
-    check_inputs(config=config)
+    #check_inputs(config=config)
     ## MAKE OUTPUT DIRECTORY
     outDir = config["pathInfo"]["outputDir"]
     prepDir = p.join(outDir,"00_prep")
@@ -86,4 +86,5 @@ def main():
                    amberParams=amberParams)
 #####################################################################################
 #####################################################################################
-main()
+if __name__ == drMD_protocol():
+    drMD_protocol()

@@ -1,0 +1,15 @@
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/00_inputs
+  inputPdb: /home/esp/scriptDevelopment/drMD/00_inputs/b3iii_0.pdb
+  outputDir: /home/esp/scriptDevelopment/drMD/01_outputs/b3iii_0
+  outputName: b3iii_0
+proteinInfo:
+  nProteins: 1
+  proteins:
+  - proteinName: b3iii_0
+    protons: false
+simulationInfo:
+- gpu: true
+  stepName: 01_energy_minimisation
+  temp: 300
+  type: EM
