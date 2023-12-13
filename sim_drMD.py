@@ -6,9 +6,6 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.unit import *
 from sys import stdout
-
-
-
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
 
@@ -71,7 +68,7 @@ def run_npt(system, prmtop, simData, saveXml, simDir):
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
-    simulation.reporters.append(PDBReporter(p.join(simDir,'NpT_step.pdb'), 1000))
+    simulation.reporters.append(DCDReporter(p.join(simDir,'NpT_step.dcd'), 1000))
     simulation.reporters.append(StateDataReporter(stdout, 1000, step=True,
                                 potentialEnergy=True, temperature=True))
     # run NVT simulation
