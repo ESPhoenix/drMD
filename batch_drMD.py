@@ -8,6 +8,12 @@ import argpass
 ## CUSTOM LIBS
 from pdbUtils import *
 from prep_drMD import *
+from concurrent.futures import ThreadPoolExecutor
+
+CURRENT_DIR = p.dirname(p.abspath(__file__))
+DRMD_SCRIPT_PATH = p.join(CURRENT_DIR, 'drMD.py')
+
+
 #####################################################################################################
 def read_inputs():
     ## create an argpass parser, read config file, snip off ".py" if on the end of file
@@ -20,6 +26,58 @@ def read_inputs():
     with open(batchConfig,"r") as yamlFile:
         batchConfig = yaml.safe_load(yamlFile) 
     return batchConfig
+
+#####################################################################################################
+def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir):
+    # Skip if not a PDB file
+    fileData = p.splitext(pdbFile)
+    if not fileData[1] == ".pdb":
+        return
+
+    # Extract basic info, make dirs
+    protName = fileData[0]
+    pdbPath = p.join(pdbDir, pdbFile)
+    runDir = p.join(outDir, protName)
+    os.makedirs(runDir, exist_ok=True)
+
+    # Convert to DataFrame, extract rest of info
+    pdbDf = pdb2df(pdbPath)
+    proteinInfo, ligandInfo = extract_info(pdbDf, pdbDir, protName, yamlDir)
+
+    # Get path info
+    pathInfo = {
+        "inputDir": pdbDir,
+        "inputPdb": pdbPath,
+        "outputDir": runDir,
+        "outputName": protName
+    }
+
+    # Combine infos into one dict (ignore ligInfo if empty)
+    if ligandInfo is None:
+        config = {
+            "pathInfo": pathInfo,
+            "proteinInfo": proteinInfo,
+            "simulationInfo": simInfo
+        }
+    else:
+        config = {
+            "pathInfo": pathInfo,
+            "proteinInfo": proteinInfo,
+            "ligandInfo": ligandInfo,
+            "simulationInfo": simInfo
+        }
+
+    # Write config to YAML
+    yamlFile = p.join(yamlDir, f"{protName}_config.yaml")
+    with open(yamlFile, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+    # Run drMD MD protocol
+    os.chdir(topDir)
+    drMdCommand = f"python {DRMD_SCRIPT_PATH} --config {yamlFile}"
+    run(drMdCommand, shell=True)
+
+
 ######################################################################################################
 def main():
     ## SORT OUT DIRECTORIES
@@ -31,43 +89,12 @@ def main():
     simInfo = batchConfig["simulationInfo"]
     os.makedirs(yamlDir,exist_ok=True)
     ## LOOP THROUGH PDB FILES IN INPUT DIR
-    for pdbFile in os.listdir(pdbDir):
-        ## SKIP IF NOT A PDB FILE
-        fileData = p.splitext(pdbFile)
-        if not fileData[1] == ".pdb":
-            continue
-        ## EXTRACT BASIC INFO, MAKE DIRS
-        protName = fileData[0]
-        pdbPath = p.join(pdbDir,pdbFile)
-        runDir = p.join(outDir,protName)
-        ## COVERT TO DF, EXTRACT REST OF INFO
-        pdbDf = pdb2df(pdbPath)
-        proteinInfo, ligandInfo = extract_info(pdbDf,pdbDir,protName,yamlDir)
-        ## GET PATH INFO
-        pathInfo = {"inputDir":pdbDir,
-                    "inputPdb":pdbPath,
-                    "outputDir":runDir,
-                    "outputName":protName}
-        ## COMBINE INFOS INTO ONE DICT (IGNORE LIGINFO IF EMPTY)
-        if ligandInfo == None:
-            config = {"pathInfo":pathInfo,
-                  "proteinInfo":proteinInfo,
-                  "simulationInfo":simInfo}
-        else:
-            config = {"pathInfo":pathInfo,
-                    "proteinInfo":proteinInfo,
-                    "ligandInfo":ligandInfo,
-                    "simulationInfo":simInfo}
-        ## WRITE CONFIG TO YAML
-        yamlFile = p.join(yamlDir,f"{protName}_config.yaml")
-        with open(yamlFile,"w") as f:
-            yaml.dump(config,f,default_flow_style=False)
-
-        ## RUN drMD MD PROTOCOL
-        os.chdir(topDir)
-        drMdCommand = f"python drMD.py --config {yamlFile}"
-        run(drMdCommand,shell=True)
-        
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        for pdbFile in os.listdir(pdbDir):
+            fileData = p.splitext(pdbFile)
+            if not fileData[1] == ".pdb":
+                continue
+            executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir)
    ## CLEAN UP
     clean_up(batchConfig,outDir)
  
@@ -96,12 +123,6 @@ def clean_up(batchConfig,outDir):
                 continue
             dirPath = p.join(outDir,dir)
             rmtree(dirPath)
-
-
-
-
-
-
 
 ######################################################################################################
 def extract_info(pdbDf,pdbDir,protName,yamlDir): ## gets info from pdb file, writes a config file
