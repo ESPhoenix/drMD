@@ -77,7 +77,6 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir):
     drMdCommand = f"python {DRMD_SCRIPT_PATH} --config {yamlFile}"
     run(drMdCommand, shell=True)
 
-
 ######################################################################################################
 def main():
     ## SORT OUT DIRECTORIES
@@ -88,7 +87,6 @@ def main():
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
     os.makedirs(yamlDir,exist_ok=True)
-    ## LOOP THROUGH PDB FILES IN INPUT DIR
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         for pdbFile in os.listdir(pdbDir):
             fileData = p.splitext(pdbFile)
