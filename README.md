@@ -21,4 +21,5 @@ conda install -c omnia openmm
 pip install argpass
 pip install pyyaml
 pip install pandas
+pip install propka
 ```
