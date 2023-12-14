@@ -7,7 +7,20 @@ simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
-    gpu: True
+
+  - stepName: "02_NVT_pre-equilibraition"
+    type: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    freezeHeavy: True
+    temp: 300
+
+#  - stepName: "03_NpT_pre-equilibriation"
+ #   type: "NpT"
+  #  duration: "100 ps"
+   # timestep: "2 fs"
+  #  freezeHeavy: False
+  #  temp: 300
 ########################################################################
 cleanUpInfo:
-  pdbOnly: True
+  pdbOnly: False
