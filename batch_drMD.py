@@ -12,10 +12,10 @@ from prep_drMD import *
 def read_inputs():
     ## create an argpass parser, read config file, snip off ".py" if on the end of file
     parser = argpass.ArgumentParser()
-    parser.add_argument("--bc")
+    parser.add_argument("--config")
     args = parser.parse_args()
 
-    batchConfig=args.bc
+    batchConfig=args.config
     ## Read config.yaml into a dictionary
     with open(batchConfig,"r") as yamlFile:
         batchConfig = yaml.safe_load(yamlFile) 

@@ -6,9 +6,11 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.unit import *
 from sys import stdout
+## CUSTOM LIBS
+from constraints_drMD import *
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
-
+    # set up simple unit translator
     timescale = {"fs":femtoseconds,
                  "ps":picoseconds,
                  "ns":nanoseconds}
@@ -34,14 +36,14 @@ def run_simulation(config, outDir, inputCoords, amberParams):
             saveXml = run_energy_minimisation(prmtop, inpcrd, system, simDir)
 
         elif sim["type"] == "NVT":
-            simData = read_sim_data(sim,timescale)
-            saveXml = run_nvt(system, prmtop, simData, saveXml, simDir)
+            sim = process_sim_data(sim,timescale)
+            saveXml = run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir)
 
         elif sim["type"] in ["NpT","NPT"]:
-            simData = read_sim_data(sim,timescale)
-            saveXml = run_npt(system, prmtop, simData, saveXml, simDir)
+            sim = process_sim_data(sim,timescale)
+            saveXml = run_npt(system, prmtop, inpcrd, sim, saveXml, simDir)
 ###########################################################################################
-def read_sim_data(sim,timescale):
+def process_sim_data(sim,timescale):
     # Reads simulation variables from config file and processes them
     timestepData = sim["timestep"].split()
     timestep = int(timestepData[0]) * timescale[timestepData[1]]
@@ -52,18 +54,22 @@ def read_sim_data(sim,timescale):
     temp = sim["temp"] * kelvin
 
 
-    simData = {"timeStep":timestep,
+    sim.update({"timeStep":timestep,
                 "duration": duration,
                 "nSteps":nSteps,
                 "nLogSteps":nLogSteps,
-                "temp":temp}
-    return simData
+                "temp":temp})
+    return sim
 ###########################################################################################
-def run_npt(system, prmtop, simData, saveXml, simDir):
+def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
     # add constant pressure force to system (makes this an NpT simulation)
-    system.addForce(MonteCarloBarostat(1*bar, simData["temp"]))
+    system.addForce(MonteCarloBarostat(1*bar, sim["temp"]))
+    if sim["freezeHeavy"]:
+        print("Adding position restraints to heavy atoms!")
+        heavyFreezeForce = gen_freeze_heavy_atoms_force(prmtop,inpcrd)
+        system.addForce(heavyFreezeForce)
     # set up intergrator and system
-    integrator = LangevinMiddleIntegrator(simData["temp"], 1/picosecond, simData["timeStep"])
+    integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
     simulation = Simulation(prmtop.topology, system, integrator)
     # load state from previous simulation
     simulation.loadState(saveXml)
@@ -71,16 +77,24 @@ def run_npt(system, prmtop, simData, saveXml, simDir):
     simulation.reporters.append(DCDReporter(p.join(simDir,'NpT_step.dcd'), 1000))
     simulation.reporters.append(StateDataReporter(stdout, 1000, step=True,
                                 potentialEnergy=True, temperature=True))
+    if inpcrd.boxVectors is not None:
+        simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
     # run NVT simulation
-    simulation.step(simData["nSteps"])
+    simulation.step(sim["nSteps"])
     # save simulation as XML
     saveXml = p.join(simDir,"NpT_step.xml")
     simulation.saveState(saveXml)
     return saveXml
 ###########################################################################################
-def run_nvt(system, prmtop, simData, saveXml, simDir):
+def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
+    ## Add position restraints to heavy atoms if instructed
+    if sim["freezeHeavy"]:
+        print("Adding position restraints to heavy atoms!")
+        system = heavy_atom_position_restraints(system,prmtop,inpcrd)
+      
+
     # set up intergrator and system
-    integrator = LangevinMiddleIntegrator(simData["temp"], 1/picosecond, simData["timeStep"])
+    integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
     simulation = Simulation(prmtop.topology, system, integrator)
     # load state from previous simulation
     simulation.loadState(saveXml)
@@ -88,8 +102,11 @@ def run_nvt(system, prmtop, simData, saveXml, simDir):
     simulation.reporters.append(DCDReporter(p.join(simDir,'NVT_step.dcd'), 1000))
     simulation.reporters.append(StateDataReporter(p.join(simDir,'NVT_step.csv'), 1000, time=True,
         kineticEnergy=True, potentialEnergy=True))
+    # box vectors
+    if inpcrd.boxVectors is not None:
+        simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
     # run NVT simulation
-    simulation.step(simData["nSteps"])
+    simulation.step(sim["nSteps"])
     # save simulation as XML
     saveXml = p.join(simDir,"NVT_step.xml")
     simulation.saveState(saveXml)
@@ -97,6 +114,8 @@ def run_nvt(system, prmtop, simData, saveXml, simDir):
 
 ###########################################################################################
 def run_energy_minimisation(prmtop, inpcrd, system, simDir):
+    print("Running Energy Minimisation!")
+
     # set up intergrator and simulation
     integrator = LangevinMiddleIntegrator(300*kelvin, 1/picosecond, 0.004*picoseconds)
     simulation = Simulation(prmtop.topology, system, integrator)
