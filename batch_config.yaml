@@ -1,7 +1,7 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/tadas/bin/drMD/00_inputs"
-  outputDir: "/home/tadas/bin/drMD/01_outputs"
+  inputDir: "full/path/to/drMD/00_inputs"
+  outputDir: "full/path/to/drMD/01_outputs"
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
