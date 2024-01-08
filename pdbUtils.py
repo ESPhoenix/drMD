@@ -12,9 +12,9 @@ def df2Pdb(df, outFile,
             pdbLine += f"{row['ATOM_ID']:>5}{' '*2}"
             pdbLine += f"{row['ATOM_NAME']:<4}"
             pdbLine += f"{row['RES_NAME']:<4}"
-            if chain:
+            try: 
                 pdbLine += f"{row['CHAIN_ID']:<1}{' '*1}"
-            else:
+            except:
                 pdbLine += ' '*2
             pdbLine += f"{row['RES_ID']:<7}"
             pdbLine += f"{row['X']:>8.3f}"
@@ -66,4 +66,23 @@ def mergePdbs(pdbList,outFile):
         df = pdb2df(pdbFile)
         dfList.append(df)
     mergedDf = pd.concat(dfList,axis=0)
-    df2Pdb(df=mergedDf, outFile=outFile)
+    df2Pdb(df=mergedDf, outFile=outFile, chain=True)
+
+############################### apply a a bunch of fixes to a pdb dataframe
+def fix_atom_names(df): 
+    # deal with unwanted apostrophies (prime)
+    df['ATOM_NAME'] = df['ATOM_NAME'].str.replace("'", "")
+    # deal with numbers at the beginnig of atom names
+    df['ATOM_NAME'] = df['ATOM_NAME'].replace(r'^(\d+)(.+)$', r'\2\1', regex=True)
+    # deal with "A" at the start of atom name
+    df['ATOM_NAME'] = df['ATOM_NAME'].apply(lambda x: x.lstrip('A') if x.startswith('A') else x)
+
+    ## ensure unique names
+    count_series = df.groupby('ATOM_NAME').cumcount()
+    df['ATOM_NAME'] = df['ATOM_NAME'] + "_" +count_series.astype(str)
+    df['ATOM_NAME'] = df['ATOM_NAME'].str.replace("_0", "")
+    df['ATOM_NAME'] = df['ATOM_NAME'].str.replace("_", "")
+
+    return df 
+
+

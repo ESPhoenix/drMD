@@ -1,19 +1,19 @@
 ########################################################################
 pathInfo:
-  inputDir: "full/path/to/drMD/00_inputs"
-  outputDir: "full/path/to/drMD/01_outputs"
+  inputDir: "/home/esp/scriptDevelopment/drMD/00_inputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/01_outputs"
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
 
-  - stepName: "02_NVT_pre-equilibraition"
-    type: "NVT"
-    duration: "100 ps"
-    timestep: "2 fs"
-    freezeHeavy: True
-    temp: 300
+#  - stepName: "02_NVT_pre-equilibraition"
+#    type: "NVT"
+#    duration: "100 ps"
+#    timestep: "2 fs"
+#    freezeHeavy: True
+#    temp: 300
 
 #  - stepName: "03_NpT_pre-equilibriation"
  #   type: "NpT"
