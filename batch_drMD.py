@@ -66,7 +66,6 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir):
             "ligandInfo": ligandInfo,
             "simulationInfo": simInfo
         }
-
     # Write config to YAML
     yamlFile = p.join(yamlDir, f"{protName}_config.yaml")
     with open(yamlFile, "w") as f:
@@ -87,6 +86,20 @@ def main():
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
     os.makedirs(yamlDir,exist_ok=True)
+    run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+   # run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+
+###################################################################################################### 
+def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+    for pdbFile in os.listdir(pdbDir):
+        fileData = p.splitext(pdbFile)
+        if not fileData[1] == ".pdb":
+            continue  
+        process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir)
+    ## CLEAN UP
+   # clean_up(batchConfig,outDir)
+######################################################################################################
+def run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         for pdbFile in os.listdir(pdbDir):
             fileData = p.splitext(pdbFile)
@@ -95,7 +108,6 @@ def main():
             executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir)
    ## CLEAN UP
     clean_up(batchConfig,outDir)
- 
 ######################################################################################################
 def clean_up(batchConfig,outDir):
     simulationInfo = batchConfig["simulationInfo"]
@@ -125,10 +137,10 @@ def clean_up(batchConfig,outDir):
 ######################################################################################################
 def extract_info(pdbDf,pdbDir,protName,yamlDir): ## gets info from pdb file, writes a config file
     ## GET PROTEIN INFORMATION
-    aminoAcids = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
+    aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
                     'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
-                      'LEU', 'LYS', 'MET', 'PHE', 'PRO',
-                        'SER', 'THR', 'TRP', 'TYR', 'VAL']
+                    'LEU', 'LYS', 'MET', 'PHE', 'PRO',
+                    'SER', 'THR', 'TRP', 'TYR', 'VAL']
     protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids)]
 
     protH = False
