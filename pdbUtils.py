@@ -71,17 +71,17 @@ def mergePdbs(pdbList,outFile):
 ############################### apply a a bunch of fixes to a pdb dataframe
 def fix_atom_names(df): 
     # deal with unwanted apostrophies (prime)
-    df['ATOM_NAME'] = df['ATOM_NAME'].str.replace("'", "")
+    df.loc[:,'ATOM_NAME'] = df['ATOM_NAME'].str.replace("'", "")
     # deal with numbers at the beginnig of atom names
-    df['ATOM_NAME'] = df['ATOM_NAME'].replace(r'^(\d+)(.+)$', r'\2\1', regex=True)
+    df.loc[:,'ATOM_NAME'] = df['ATOM_NAME'].replace(r'^(\d+)(.+)$', r'\2\1', regex=True)
     # deal with "A" at the start of atom name
-    df['ATOM_NAME'] = df['ATOM_NAME'].apply(lambda x: x.lstrip('A') if x.startswith('A') else x)
+    df.loc[:,'ATOM_NAME'] = df['ATOM_NAME'].apply(lambda x: x.lstrip('A') if x.startswith('A') else x)
 
     ## ensure unique names
     count_series = df.groupby('ATOM_NAME').cumcount()
-    df['ATOM_NAME'] = df['ATOM_NAME'] + "_" +count_series.astype(str)
-    df['ATOM_NAME'] = df['ATOM_NAME'].str.replace("_0", "")
-    df['ATOM_NAME'] = df['ATOM_NAME'].str.replace("_", "")
+    df.loc[:,'ATOM_NAME'] = df['ATOM_NAME'] + "_" +count_series.astype(str)
+    df.loc[:,'ATOM_NAME'] = df['ATOM_NAME'].str.replace("_0", "")
+    df.loc[:,'ATOM_NAME'] = df['ATOM_NAME'].str.replace("_", "")
 
     return df 
 
