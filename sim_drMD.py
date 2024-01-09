@@ -7,7 +7,7 @@ from simtk.openmm import *
 from simtk.unit import *
 from sys import stdout
 ## CUSTOM LIBS
-from constraints_drMD import *
+from constraints_drMD import heavy_atom_position_restraints
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
     # set up simple unit translator
@@ -66,8 +66,7 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
     system.addForce(MonteCarloBarostat(1*bar, sim["temp"]))
     if sim["freezeHeavy"]:
         print("Adding position restraints to heavy atoms!")
-        heavyFreezeForce = gen_freeze_heavy_atoms_force(prmtop,inpcrd)
-        system.addForce(heavyFreezeForce)
+        system = heavy_atom_position_restraints(system,prmtop,inpcrd)
     # set up intergrator and system
     integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
     simulation = Simulation(prmtop.topology, system, integrator)
