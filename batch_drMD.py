@@ -87,7 +87,7 @@ def main():
     simInfo = batchConfig["simulationInfo"]
     os.makedirs(yamlDir,exist_ok=True)
     run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-   # run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
+   # run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
