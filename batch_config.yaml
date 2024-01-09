@@ -1,7 +1,8 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/00_inputs"
-  outputDir: "/home/esp/scriptDevelopment/drMD/01_outputs"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/02_outputs"
+########################################################################
 ########################################################################
 ligandInfo:
   nLigands: 2
@@ -9,32 +10,47 @@ ligandInfo:
     - ligandName: "PLM"
       protons: False
       charge: -1
-      toppar: False
-      mol2: False
+      toppar: True
+      mol2: True
     - ligandName: "FAD"
       protons: True
       charge: -2
-      toppar: False
-      mol2: False
+      toppar: True
+      mol2: True
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
 
-#  - stepName: "02_NVT_pre-equilibraition"
-#    type: "NVT"
-#    duration: "100 ps"
-#    timestep: "2 fs"
-#    freezeHeavy: True
-#    temp: 300
+  - stepName: "02_NVT_pre-equilibraition"
+    type: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    freezeHeavy: True
+    temp: 300
 
-#  - stepName: "03_NpT_pre-equilibriation"
- #   type: "NpT"
-  #  duration: "100 ps"
-   # timestep: "2 fs"
-  #  freezeHeavy: False
-  #  temp: 300
+  - stepName: "03_NpT_pre-equilibriation"
+    type: "NpT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    freezeHeavy: True
+    temp: 300
+
+  - stepName: "04_NpT_equilibriation"
+    type: "NpT"
+    duration: "10 ns"
+    timestep: "2 fs"
+    freezeHeavy: False
+    temp: 300
+
+  - stepName: "05_NpT_production MD"
+    type: "NpT"
+    duration: "50 ns"
+    timestep: "2 fs"
+    freezeHeavy: False
+    temp: 300
+
 ########################################################################
 cleanUpInfo:
   pdbOnly: False
