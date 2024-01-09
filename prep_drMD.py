@@ -61,27 +61,15 @@ def split_input_pdb(inputPdb,config,outDir):
     protPrepDir = p.join(outDir,"PROT")
     os.makedirs(protPrepDir,exist_ok=True)
     df2Pdb(pdbDf,p.join(protPrepDir,"PROT.pdb"))
-#####################################################################################
-def prepare_ligand_parameters(config, outDir):
-    # read inputs from config file
-    ligandsDict = config["ligandInfo"]["ligands"]
-    inputDir = config["pathInfo"]["inputDir"]
-    mainDir = p.dirname(config["pathInfo"]["outputDir"])
-    # create a dir to save parameter files in (saves re-running on subsequent runs)
-    ligParamDir = p.join(mainDir,"01_ligand_parameters")
-    os.makedirs(ligParamDir,exist_ok=True)
-    # initialise list to store pdb files and dict to store all info
-    ligandPdbs = []
-    ligandFileDict = {}
-    # for each ligand in config
-    for ligand in ligandsDict:
-        ligFileDict = {}
-        # find files and directories
-        ligandName = ligand["ligandName"]
-        ligPrepDir = p.join(outDir,ligandName)
-        os.chdir(ligPrepDir)
+#############################  PROTONATION & PDB CREATION ###############################
+def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs):
+    if ligand["protons"]:
         ligPdb = p.join(ligPrepDir,f"{ligandName}.pdb")
-        ####  PROTONATION & PDB CREATION ####
+        ligandPdbs.append(ligPdb)
+        return ligPdb, ligandPdbs
+    else:
+        # find pdb ligand pdb file
+        ligPdb = p.join(ligPrepDir,f"{ligandName}.pdb")
         # fix atom names 
         ligDf = pdb2df(ligPdb)
         ligDf = fix_atom_names(ligDf)
@@ -104,37 +92,73 @@ def prepare_ligand_parameters(config, outDir):
         run(pdb4amberCommand,shell=True)
         ligPdb = ligPdb_amber
         ligandPdbs.append(ligPdb)
+        return ligPdb, ligandPdbs
+###############################  MOL2 CREATION #####################################
+def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFileDict):
+    ####  MOL2 CREATION ####
+    # look for mol2 from config, then in ligParamDir, if not found, create new mol2
+    if ligand["mol2"]:  # look in config
+        ligMol2 = p.join(inputDir,f"{ligandName}.mol2")
 
-        ####  MOL2 CREATION ####
-        # look for mol2 from config, then in ligParamDir, if not found, create new mol2
-        if ligand["mol2"]:  # look in config
-            ligMol2 = p.join(inputDir,f"{ligandName}.mol2")
+    elif p.isfile(p.join(ligParamDir,f"{ligandName}.mol2")): # look in ligParamDir
+        ligMol2 = p.join(ligParamDir,f"{ligandName}.mol2")
+    else:  # convert to mol2 with antechamber
+        charge = ligand["charge"]
+        ligMol2 = p.join(ligPrepDir,f"{ligandName}.mol2")
+        antechamberCommand = f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
+        run(antechamberCommand, shell=True)
+        # copy to ligParamDir for future use
+        copy(ligMol2,p.join(ligParamDir,f"{ligandName}.mol2"))
+    # add mol2  path to ligFileDict 
+    ligFileDict.update({"mol2":ligMol2})
+    return ligMol2, ligFileDict
+######################### TOPPAR CREATION ##########################################
 
-        elif p.isfile(p.join(ligParamDir,f"{ligandName}.mol2")): # look in ligParamDir
-            ligMol2 = p.join(ligParamDir,f"{ligandName}.mol2")
-        else:  # convert to mol2 with antechamber
-            charge = ligand["charge"]
-            ligMol2 = p.join(ligPrepDir,f"{ligandName}.mol2")
-            antechamberCommand = f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
-            run(antechamberCommand, shell=True)
-            # copy to ligParamDir for future use
-            copy(ligMol2,p.join(ligParamDir,f"{ligandName}.mol2"))
-        # add mol2  path to ligFileDict 
-        ligFileDict.update({"mol2":ligMol2})
+def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligFileDict):
+    # look for frcmod from config, then in ligParamDir, if not found, create new frcmod
+    if ligand["toppar"]: # look in config
+        ligFrcmod = p.join(inputDir,f"{ligandName}.frcmod") 
+    elif p.isfile(p.join(ligParamDir,f"{ligandName}.frcmod")): # look in ligParamDir
+        ligFrcmod = p.join(ligParamDir,f"{ligandName}.frcmod")    
+    else :    # use mol2 to generate amber parameters with parmchk2
+        ligFrcmod = p.join(ligPrepDir,f"{ligandName}.frcmod")
+        parmchk2Command = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
+        run(parmchk2Command,shell=True)
+        copy(ligFrcmod,p.join(ligParamDir,f"{ligandName}.frcmod"))
+    # add frcmod path to ligFileDict
+    ligFileDict.update({"frcmod":ligFrcmod})
 
-        ####  TOPPAR CREATION ####
-        # look for frcmod from config, then in ligParamDir, if not found, create new frcmod
-        if ligand["toppar"]: # look in config
-            ligFrcmod = p.join(inputDir,f"{ligandName}.frcmod") 
-        elif p.isfile(p.join(ligParamDir,f"{ligandName}.frcmod")): # look in ligParamDir
-            ligFrcmod = p.join(ligParamDir,f"{ligandName}.frcmod")    
-        else :    # use mol2 to generate amber parameters with parmchk2
-            ligFrcmod = p.join(ligPrepDir,f"{ligandName}.frcmod")
-            parmchk2Command = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
-            run(parmchk2Command,shell=True)
-            copy(ligFrcmod,p.join(ligParamDir,f"{ligandName}.frcmod"))
-        # add frcmod path to ligFileDict
-        ligFileDict.update({"frcmod":ligFrcmod})
+    return ligFileDict
+
+
+#####################################################################################
+def prepare_ligand_parameters(config, outDir):
+    # read inputs from config file
+    ligandsDict = config["ligandInfo"]["ligands"]
+    inputDir = config["pathInfo"]["inputDir"]
+    mainDir = p.dirname(config["pathInfo"]["outputDir"])
+    # create a dir to save parameter files in (saves re-running on subsequent runs)
+    ligParamDir = p.join(mainDir,"01_ligand_parameters")
+    os.makedirs(ligParamDir,exist_ok=True)
+    # initialise list to store pdb files and dict to store all info
+    ligandPdbs = []
+    ligandFileDict = {}
+    # for each ligand in config
+    for ligand in ligandsDict:
+        ligFileDict = {}
+        # find files and directories
+        ligandName = ligand["ligandName"]
+        ligPrepDir = p.join(outDir,ligandName)
+        os.chdir(ligPrepDir)
+
+        ligPdb, ligandPdbs       = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
+
+        ligMol2, ligFileDict    = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
+                                              ligPrepDir,ligPdb,ligFileDict)
+        
+        ligFileDict             =       ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
+                                                      ligPrepDir,ligMol2,ligFileDict)
+
         ligandFileDict.update({ligandName:ligFileDict})
     return ligandPdbs, ligandFileDict
 #####################################################################################
