@@ -28,7 +28,7 @@ def read_inputs():
     return batchConfig
 
 #####################################################################################################
-def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir):
+def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig):
     # Skip if not a PDB file
     fileData = p.splitext(pdbFile)
     if not fileData[1] == ".pdb":
@@ -42,7 +42,7 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir):
 
     # Convert to DataFrame, extract rest of info
     pdbDf = pdb2df(pdbPath)
-    proteinInfo, ligandInfo = extract_info(pdbDf, pdbDir, protName, yamlDir)
+    proteinInfo, ligandInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
 
     # Get path info
     pathInfo = {
@@ -87,7 +87,7 @@ def main():
     simInfo = batchConfig["simulationInfo"]
     os.makedirs(yamlDir,exist_ok=True)
     run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-   # run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+   # run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
@@ -95,7 +95,7 @@ def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
         fileData = p.splitext(pdbFile)
         if not fileData[1] == ".pdb":
             continue  
-        process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir)
+        process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
     ## CLEAN UP
    # clean_up(batchConfig,outDir)
 ######################################################################################################
@@ -105,7 +105,7 @@ def run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
             fileData = p.splitext(pdbFile)
             if not fileData[1] == ".pdb":
                 continue
-            executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir)
+            executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
    ## CLEAN UP
     clean_up(batchConfig,outDir)
 ######################################################################################################
@@ -135,7 +135,7 @@ def clean_up(batchConfig,outDir):
             rmtree(dirPath)
 
 ######################################################################################################
-def extract_info(pdbDf,pdbDir,protName,yamlDir): ## gets info from pdb file, writes a config file
+def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from pdb file, writes a config file
     ## GET PROTEIN INFORMATION
     aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
                     'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
@@ -159,32 +159,43 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir): ## gets info from pdb file, wri
         ligandInfo = None
         return proteinInfo, ligandInfo
     
-    ligList = []
-    for ligName in ligNames:
-        ligDf = ligsDf[ligsDf["RES_NAME"] == ligName]
-        ligH = False
-        if (ligDf["ELEMENT"] == "H").any():
-            ligH = True
-        ligMol2 = p.join(pdbDir,f"{ligName}.mol2")
-        mol2 = False
-        if p.isfile(ligMol2):
-            mol2 = True
-        ligFrcmod = p.join(pdbDir,f"{ligName}.frcmod")
-        frcmod = False
-        if p.isfile(ligFrcmod):
-            frcmod = True       
+    ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
+    if "ligandInfo" in batchConfig:
+        ligandInfo = batchConfig["ligandInfo"]
+        return proteinInfo, ligandInfo
+    ## CREATE ligandInfo AUTOMATICALLY (WORKS FOR SIMPLE LIGANDS)
+    else:
+        ligList = []
+        for ligName in ligNames:
+            ligDf = ligsDf[ligsDf["RES_NAME"] == ligName]
+            # deal with protonation
+            ligH = False
+            if (ligDf["ELEMENT"] == "H").any():
+                ligH = True
 
-        charge = find_ligand_charge(ligDf,ligName,yamlDir,pH=7.4)
-        tmpDict = {"ligandName":ligName,
-                   "protons":   ligH,
-                   "mol2":      mol2,
-                   "toppar":    frcmod,
-                   "charge":    charge}
-        ligList.append(tmpDict)
-    nLigands = len(ligList)
-    ligandInfo = {"nLigands":nLigands,
-                  "ligands":ligList}
+            # deal with mol2
+            ligMol2 = p.join(pdbDir,f"{ligName}.mol2")
+            mol2 = False
+            if p.isfile(ligMol2):
+                mol2 = True
+            # deal with frcmod
+            ligFrcmod = p.join(pdbDir,f"{ligName}.frcmod")
+            frcmod = False
+            if p.isfile(ligFrcmod):
+                frcmod = True  
+            # deal with charge
+            charge = find_ligand_charge(ligDf,ligName,yamlDir,pH=7.4)
+            # write to temporary dict, then to ligandInfo for configg
+            tmpDict = {"ligandName":ligName,
+                    "protons":   ligH,
+                    "mol2":      mol2,
+                    "toppar":    frcmod,
+                    "charge":    charge}
+            ligList.append(tmpDict)
+        nLigands = len(ligList)
+        ligandInfo = {"nLigands":nLigands,
+                    "ligands":ligList}
 
-    return proteinInfo, ligandInfo
+        return proteinInfo, ligandInfo
 ######################################################################################################
 main()

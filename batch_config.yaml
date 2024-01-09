@@ -3,6 +3,20 @@ pathInfo:
   inputDir: "/home/esp/scriptDevelopment/drMD/00_inputs"
   outputDir: "/home/esp/scriptDevelopment/drMD/01_outputs"
 ########################################################################
+ligandInfo:
+  nLigands: 2
+  ligands:
+    - ligandName: "PLM"
+      protons: False
+      charge: -1
+      toppar: False
+      mol2: False
+    - ligandName: "FAD"
+      protons: True
+      charge: -2
+      toppar: False
+      mol2: False
+########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
