@@ -74,8 +74,10 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
     simulation.loadState(saveXml)
     # set up reporters
     simulation.reporters.append(DCDReporter(p.join(simDir,'NpT_step.dcd'), 1000))
-    simulation.reporters.append(StateDataReporter(stdout, 1000, step=True,
-                                potentialEnergy=True, temperature=True))
+    simulation.reporters.append(StateDataReporter(p.join(simDir,'NpT_step.csv'),
+                                                   1000, time=True,
+                                                   potentialEnergy=True, temperature=True))
+
     if inpcrd.boxVectors is not None:
         simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
     # run NVT simulation
@@ -83,6 +85,12 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
     # save simulation as XML
     saveXml = p.join(simDir,"NpT_step.xml")
     simulation.saveState(saveXml)
+
+    # save result as pdb
+    state = simulation.context.getState(getPositions=True, getEnergy=True)
+    with open(p.join(simDir,"NpT_final_geom.pdb"), 'w') as output:
+        PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+
     return saveXml
 ###########################################################################################
 def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
@@ -99,8 +107,10 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
     simulation.loadState(saveXml)
     # set up reporters
     simulation.reporters.append(DCDReporter(p.join(simDir,'NVT_step.dcd'), 1000))
-    simulation.reporters.append(StateDataReporter(p.join(simDir,'NVT_step.csv'), 1000, time=True,
-        kineticEnergy=True, potentialEnergy=True))
+    simulation.reporters.append(StateDataReporter(p.join(simDir,'NVT_step.csv'),
+                                                   1000, time=True,
+                                                   potentialEnergy=True, temperature=True))
+
     # box vectors
     if inpcrd.boxVectors is not None:
         simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
@@ -109,6 +119,12 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
     # save simulation as XML
     saveXml = p.join(simDir,"NVT_step.xml")
     simulation.saveState(saveXml)
+
+    # save result as pdb
+    state = simulation.context.getState(getPositions=True, getEnergy=True)
+    with open(p.join(simDir,"NVT_final_geom.pdb"), 'w') as output:
+        PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+
     return saveXml
 
 ###########################################################################################
