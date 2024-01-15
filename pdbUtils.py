@@ -31,6 +31,7 @@ def df2Pdb(df, outFile,
                 element = row["ATOM_NAME"][0]
                 pdbLine += f"{element:>12}\n"
             f.write(pdbLine)
+        f.write("TER")
 ############################### read pdb file as pdb dataframe
 def pdb2df(protPdb):
     columns = ['ATOM', 'ATOM_ID', 'ATOM_NAME', 'RES_NAME', 'CHAIN_ID', 'RES_ID', 'X', 'Y', 'Z', 'OCCUPANCY', 'BETAFACTOR', 'ELEMENT']
@@ -39,13 +40,21 @@ def pdb2df(protPdb):
         for line in pdb_file:
             if line.startswith('ATOM') or line.startswith('HETATM'):
                 atom_type = line[0:6].strip()
-                atom_id = int(line[6:11].strip())
+                try:
+                    atom_id = int(line[6:11].strip())
+                except:
+                    atom_id = str(line[6:11].strip())
+
                 atom_name = line[12:16].strip()
                 res_name = line[17:20].strip()
                 chain_id = line[21:22].strip()
                 if chain_id == '':
                     chain_id = None
-                res_id = int(line[22:26].strip())
+                try:
+                    res_id = int(line[22:26].strip())
+                except:
+                    res_id = str(line[22:26].strip())
+
                 x = float(line[30:38].strip())
                 y = float(line[38:46].strip())
                 z = float(line[46:54].strip())

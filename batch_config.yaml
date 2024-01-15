@@ -23,34 +23,36 @@ simulationInfo:
     type: "EM"
     temp: 300
 
-  - stepName: "02_NVT_pre-equilibraition"
-    type: "NVT"
-    duration: "100 ps"
-    timestep: "2 fs"
-    freezeHeavy: True
-    temp: 300
-
-  - stepName: "03_NpT_pre-equilibriation"
-    type: "NpT"
-    duration: "100 ps"
-    timestep: "2 fs"
-    freezeHeavy: True
-    temp: 300
-
-  - stepName: "04_NpT_equilibriation"
-    type: "NpT"
-    duration: "10 ns"
-    timestep: "2 fs"
-    freezeHeavy: False
-    temp: 300
-
-  - stepName: "05_NpT_production MD"
-    type: "NpT"
-    duration: "50 ns"
-    timestep: "2 fs"
-    freezeHeavy: False
-    temp: 300
+#  - stepName: "02_NVT_pre-equilibraition"
+#    type: "NVT"
+#    duration: "100 ps"
+#    timestep: "2 fs"
+#    freezeHeavy: True
+#    temp: 300
+#
+#  - stepName: "03_NpT_pre-equilibriation"
+#    type: "NpT"
+#    duration: "100 ps"
+#    timestep: "2 fs"
+#    freezeHeavy: True
+#    temp: 300
+#
+#  - stepName: "04_NpT_equilibriation"
+#    type: "NpT"
+#    duration: "10 ns"
+#    timestep: "2 fs"
+#    freezeHeavy: False
+#    temp: 300
+#
+#  - stepName: "05_NpT_production MD"
+#    type: "NpT"
+#    duration: "50 ns"
+#    timestep: "2 fs"
+#    freezeHeavy: False
+#    temp: 300
 
 ########################################################################
 cleanUpInfo:
-  pdbOnly: False
+  getEndpointPdbs: True
+  removeWaters : True
+  removeIons : True
