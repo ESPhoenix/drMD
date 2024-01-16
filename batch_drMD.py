@@ -122,7 +122,7 @@ def clean_up_handler(batchConfig):
     cleanUpInfo = batchConfig["cleanUpInfo"]
     if "getEndpointPdbs" in cleanUpInfo:
         if cleanUpInfo["getEndpointPdbs"]:
-            cleanup.get_endpoint_pdbs(simulationInfo, outDir)
+            cleanup.get_endpoint_pdbs(simulationInfo, outDir,cleanUpInfo)
             if any(key in cleanUpInfo for key in ["removeWaters","removeIons"]):
                 cleanup.remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir)
 
