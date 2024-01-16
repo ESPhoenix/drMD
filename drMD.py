@@ -44,6 +44,8 @@ def drMD_protocol():
     prepDir = p.join(outDir,"00_prep")
     os.makedirs(outDir,exist_ok=True)
     os.makedirs(prepDir,exist_ok=True)
+    
+    prepLog = p.join(prepDir,"prep.log")
 
     if "ligandInfo" in config:
         ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
@@ -52,9 +54,9 @@ def drMD_protocol():
                         config = config,
                         outDir=prepDir)
         ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
-        ligandPdbs,ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir)
+        ligandPdbs,ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
         ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir)
+        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
         ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
         wholePrepDir = p.join(prepDir,"WHOLE")
         os.makedirs(wholePrepDir,exist_ok=True)
@@ -66,7 +68,8 @@ def drMD_protocol():
         inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
                             ligandFileDict=ligandFileDict,
                             pdbFile= mergedPdb,
-                            outName= outName)
+                            outName= outName,
+                            prepLog= prepLog)
 
     else:
         ## PREPARE PROTEIN STRUCTURE
@@ -78,7 +81,8 @@ def drMD_protocol():
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                         pdbFile= mergedPdb,
-                                                        outName= outName)
+                                                        outName= outName,
+                                                        prepLog = prepLog)
 
     run_simulation(config = config,
                    outDir = outDir,
