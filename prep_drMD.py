@@ -2,13 +2,14 @@
 import os
 from os import path as p
 import pandas as pd
+import subprocess
 from subprocess import run
 import string
 from shutil import copy
 ## drMD UTILS
 from pdbUtils import *
 #####################################################################################
-def find_ligand_charge(ligDf,ligName,outDir,pH):
+def find_ligand_charge(ligDf,ligName,outDir,pH,prepLog):
     ## uses propka to identify charges on a ligand
     #make a temportaty pdb file from the ligand dataframe
     os.chdir(outDir)
@@ -17,7 +18,8 @@ def find_ligand_charge(ligDf,ligName,outDir,pH):
     df2Pdb(ligDf,tmpPdb,chain=False)
     # run propka 
     proPkaCommand = f"propka3 {tmpPdb}"
-    run(proPkaCommand,shell=True)
+    run_with_log(proPkaCommand,prepLog)
+
     proPkaFile = f"{ligName}.pka"
     # read propka output to extract charge at specified pH
     with open(proPkaFile,"r") as f:
@@ -62,7 +64,7 @@ def split_input_pdb(inputPdb,config,outDir):
     os.makedirs(protPrepDir,exist_ok=True)
     df2Pdb(pdbDf,p.join(protPrepDir,"PROT.pdb"))
 #############################  PROTONATION & PDB CREATION ###############################
-def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs):
+def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, prepLog):
     if ligand["protons"]:
         ligPdb = p.join(ligPrepDir,f"{ligandName}.pdb")
         ligandPdbs.append(ligPdb)
@@ -78,23 +80,23 @@ def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs):
         # remove pre-existing protons with reduce
         ligPdb_noH = p.join(ligPrepDir,f"{ligandName}_noH.pdb")
         trimCommand = f"reduce -Trim {ligPdb_fixNames} > {ligPdb_noH}"
-        run(trimCommand,shell=True)
+        run_with_log(trimCommand,prepLog)
         # add protons with reduce
         ligPdb_h = p.join(ligPrepDir,f"{ligandName}_H.pdb")
         reduceCommand = f"reduce {ligPdb_noH} > {ligPdb_h}"
-        run(reduceCommand,shell=True)
+        run_with_log(reduceCommand,prepLog)
         # rename all new hydrogens H1, H2, H3 ... (fixes 4-character names)
         ligPdb_newH = p.join(ligPrepDir,f"{ligandName}_newH.pdb")
         rename_hydrogens(ligPdb_h,ligPdb_newH)
         # run pdb4amber to get compatable types and fix atom numbering
         ligPdb_amber = p.join(ligPrepDir,f"{ligandName}_amber.pdb")
         pdb4amberCommand = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
-        run(pdb4amberCommand,shell=True)
+        run_with_log(pdb4amberCommand,prepLog)
         ligPdb = ligPdb_amber
         ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
 ###############################  MOL2 CREATION #####################################
-def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFileDict):
+def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFileDict, prepLog):
     ####  MOL2 CREATION ####
     # look for mol2 from config, then in ligParamDir, if not found, create new mol2
     if ligand["mol2"]:  # look in config
@@ -106,7 +108,7 @@ def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFil
         charge = ligand["charge"]
         ligMol2 = p.join(ligPrepDir,f"{ligandName}.mol2")
         antechamberCommand = f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
-        run(antechamberCommand, shell=True)
+        run_with_log(antechamberCommand,prepLog)
         # copy to ligParamDir for future use
         copy(ligMol2,p.join(ligParamDir,f"{ligandName}.mol2"))
     # add mol2  path to ligFileDict 
@@ -114,7 +116,7 @@ def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFil
     return ligMol2, ligFileDict
 ######################### TOPPAR CREATION ##########################################
 
-def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligFileDict):
+def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligFileDict, prepLog):
     # look for frcmod from config, then in ligParamDir, if not found, create new frcmod
     if ligand["toppar"]: # look in config
         ligFrcmod = p.join(inputDir,f"{ligandName}.frcmod") 
@@ -123,7 +125,7 @@ def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligF
     else :    # use mol2 to generate amber parameters with parmchk2
         ligFrcmod = p.join(ligPrepDir,f"{ligandName}.frcmod")
         parmchk2Command = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
-        run(parmchk2Command,shell=True)
+        run_with_log(parmchk2Command,prepLog)
         copy(ligFrcmod,p.join(ligParamDir,f"{ligandName}.frcmod"))
     # add frcmod path to ligFileDict
     ligFileDict.update({"frcmod":ligFrcmod})
@@ -132,7 +134,7 @@ def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligF
 
 
 #####################################################################################
-def prepare_ligand_parameters(config, outDir):
+def prepare_ligand_parameters(config, outDir, prepLog):
     # read inputs from config file
     ligandsDict = config["ligandInfo"]["ligands"]
     inputDir = config["pathInfo"]["inputDir"]
@@ -151,13 +153,13 @@ def prepare_ligand_parameters(config, outDir):
         ligPrepDir = p.join(outDir,ligandName)
         os.chdir(ligPrepDir)
 
-        ligPdb, ligandPdbs       = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
+        ligPdb, ligandPdbs       = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs,prepLog)  
 
         ligMol2, ligFileDict    = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
-                                              ligPrepDir,ligPdb,ligFileDict)
+                                              ligPrepDir,ligPdb,ligFileDict,prepLog)
         
         ligFileDict             =       ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
-                                                      ligPrepDir,ligMol2,ligFileDict)
+                                                      ligPrepDir,ligMol2,ligFileDict,prepLog)
 
         ligandFileDict.update({ligandName:ligFileDict})
     return ligandPdbs, ligandFileDict
@@ -177,7 +179,7 @@ def rename_hydrogens(pdbFile,outFile):
         count += 1
     df2Pdb(pdbDf,outFile,chain=False)
 #####################################################################################
-def prepare_protein_structure(config, outDir):
+def prepare_protein_structure(config, outDir, prepLog):
     proteinDict = config["proteinInfo"]["proteins"]
     proteinPdbs = []
     # for each protein in config
@@ -195,18 +197,19 @@ def prepare_protein_structure(config, outDir):
             # add protons with reduce
             protPdb_h = p.join(protPrepDir,"PROT_h.pdb")
             reduceCommand = f"reduce {protPdb} > {protPdb_h}"
-            run(reduceCommand, shell=True)
-            #run pdb4amber to get compatable types and fix atom numbering
+            run_with_log(reduceCommand,prepLog)
+          
+             #run pdb4amber to get compatable types and fix atom numbering
             protPdb_amber = p.join(protPrepDir,"PROT_amber.pdb")
             pdb4amberCommand = f"pdb4amber -i {protPdb_h} -o {protPdb_amber}"
-            run(pdb4amberCommand, shell = True)
-            protPdb = protPdb
+            run_with_log(pdb4amberCommand,prepLog)
+ 
             proteinPdbs.append(protPdb)
     return proteinPdbs
 
 
 #####################################################################################
-def make_amber_params(outDir, pdbFile, outName,ligandFileDict=False):
+def make_amber_params(outDir, pdbFile, outName,prepLog,ligandFileDict=False):
     os.chdir(outDir)
     # write tleap input file
     tleapInput = p.join(outDir, "TLEAP.in")
@@ -237,8 +240,17 @@ def make_amber_params(outDir, pdbFile, outName,ligandFileDict=False):
         f.write("quit\n")
     tleapOutput = p.join(outDir,"TLEAP.out")
     tleapCommand = f"tleap -f {tleapInput} > {tleapOutput}"
-    run(tleapCommand,shell=True)
+    run_with_log(tleapCommand,prepLog)
+
     inputCoords = p.join(outDir, f"{outName}.inpcrd")
     amberParams = p.join(outDir, f"{outName}.prmtop")
 
     return inputCoords, amberParams
+#####################################################################################
+def run_with_log(command, prepLog):
+    process = run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    with open(prepLog,"a") as log:
+        log.write(process.stdout)
+        
+
+#####################################################################################
