@@ -4,7 +4,11 @@ from shutil import copy, rmtree
 from pdbUtils import *
 
 ######################################################################################################
-def  get_endpoint_pdbs(simulationInfo, outDir):                 
+def  get_endpoint_pdbs(simulationInfo, outDir, cleanUpInfo):
+    if "keepFileNames" in cleanUpInfo:
+        keepFileNames = cleanUpInfo["keepFileNames"]   
+    else:
+        keepFileNames = False
     excudeDirNames = ["00_configs","01_ligand_parameters"]
     for sim in simulationInfo:
         stepName = sim["stepName"]
@@ -18,7 +22,10 @@ def  get_endpoint_pdbs(simulationInfo, outDir):
             stepDir = p.join(outDir,protName,stepName)
             for file in os.listdir(stepDir):
                 if p.splitext(file)[1] == ".pdb":
-                    copy(p.join(stepDir,file),p.join(collateDir,f"{protName}_{tag}.pdb"))
+                    if keepFileNames: 
+                        copy(p.join(stepDir,file),p.join(collateDir,f"{protName}.pdb"))
+                    else:
+                        copy(p.join(stepDir,file),p.join(collateDir,f"{protName}_{tag}.pdb"))
 ######################################################################################################
 def remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir):
     for sim in simulationInfo:

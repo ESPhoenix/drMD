@@ -56,3 +56,4 @@ cleanUpInfo:
   getEndpointPdbs: True
   removeWaters : True
   removeIons : True
+  keepFileNames: True
