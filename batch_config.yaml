@@ -4,6 +4,9 @@ pathInfo:
   outputDir: "/home/esp/scriptDevelopment/drMD/02_outputs"
 ########################################################################
 ########################################################################
+generalInfo:
+  pH: 2
+########################################################################
 ligandInfo:
   nLigands: 2
   ligands:
@@ -23,19 +26,19 @@ simulationInfo:
     type: "EM"
     temp: 300
 
-  - stepName: "02_NVT_pre-equilibraition"
-    type: "NVT"
-    duration: "100 ps"
-    timestep: "2 fs"
-    freezeHeavy: True
-    temp: 300
-
-  - stepName: "03_NpT_pre-equilibriation"
-    type: "NpT"
-    duration: "100 ps"
-    timestep: "2 fs"
-    freezeHeavy: True
-    temp: 300
+#  - stepName: "02_NVT_pre-equilibraition"
+#    type: "NVT"
+#    duration: "100 ps"
+#    timestep: "2 fs"
+#    freezeHeavy: True
+#    temp: 300
+#
+#  - stepName: "03_NpT_pre-equilibriation"
+#    type: "NpT"
+#    duration: "100 ps"
+#    timestep: "2 fs"
+#    freezeHeavy: True
+#    temp: 300
 #
 #  - stepName: "04_NpT_equilibriation"
 #    type: "NpT"

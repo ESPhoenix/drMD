@@ -180,7 +180,16 @@ def rename_hydrogens(pdbFile,outFile):
     df2Pdb(pdbDf,outFile,chain=False)
 #####################################################################################
 def prepare_protein_structure(config, outDir, prepLog):
+    # get instructions for protein prep
     proteinDict = config["proteinInfo"]["proteins"]
+    # get pH from config file, else use a default
+    setPH = False
+    if "generalInfo" in config:
+        if "pH" in config["generalInfo"]:
+            setPH = config["generalInfo"]["pH"]
+    if not setPH:
+        setPH = 7.4
+
     proteinPdbs = []
     # for each protein in config
     for protein in proteinDict:
@@ -194,10 +203,10 @@ def prepare_protein_structure(config, outDir, prepLog):
             copy(config["pathInfo"]["inputPdb"],protPdb)
 
         if not protein["protons"]:
-            # add protons with reduce
+            # add protons with pdb2pqr
             protPdb_h = p.join(protPrepDir,"PROT_h.pdb")
-            reduceCommand = f"reduce {protPdb} > {protPdb_h}"
-            run_with_log(reduceCommand,prepLog)
+            pdb2pqrCommand = f"pdb2pqr {protPdb} -ff AMBER --with-ph {setPH} --titration-state-method propka --pdb-output {protPdb_h}"
+            run_with_log(pdb2pqrCommand, prepLog)
           
              #run pdb4amber to get compatable types and fix atom numbering
             protPdb_amber = p.join(protPrepDir,"PROT_amber.pdb")

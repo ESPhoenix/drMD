@@ -44,7 +44,7 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
 
     # Convert to DataFrame, extract rest of info
     pdbDf = pdb2df(pdbPath)
-    proteinInfo, ligandInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
+    proteinInfo, ligandInfo, generalInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
 
     # Get path info
     pathInfo = {
@@ -58,12 +58,14 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     if ligandInfo is None:
         config = {
             "pathInfo": pathInfo,
+            "generalInfo" : generalInfo,
             "proteinInfo": proteinInfo,
             "simulationInfo": simInfo
         }
     else:
         config = {
             "pathInfo": pathInfo,
+            "generalInfo" : generalInfo,
             "proteinInfo": proteinInfo,
             "ligandInfo": ligandInfo,
             "simulationInfo": simInfo
@@ -88,8 +90,8 @@ def main():
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
     os.makedirs(yamlDir,exist_ok=True)
-    #run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-    run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    #run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
@@ -142,6 +144,12 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
     proteinInfo = {"nProteins":1,
                    "proteins":[{"proteinName":f"{protName}",
                                 "protons":protH}]}   
+    ## GET GENERAL INFORMATION (only pH at the moment!)
+    if "generalInfo" in batchConfig:
+        generalInfo = batchConfig["generalInfo"]
+    else:
+        generalInfo = False
+
     ## GET LIGAND INFORMATION 
     ligsDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids)]
     ligNames = ligsDf["RES_NAME"].unique().tolist()
@@ -154,7 +162,7 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
     ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
     if "ligandInfo" in batchConfig:
         ligandInfo = batchConfig["ligandInfo"]
-        return proteinInfo, ligandInfo
+        return proteinInfo, ligandInfo, generalInfo
     ## CREATE ligandInfo AUTOMATICALLY (WORKS FOR SIMPLE LIGANDS)
     else:
         ligList = []
@@ -187,7 +195,7 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
         nLigands = len(ligList)
         ligandInfo = {"nLigands":nLigands,
                     "ligands":ligList}
-
-        return proteinInfo, ligandInfo
+        
+        return proteinInfo, ligandInfo, generalInfo
 ######################################################################################################
 main()

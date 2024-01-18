@@ -73,7 +73,9 @@ def drMD_protocol():
 
     else:
         ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir)  
+        proteinPdbs = prepare_protein_structure(config=config,
+                                                 outDir = prepDir,
+                                                   prepLog = prepLog)  
         ## MERGE PROTEIN PDBS
         outName = config["pathInfo"]["outputName"]
         mergedPdb = p.join(p.join(prepDir,"PROT",f"{outName}.pdb"))
