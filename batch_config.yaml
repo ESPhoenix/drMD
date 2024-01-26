@@ -3,6 +3,8 @@ pathInfo:
   inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
   outputDir: "/home/esp/scriptDevelopment/drMD/02_outputs"
 ########################################################################
+generalInfo:
+  cpuCount: 16
 ########################################################################
 ligandInfo:
   nLigands: 2

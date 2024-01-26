@@ -4,7 +4,7 @@ from shutil import copy, rmtree
 from pdbUtils import *
 
 ######################################################################################################
-def  get_endpoint_pdbs(simulationInfo, outDir, cleanUpInfo):
+def get_endpoint_pdbs(simulationInfo, outDir, cleanUpInfo):
     if "keepFileNames" in cleanUpInfo:
         keepFileNames = cleanUpInfo["keepFileNames"]   
     else:
