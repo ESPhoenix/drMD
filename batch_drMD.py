@@ -87,9 +87,12 @@ def main():
     yamlDir = p.join(outDir,"00_configs")
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
+    cpuCount = batchConfig["generalInfo"]["cpuCount"]
     os.makedirs(yamlDir,exist_ok=True)
-    #run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-    run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    if cpuCount == 1:
+        run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    elif cpuCount > 1:
+        run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
@@ -101,8 +104,8 @@ def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
     ## CLEAN UP
     clean_up_handler(batchConfig)
 ######################################################################################################
-def run_paralell(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
-    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+def run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+    with ThreadPoolExecutor(max_workers=min(os.cpu_count(),cpuCount)) as executor:
         for pdbFile in os.listdir(pdbDir):
             fileData = p.splitext(pdbFile)
             if not fileData[1] == ".pdb":

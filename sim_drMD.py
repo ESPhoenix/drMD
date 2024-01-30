@@ -7,7 +7,7 @@ from simtk.openmm import *
 from simtk.unit import *
 from sys import stdout
 ## CUSTOM LIBS
-from constraints_drMD import heavy_atom_position_restraints
+from constraints_drMD import heavy_atom_position_restraints, restrain_all_atom_names_except_list
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
     # set up simple unit translator
@@ -33,7 +33,7 @@ def run_simulation(config, outDir, inputCoords, amberParams):
         os.chdir(simDir)
         # Check for simulation type, run as needed:
         if sim["type"] == "EM":
-            saveXml = run_energy_minimisation(prmtop, inpcrd, system, simDir)
+            saveXml = run_energy_minimisation(prmtop, inpcrd, system, sim, simDir)
 
         elif sim["type"] == "NVT":
             sim = process_sim_data(sim,timescale)
@@ -128,9 +128,13 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
     return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop, inpcrd, system, simDir):
-    print("Running Energy Minimisation!")
+def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir):
+    
+    if "relaxAtomNamesList" in sim:
+        print(f"Restraining all atoms execept {sim['relaxAtomNamesList']}")
+        system = restrain_all_atom_names_except_list(system,prmtop,inpcrd,sim['relaxAtomNamesList'])
 
+    print("Running Energy Minimisation!")
     # set up intergrator and simulation
     integrator = LangevinMiddleIntegrator(300*kelvin, 1/picosecond, 0.004*picoseconds)
     simulation = Simulation(prmtop.topology, system, integrator)
