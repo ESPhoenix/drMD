@@ -13,7 +13,6 @@ def right_aligned(pdbList, textList):
 
 def left_aligned(pdbList, textList):
     for i, letter in enumerate(textList):
-        print(i)
         pdbList[i] = letter
     return pdbList
 
