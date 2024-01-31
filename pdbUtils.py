@@ -3,34 +3,52 @@ import os
 from os import path as p
 import pandas as pd
 
+
+def right_aligned(pdbList, textList):
+    lastSpaceIndex = len(pdbList) - 1 - pdbList[::-1].index(" ")
+    # Replace spaces with letters starting from the end
+    for i, letter in enumerate(reversed(textList)):
+        pdbList[lastSpaceIndex - i] = letter
+    return pdbList
+
+def left_aligned(pdbList, textList):
+    for i, letter in enumerate(textList):
+        print(i)
+        pdbList[i] = letter
+    return pdbList
+
+
 ########################## write pdb dataframe to pdb file
 def df2Pdb(df, outFile,
            chain=True):
     with open(outFile,"w") as f:
         for _, row in df.iterrows():
-            pdbLine = f"{row['ATOM']:<6}"
-            pdbLine += f"{row['ATOM_ID']:>5}{' '*2}"
-            pdbLine += f"{row['ATOM_NAME']:<4}"
-            pdbLine += f"{row['RES_NAME']:<4}"
+
+            pdbList = [" " for _ in range(80)]
+            pdbList[0:6]    = left_aligned(pdbList[0:6],list(row['ATOM']))
+            pdbList[6:11]   = right_aligned(pdbList[6:11],list(str(row['ATOM_ID'])))
+            pdbList[12:16]  = right_aligned(pdbList[12:16], list(row['ATOM_NAME']))
+            pdbList[17:20]  = right_aligned(pdbList[17:20], list(row['RES_NAME']))
             try: 
-                pdbLine += f"{row['CHAIN_ID']:<1}{' '*1}"
+                pdbList[21]  = row['CHAIN_ID']
             except:
-                pdbLine += ' '*2
-            pdbLine += f"{row['RES_ID']:<7}"
-            pdbLine += f"{row['X']:>8.3f}"
-            pdbLine += f"{row['Y']:>8.3f}"
-            pdbLine += f"{row['Z']:>8.3f}"
-            pdbLine += f"{row['OCCUPANCY']:>6.2f}"
+                pdbList[21] = " "
+            pdbList[22:26]  = right_aligned(pdbList[22:26], list(str(row['RES_ID'])))
+            pdbList[30:38]  = right_aligned(pdbList[30:38], list(f"{row['X']:>8.3f}"))
+            pdbList[38:46]  = right_aligned(pdbList[38:46], list(f"{row['Y']:>8.3f}"))
+            pdbList[46:54]  = right_aligned(pdbList[46:54], list(f"{row['Z']:>8.3f}"))
+            pdbList[54:60]  = right_aligned(pdbList[54:60], list(f"{row['OCCUPANCY']:>6.2f}"))
             try:
-                pdbLine += f"{row['BETAFACTOR']:>6.2f}"
+                pdbList[60:66]  = right_aligned(pdbList[60:66], list(f"{row['BETAFACTOR']:>6.2f}"))
             except:
-                pdbLine += row["BETAFACTOR"]
+                pdbList[60:66] = right_aligned(pdbList[60:66],list("1.00"))
             try:
-                pdbLine += f"{row['ELEMENT']:>12}\n"
+                pdbList[76:78] = right_aligned(pdbList[76:78], list(row['ELEMENT']))
             except:
                 element = row["ATOM_NAME"][0]
-                pdbLine += f"{element:>12}\n"
-            f.write(pdbLine)
+                pdbList[76:78] = right_aligned(pdbList[76:78], list(element))
+            pdbLine = "".join(pdbList)
+            f.write(f"{pdbLine}\n")
         f.write("TER")
 ############################### read pdb file as pdb dataframe
 def pdb2df(protPdb):
