@@ -28,6 +28,6 @@ git clone https://github.com/ESPhoenix/drMD.git
 # Usage
 ## Run example pdbs
 ```bash
-python path/to/drMD/batch_drMD.py --bc path/to/drMD/batch_config.yaml
+python path/to/drMD/batch_drMD.py --config path/to/drMD/batch_config.yaml
 ```
 #### To run your own pdb files, modify `batch_config.yaml` file 
