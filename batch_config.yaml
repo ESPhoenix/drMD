@@ -4,7 +4,7 @@ pathInfo:
   outputDir: "/home/esp/scriptDevelopment/drMD/02_outputs"
 ########################################################################
 generalInfo:
-  cpuCount: 16
+  cpuCount: 10
 ########################################################################
 ligandInfo:
   nLigands: 2
@@ -24,6 +24,8 @@ simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
+    relaxAtomSymbolList: [] # "O","H"
+    maxIterations: 200
 
 # - stepName: "02_NVT_pre-equilibraition"
 #   type: "NVT"

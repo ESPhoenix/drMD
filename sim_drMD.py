@@ -7,7 +7,7 @@ from simtk.openmm import *
 from simtk.unit import *
 from sys import stdout
 ## CUSTOM LIBS
-from constraints_drMD import heavy_atom_position_restraints, restrain_all_atom_names_except_list
+from constraints_drMD import heavy_atom_position_restraints, constrain_all_atom_names_except_list
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
     # set up simple unit translator
@@ -130,9 +130,9 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
 ###########################################################################################
 def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir):
     
-    if "relaxAtomNamesList" in sim:
-        print(f"Restraining all atoms execept {sim['relaxAtomNamesList']}")
-        system = restrain_all_atom_names_except_list(system,prmtop,inpcrd,sim['relaxAtomNamesList'])
+    if "relaxAtomSymbolList" in sim:
+        print(f"Constraining all atoms execept {sim['relaxAtomSymbolList']}")
+        system = constrain_all_atom_names_except_list(system,prmtop,sim['relaxAtomSymbolList'])
 
     print("Running Energy Minimisation!")
     # set up intergrator and simulation
@@ -140,7 +140,7 @@ def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir):
     simulation = Simulation(prmtop.topology, system, integrator)
     simulation.context.setPositions(inpcrd.positions)
     # run energy minimisation
-    simulation.minimizeEnergy()
+    simulation.minimizeEnergy(maxIterations=sim['maxIterations']) # (tolerance=Quantity(value=10.000000000000004, unit=kilojoule/mole), maxIterations=0)
     # save result as pdb
     state = simulation.context.getState(getPositions=True, getEnergy=True)
     with open(p.join(simDir,"minimised_geom.pdb"), 'w') as output:
