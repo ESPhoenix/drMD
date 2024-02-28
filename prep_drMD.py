@@ -67,6 +67,10 @@ def split_input_pdb(inputPdb,config,outDir):
 def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, prepLog):
     if ligand["protons"]:
         ligPdb = p.join(ligPrepDir,f"{ligandName}.pdb")
+        ligDf = pdb2df(ligPdb)
+        ligDf = fix_atom_names(ligDf)
+        df2Pdb(ligDf, ligPdb)
+        rename_hydrogens(ligPdb, ligPdb)
         ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
     else:

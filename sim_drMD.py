@@ -20,6 +20,7 @@ def run_simulation(config, outDir, inputCoords, amberParams):
     # load amber files, create system
     prmtop = AmberPrmtopFile(amberParams)
     inpcrd = AmberInpcrdFile(inputCoords)  
+
     system = prmtop.createSystem(nonbondedMethod=PME,
                                     nonbondedCutoff=1*nanometer,
                                     constraints = HBonds)
@@ -42,6 +43,24 @@ def run_simulation(config, outDir, inputCoords, amberParams):
         elif sim["type"] in ["NpT","NPT"]:
             sim = process_sim_data(sim,timescale)
             saveXml = run_npt(system, prmtop, inpcrd, sim, saveXml, simDir)
+
+###########################################################################################
+def init_reporters(simDir, nSteps, nLogSteps):
+    vitalsCsv = p.join(simDir, "vitals_report.csv")
+    vitalsStateReporter = StateDataReporter(file = vitalsCsv, reportInterval = nLogSteps, step = True,
+                                            time = True, potentialEnergy = True, kineticEnergy = True,
+                                            totalEnergy = True, temperature = True, volume = True,
+                                            density = True)
+    progressCsv = p.join(simDir, "progress_report.csv")
+    progressStateReporter = StateDataReporter(file = progressCsv, progress = True, remainingTime = True,
+                                            speed = True, elapsedTime = True, totalSteps = nSteps,
+                                            reportInterval = nLogSteps)
+
+    dcdFile = p.join(simDir, "trajectory.dcd")
+    dcdTrajectoryReporter = DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
+
+
+    return vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter
 ###########################################################################################
 def process_sim_data(sim,timescale):
     # Reads simulation variables from config file and processes them
@@ -50,9 +69,9 @@ def process_sim_data(sim,timescale):
     durationData = sim["duration"].split()
     duration = int(durationData[0]) * timescale[durationData[1]]
     nSteps = int(duration / timestep)
+    print(nSteps)
     nLogSteps = round(nSteps / 500)
     temp = sim["temp"] * kelvin
-
 
     sim.update({"timeStep":timestep,
                 "duration": duration,
@@ -73,11 +92,15 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
-    simulation.reporters.append(DCDReporter(p.join(simDir,'NpT_step.dcd'), 1000))
-    simulation.reporters.append(StateDataReporter(p.join(simDir,'NpT_step.csv'),
-                                                   1000, time=True,
-                                                   potentialEnergy=True, temperature=True))
+    totalSteps = simulation.currentStep + sim["nSteps"]
+    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter = init_reporters(simDir = simDir,
+                                                                                        nSteps =  totalSteps,
+                                                                                        nLogSteps = sim["nLogSteps"])
 
+    for rep in [vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter]:
+        simulation.reporters.append(rep)
+
+    # set up periodic boundary conditions
     if inpcrd.boxVectors is not None:
         simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
     # run NVT simulation
@@ -99,17 +122,19 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
         print("Adding position restraints to heavy atoms!")
         system = heavy_atom_position_restraints(system,prmtop,inpcrd)
       
-
     # set up intergrator and system
     integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
     simulation = Simulation(prmtop.topology, system, integrator)
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
-    simulation.reporters.append(DCDReporter(p.join(simDir,'NVT_step.dcd'), 1000))
-    simulation.reporters.append(StateDataReporter(p.join(simDir,'NVT_step.csv'),
-                                                   1000, time=True,
-                                                   potentialEnergy=True, temperature=True))
+    totalSteps = simulation.currentStep + sim["nSteps"]
+    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter = init_reporters(simDir = simDir,
+                                                                                        nSteps =  totalSteps,
+                                                                                        nLogSteps = sim["nLogSteps"])
+
+    for rep in [vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter]:
+        simulation.reporters.append(rep)
 
     # box vectors
     if inpcrd.boxVectors is not None:
@@ -139,8 +164,8 @@ def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir):
     integrator = LangevinMiddleIntegrator(300*kelvin, 1/picosecond, 0.004*picoseconds)
     simulation = Simulation(prmtop.topology, system, integrator)
     simulation.context.setPositions(inpcrd.positions)
-    # run energy minimisation
-    simulation.minimizeEnergy(maxIterations=sim['maxIterations']) # (tolerance=Quantity(value=10.000000000000004, unit=kilojoule/mole), maxIterations=0)
+    # run eneregy minimisation
+    simulation.minimizeEnergy(maxIterations=sim['maxIterations']) 
     # save result as pdb
     state = simulation.context.getState(getPositions=True, getEnergy=True)
     with open(p.join(simDir,"minimised_geom.pdb"), 'w') as output:

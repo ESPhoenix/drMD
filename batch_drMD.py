@@ -180,7 +180,7 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
                 frcmod = True  
             # deal with charge
             charge = find_ligand_charge(ligDf,ligName,yamlDir,pH=7.4)
-            # write to temporary dict, then to ligandInfo for configg
+            # write to temporary dict, then to ligandInfo for config
             tmpDict = {"ligandName":ligName,
                     "protons":   ligH,
                     "mol2":      mol2,
