@@ -8,6 +8,7 @@ from simtk.unit import *
 from sys import stdout
 ## CUSTOM LIBS
 from constraints_drMD import heavy_atom_position_restraints, constrain_all_atom_names_except_list
+import analysis_drMD as analysis 
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
     # set up simple unit translator
@@ -15,7 +16,7 @@ def run_simulation(config, outDir, inputCoords, amberParams):
                  "ps":picoseconds,
                  "ns":nanoseconds}
     ## set up gpu
-    platform=Platform.getPlatformByName("CUDA")
+    platform=Platform.getPlatformByName("OpenCL")
 
     # load amber files, create system
     prmtop = AmberPrmtopFile(amberParams)
@@ -34,15 +35,15 @@ def run_simulation(config, outDir, inputCoords, amberParams):
         os.chdir(simDir)
         # Check for simulation type, run as needed:
         if sim["type"] == "EM":
-            saveXml = run_energy_minimisation(prmtop, inpcrd, system, sim, simDir)
+            saveXml = run_energy_minimisation(prmtop, inpcrd, system, sim, simDir, platform)
 
         elif sim["type"] == "NVT":
             sim = process_sim_data(sim,timescale)
-            saveXml = run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir)
+            saveXml = run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform)
 
         elif sim["type"] in ["NpT","NPT"]:
             sim = process_sim_data(sim,timescale)
-            saveXml = run_npt(system, prmtop, inpcrd, sim, saveXml, simDir)
+            saveXml = run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform)
 
 ###########################################################################################
 def init_reporters(simDir, nSteps, nLogSteps):
@@ -60,7 +61,7 @@ def init_reporters(simDir, nSteps, nLogSteps):
     dcdTrajectoryReporter = DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
 
 
-    return vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter
+    return vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv
 ###########################################################################################
 def process_sim_data(sim,timescale):
     # Reads simulation variables from config file and processes them
@@ -80,7 +81,7 @@ def process_sim_data(sim,timescale):
                 "temp":temp})
     return sim
 ###########################################################################################
-def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
+def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     # add constant pressure force to system (makes this an NpT simulation)
     system.addForce(MonteCarloBarostat(1*bar, sim["temp"]))
     if sim["freezeHeavy"]:
@@ -88,12 +89,12 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
         system = heavy_atom_position_restraints(system,prmtop,inpcrd)
     # set up intergrator and system
     integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
-    simulation = Simulation(prmtop.topology, system, integrator)
+    simulation = Simulation(prmtop.topology, system, integrator, platform)
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
-    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter = init_reporters(simDir = simDir,
+    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv = init_reporters(simDir = simDir,
                                                                                         nSteps =  totalSteps,
                                                                                         nLogSteps = sim["nLogSteps"])
 
@@ -114,9 +115,10 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir):
     with open(p.join(simDir,"NpT_final_geom.pdb"), 'w') as output:
         PDBFile.writeFile(simulation.topology, state.getPositions(), output)
 
+    analysis.plot_vitals(vitalsCsv = p.join(outDir), outDir = simDir)
     return saveXml
 ###########################################################################################
-def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
+def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     ## Add position restraints to heavy atoms if instructed
     if sim["freezeHeavy"]:
         print("Adding position restraints to heavy atoms!")
@@ -124,12 +126,12 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
       
     # set up intergrator and system
     integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
-    simulation = Simulation(prmtop.topology, system, integrator)
+    simulation = Simulation(prmtop.topology, system, integrator, platform)
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
-    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter = init_reporters(simDir = simDir,
+    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv = init_reporters(simDir = simDir,
                                                                                         nSteps =  totalSteps,
                                                                                         nLogSteps = sim["nLogSteps"])
 
@@ -153,7 +155,7 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir):
     return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir):
+def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir,platform):
     
     if "relaxAtomSymbolList" in sim:
         print(f"Constraining all atoms execept {sim['relaxAtomSymbolList']}")
@@ -162,7 +164,7 @@ def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir):
     print("Running Energy Minimisation!")
     # set up intergrator and simulation
     integrator = LangevinMiddleIntegrator(300*kelvin, 1/picosecond, 0.004*picoseconds)
-    simulation = Simulation(prmtop.topology, system, integrator)
+    simulation = Simulation(prmtop.topology, system, integrator, platform)
     simulation.context.setPositions(inpcrd.positions)
     # run eneregy minimisation
     simulation.minimizeEnergy(maxIterations=sim['maxIterations']) 
