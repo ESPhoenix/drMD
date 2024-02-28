@@ -3,7 +3,7 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.unit import *
 
-
+###########################################################################################
 def constrain_all_atom_names_except_list(system, prmtop, unrestrictedAtomSymbolList):
     # Sets the mass of all atoms to zero.
     # Except atoms in unrestrictedAtomSymbolList and water
@@ -29,9 +29,7 @@ def constrain_all_atom_names_except_list(system, prmtop, unrestrictedAtomSymbolL
 
 
 ###########################################################################################
-def restrain_all_atom_names_except_list(
-    system, prmtop, inpcrd, unrestrictedAtomSymbolList
-):
+def restrain_all_atom_names_except_list(system, prmtop, inpcrd, unrestrictedAtomSymbolList):
     # assert all names in unrestrictedAtomNamesList are in an allowed list.
 
     restraint = CustomExternalForce("k*periodicdistance(x, y, z, x0, y0, z0)^2")
@@ -47,6 +45,7 @@ def restrain_all_atom_names_except_list(
 
     return system
 
-
+###########################################################################################
 def heavy_atom_position_restraints(system, prmtop, inpcrd):
     return restrain_all_atom_names_except_list(system, prmtop, inpcrd, ["H"])
+###########################################################################################
