@@ -1,94 +1,199 @@
 ## BASIC LIBS
 import os
 from os import path as p
-from shutil import copy
+from shutil import copy, rmtree
 ## INPUT LIBS
 import yaml
 import argpass
-## drMD UTILS
-from prep_drMD import *
-## drMD simulation
-from sim_drMD import *
-#####################################################################################
+## CUSTOM LIBS
+from module_pdbUtils import pdb2df
+from module_drPrep as drPrep
+import module_drCleanup as drCleanup
+## Multiprocessing
+from concurrent.futures import ThreadPoolExecutor
+
+
+
+## GET LOCATION OF drOperator
+topDir = p.dirname(p.abspath(__file__))
+drOperatorPath = p.join(CURRENT_DIR, 'module_drOperator.py')
+
+
+#####################################################################################################
 def read_inputs():
     ## create an argpass parser, read config file, snip off ".py" if on the end of file
     parser = argpass.ArgumentParser()
     parser.add_argument("--config")
     args = parser.parse_args()
-    configYaml=args.config
 
+    batchConfig=args.config
     ## Read config.yaml into a dictionary
-    with open(configYaml,"r") as yamlFile:
-        config = yaml.safe_load(yamlFile) 
-    return config
-#####################################################################################
-def check_inputs(config):
-    if not config["proteinInfo"]["nProteins"] == len(config["proteinInfo"]["proteins"]):
-        print("Number of proteins in config does not match nProteins")
-        exit()
-    if "ligandInfo" in config and not "ligandInfo" == None:
-        if not config["ligandInfo"]["nLigands"] == len(config["ligandInfo"]["ligands"]):
-            print("Number of ligands in config does not match nLigands")
-            exit()
-    if not p.isfile(config["pathInfo"]["inputPdb"]):
-        print("Input PDB does not exist")
-        exit()       
+    with open(batchConfig,"r") as yamlFile:
+        batchConfig = yaml.safe_load(yamlFile) 
+    return batchConfig
 
-#####################################################################################
-#####################################################################################
-def drMD_protocol():
-    config = read_inputs()
-    #check_inputs(config=config)
-    ## MAKE OUTPUT DIRECTORY
-    outDir = config["pathInfo"]["outputDir"]
-    prepDir = p.join(outDir,"00_prep")
-    os.makedirs(outDir,exist_ok=True)
-    os.makedirs(prepDir,exist_ok=True)
-    
-    prepLog = p.join(prepDir,"prep.log")
+#####################################################################################################
+def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig):
+    # Skip if not a PDB file
+    fileData = p.splitext(pdbFile)
+    if not fileData[1] == ".pdb":
+        return
 
-    if "ligandInfo" in config:
-        ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
-        inputPdb = config["pathInfo"]["inputPdb"]
-        split_input_pdb(inputPdb =inputPdb,
-                        config = config,
-                        outDir=prepDir)
-        ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
-        ligandPdbs,ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
-        ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
-        ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
-        wholePrepDir = p.join(prepDir,"WHOLE")
-        os.makedirs(wholePrepDir,exist_ok=True)
-        allPdbs = proteinPdbs + ligandPdbs
-        outName = config["pathInfo"]["outputName"]
-        mergedPdb = p.join(wholePrepDir,f"{outName}.pdb")
-        mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
-        ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
-                            ligandFileDict=ligandFileDict,
-                            pdbFile= mergedPdb,
-                            outName= outName,
-                            prepLog= prepLog)
+    # Extract basic info, make dirs
+    protName = fileData[0]
+    pdbPath = p.join(pdbDir, pdbFile)
+    runDir = p.join(outDir, protName)
+    os.makedirs(runDir, exist_ok=True)
 
+    # Convert to DataFrame, extract rest of info
+    pdbDf = pdb2df(pdbPath)
+    proteinInfo, ligandInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
+
+    # Get path info
+    pathInfo = {
+        "inputDir": pdbDir,
+        "inputPdb": pdbPath,
+        "outputDir": runDir,
+        "outputName": protName
+    }
+
+    # Combine infos into one dict (ignore ligInfo if empty)
+    if ligandInfo is None:
+        config = {
+            "pathInfo": pathInfo,
+            "proteinInfo": proteinInfo,
+            "simulationInfo": simInfo
+        }
     else:
-        ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
-        ## MERGE PROTEIN PDBS
-        outName = config["pathInfo"]["outputName"]
-        mergedPdb = p.join(p.join(prepDir,"PROT",f"{outName}.pdb"))
-        mergePdbs(pdbList=proteinPdbs, outFile = mergedPdb)
-        ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
-                                                        pdbFile= mergedPdb,
-                                                        outName= outName,
-                                                        prepLog = prepLog)
+        config = {
+            "pathInfo": pathInfo,
+            "proteinInfo": proteinInfo,
+            "ligandInfo": ligandInfo,
+            "simulationInfo": simInfo
+        }
+    # Write config to YAML
+    configYaml = p.join(yamlDir, f"{protName}_config.yaml")
+    with open(configYaml, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
 
-    run_simulation(config = config,
-                   outDir = outDir,
-                   inputCoords=inputCoords,
-                   amberParams=amberParams)
-#####################################################################################
-#####################################################################################
-if __name__ == drMD_protocol():
-    drMD_protocol()
+    # Run drMD MD protocol
+    os.chdir(topDir)
+    drOperatorCommand = f"python {drOperatorPath} --config {configYaml}"
+    run(drOperatorCommand, shell=True)
+
+######################################################################################################
+def main():
+    ## SORT OUT DIRECTORIES
+    topDir = os.getcwd()
+    batchConfig = read_inputs()
+    outDir = batchConfig["pathInfo"]["outputDir"]
+    yamlDir = p.join(outDir,"00_configs")
+    pdbDir = batchConfig["pathInfo"]["inputDir"]
+    simInfo = batchConfig["simulationInfo"]
+    cpuCount = batchConfig["generalInfo"]["cpuCount"]
+    os.makedirs(yamlDir,exist_ok=True)
+    if cpuCount == 1:
+        run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    elif cpuCount > 1:
+        run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+
+###################################################################################################### 
+def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+    for pdbFile in os.listdir(pdbDir):
+        fileData = p.splitext(pdbFile)
+        if not fileData[1] == ".pdb":
+            continue  
+        process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
+    ## CLEAN UP
+    clean_up_handler(batchConfig)
+######################################################################################################
+def run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+    with ThreadPoolExecutor(max_workers=min(os.cpu_count(),cpuCount)) as executor:
+        for pdbFile in os.listdir(pdbDir):
+            fileData = p.splitext(pdbFile)
+            if not fileData[1] == ".pdb":
+                continue
+            executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
+   ## CLEAN UP
+    clean_up_handler(batchConfig)
+
+######################################################################################################
+def clean_up_handler(batchConfig):
+    # READ FROM batchConfig
+    simulationInfo = batchConfig["simulationInfo"]
+    outDir = batchConfig["pathInfo"]["outputDir"]
+    # RUN THROUGH OPTIONS IN cleanUpInfo
+    if  not "cleanUpInfo" in batchConfig:
+        return 
+    cleanUpInfo = batchConfig["cleanUpInfo"]
+    if "getEndpointPdbs" in cleanUpInfo:
+        if cleanUpInfo["getEndpointPdbs"]:
+            cleanup.get_endpoint_pdbs(simulationInfo, outDir,cleanUpInfo)
+            if any(key in cleanUpInfo for key in ["removeWaters","removeIons"]):
+                cleanup.remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir)
+
+######################################################################################################
+def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from pdb file, writes a config file
+    ## GET PROTEIN INFORMATION
+    aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
+                    'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
+                    'LEU', 'LYS', 'MET', 'PHE', 'PRO',
+                    'SER', 'THR', 'TRP', 'TYR', 'VAL']
+    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids)]
+
+    protH = False
+    if (protDf["ELEMENT"] == "H").any():
+        protH = True
+
+    proteinInfo = {"nProteins":1,
+                   "proteins":[{"proteinName":f"{protName}",
+                                "protons":protH}]}   
+    ## GET LIGAND INFORMATION 
+    ligsDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids)]
+    ligNames = ligsDf["RES_NAME"].unique().tolist()
+
+    ## SKIP IF NOT LIGAND
+    if len(ligNames) == 0:
+        ligandInfo = None
+        return proteinInfo, ligandInfo
+    
+    ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
+    if "ligandInfo" in batchConfig:
+        ligandInfo = batchConfig["ligandInfo"]
+        return proteinInfo, ligandInfo
+    ## CREATE ligandInfo AUTOMATICALLY (WORKS FOR SIMPLE LIGANDS)
+    else:
+        ligList = []
+        for ligName in ligNames:
+            ligDf = ligsDf[ligsDf["RES_NAME"] == ligName]
+            # deal with protonation
+            ligH = False
+            if (ligDf["ELEMENT"] == "H").any():
+                ligH = True
+
+            # deal with mol2
+            ligMol2 = p.join(pdbDir,f"{ligName}.mol2")
+            mol2 = False
+            if p.isfile(ligMol2):
+                mol2 = True
+            # deal with frcmod
+            ligFrcmod = p.join(pdbDir,f"{ligName}.frcmod")
+            frcmod = False
+            if p.isfile(ligFrcmod):
+                frcmod = True  
+            # deal with charge
+            charge = find_ligand_charge(ligDf,ligName,yamlDir,pH=7.4)
+            # write to temporary dict, then to ligandInfo for config
+            tmpDict = {"ligandName":ligName,
+                    "protons":   ligH,
+                    "mol2":      mol2,
+                    "toppar":    frcmod,
+                    "charge":    charge}
+            ligList.append(tmpDict)
+        nLigands = len(ligList)
+        ligandInfo = {"nLigands":nLigands,
+                    "ligands":ligList}
+
+        return proteinInfo, ligandInfo
+######################################################################################################
+main()
