@@ -2,21 +2,17 @@
 import os
 from os import path as p
 from shutil import copy, rmtree
+from subprocess import run
 ## INPUT LIBS
 import yaml
 import argpass
-## CUSTOM LIBS
+## CUSTOM DR MD MODULES
 from module_pdbUtils import pdb2df
-from module_drPrep as drPrep
+import module_drPrep as drPrep
 import module_drCleanup as drCleanup
+import module_drOperator as drOperator
 ## Multiprocessing
 from concurrent.futures import ThreadPoolExecutor
-
-
-
-## GET LOCATION OF drOperator
-topDir = p.dirname(p.abspath(__file__))
-drOperatorPath = p.join(CURRENT_DIR, 'module_drOperator.py')
 
 
 #####################################################################################################
@@ -76,10 +72,8 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     with open(configYaml, "w") as f:
         yaml.dump(config, f, default_flow_style=False)
 
-    # Run drMD MD protocol
-    os.chdir(topDir)
-    drOperatorCommand = f"python {drOperatorPath} --config {configYaml}"
-    run(drOperatorCommand, shell=True)
+    drOperator.drMD_protocol(configYaml)
+
 
 ######################################################################################################
 def main():
@@ -128,9 +122,9 @@ def clean_up_handler(batchConfig):
     cleanUpInfo = batchConfig["cleanUpInfo"]
     if "getEndpointPdbs" in cleanUpInfo:
         if cleanUpInfo["getEndpointPdbs"]:
-            cleanup.get_endpoint_pdbs(simulationInfo, outDir,cleanUpInfo)
+            drCleanup.get_endpoint_pdbs(simulationInfo, outDir,cleanUpInfo)
             if any(key in cleanUpInfo for key in ["removeWaters","removeIons"]):
-                cleanup.remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir)
+                drCleanup.remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir)
 
 ######################################################################################################
 def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from pdb file, writes a config file
@@ -182,7 +176,7 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
             if p.isfile(ligFrcmod):
                 frcmod = True  
             # deal with charge
-            charge = find_ligand_charge(ligDf,ligName,yamlDir,pH=7.4)
+            charge = drPrep.find_ligand_charge(ligDf,ligName,yamlDir,pH=7.4)
             # write to temporary dict, then to ligandInfo for config
             tmpDict = {"ligandName":ligName,
                     "protons":   ligH,

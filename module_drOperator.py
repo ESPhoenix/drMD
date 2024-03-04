@@ -6,17 +6,12 @@ from shutil import copy
 import yaml
 import argpass
 ## drMD UTILS
-from prep_drMD import *
+import module_drPrep as drPrep
 ## drMD simulation
-from sim_drMD import *
+import module_drSim as drSim
+from module_pdbUtils import mergePdbs
 #####################################################################################
-def read_inputs():
-    ## create an argpass parser, read config file, snip off ".py" if on the end of file
-    parser = argpass.ArgumentParser()
-    parser.add_argument("--config")
-    args = parser.parse_args()
-    configYaml=args.config
-
+def read_inputs(configYaml):
     ## Read config.yaml into a dictionary
     with open(configYaml,"r") as yamlFile:
         config = yaml.safe_load(yamlFile) 
@@ -36,8 +31,8 @@ def check_inputs(config):
 
 #####################################################################################
 #####################################################################################
-def drMD_protocol():
-    config = read_inputs()
+def drMD_protocol(configYaml):
+    config = read_inputs(configYaml)
     #check_inputs(config=config)
     ## MAKE OUTPUT DIRECTORY
     outDir = config["pathInfo"]["outputDir"]
@@ -50,13 +45,13 @@ def drMD_protocol():
     if "ligandInfo" in config:
         ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
         inputPdb = config["pathInfo"]["inputPdb"]
-        split_input_pdb(inputPdb =inputPdb,
+        drPrep.split_input_pdb(inputPdb =inputPdb,
                         config = config,
                         outDir=prepDir)
         ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
-        ligandPdbs,ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
+        ligandPdbs,ligandFileDict = drPrep.prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
         ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
+        proteinPdbs = drPrep.prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
         ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
         wholePrepDir = p.join(prepDir,"WHOLE")
         os.makedirs(wholePrepDir,exist_ok=True)
@@ -65,7 +60,7 @@ def drMD_protocol():
         mergedPdb = p.join(wholePrepDir,f"{outName}.pdb")
         mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
+        inputCoords, amberParams = drPrep.make_amber_params(outDir = wholePrepDir,
                             ligandFileDict=ligandFileDict,
                             pdbFile= mergedPdb,
                             outName= outName,
@@ -73,22 +68,20 @@ def drMD_protocol():
 
     else:
         ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
+        proteinPdbs = drPrep.prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
         ## MERGE PROTEIN PDBS
         outName = config["pathInfo"]["outputName"]
         mergedPdb = p.join(p.join(prepDir,"PROT",f"{outName}.pdb"))
         mergePdbs(pdbList=proteinPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
+        inputCoords, amberParams = drPrep.make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                         pdbFile= mergedPdb,
                                                         outName= outName,
                                                         prepLog = prepLog)
 
-    run_simulation(config = config,
+    drSim.run_simulation(config = config,
                    outDir = outDir,
                    inputCoords=inputCoords,
                    amberParams=amberParams)
 #####################################################################################
 #####################################################################################
-if __name__ == drMD_protocol():
-    drMD_protocol()

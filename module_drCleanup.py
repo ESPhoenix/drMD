@@ -1,7 +1,7 @@
 import os
 from os import path as p 
 from shutil import copy, rmtree
-from pdbUtils import *
+from module_pdbUtils import pdb2df, df2pdb
 
 ######################################################################################################
 def get_endpoint_pdbs(simulationInfo, outDir, cleanUpInfo):
@@ -42,6 +42,6 @@ def remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir):
             if "removeIons" in cleanUpInfo:
                 if cleanUpInfo["removeIons"]: ## PLACEHOLDER ION NAMES
                     pdbDf = pdbDf[~pdbDf["RES_NAME"].isin(["Na+","Cl-","Mg2+","F-"])].copy()
-            df2Pdb(pdbDf, pdbFile)
+            df2pdb(pdbDf, pdbFile)
 ######################################################################################################
 
