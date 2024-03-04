@@ -7,7 +7,7 @@ from subprocess import run
 import string
 from shutil import copy
 ## drMD UTILS
-from pdbUtils import *
+from module_pdbUtils import pdb2df, df2pdb, fix_atom_names
 #####################################################################################
 def find_ligand_charge(ligDf,ligName,outDir,pH,prepLog):
     ## uses propka to identify charges on a ligand
@@ -15,7 +15,7 @@ def find_ligand_charge(ligDf,ligName,outDir,pH,prepLog):
     os.chdir(outDir)
     ligDf = fix_atom_names(ligDf)
     tmpPdb = p.join(outDir,f"{ligName}.pdb")
-    df2Pdb(ligDf,tmpPdb,chain=False)
+    df2pdb(ligDf,tmpPdb,chain=False)
     # run propka 
     proPkaCommand = f"propka3 {tmpPdb}"
     run_with_log(proPkaCommand,prepLog)
@@ -57,19 +57,19 @@ def split_input_pdb(inputPdb,config,outDir):
         ligPrepDir = p.join(outDir,ligandName)
         os.makedirs(ligPrepDir,exist_ok=True)
         ligDf = pdbDf[pdbDf["RES_NAME"]==ligandName]
-        df2Pdb(ligDf,p.join(ligPrepDir,f"{ligandName}.pdb"),chain=False)
+        df2pdb(ligDf,p.join(ligPrepDir,f"{ligandName}.pdb"),chain=False)
         pdbDf.drop(pdbDf[pdbDf["RES_NAME"]==ligandName].index,inplace=True)
     # write protein only to pdb file
     protPrepDir = p.join(outDir,"PROT")
     os.makedirs(protPrepDir,exist_ok=True)
-    df2Pdb(pdbDf,p.join(protPrepDir,"PROT.pdb"))
+    df2pdb(pdbDf,p.join(protPrepDir,"PROT.pdb"))
 #############################  PROTONATION & PDB CREATION ###############################
 def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, prepLog):
     if ligand["protons"]:
         ligPdb = p.join(ligPrepDir,f"{ligandName}.pdb")
         ligDf = pdb2df(ligPdb)
         ligDf = fix_atom_names(ligDf)
-        df2Pdb(ligDf, ligPdb)
+        df2pdb(ligDf, ligPdb)
         rename_hydrogens(ligPdb, ligPdb)
         ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
@@ -80,7 +80,7 @@ def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, prepLog):
         ligDf = pdb2df(ligPdb)
         ligDf = fix_atom_names(ligDf)
         ligPdb_fixNames = p.join(ligPrepDir,f"{ligandName}_fixNames.pdb")
-        df2Pdb(ligDf, ligPdb_fixNames,chain = False)
+        df2pdb(ligDf, ligPdb_fixNames,chain = False)
         # remove pre-existing protons with reduce
         ligPdb_noH = p.join(ligPrepDir,f"{ligandName}_noH.pdb")
         trimCommand = f"reduce -Trim {ligPdb_fixNames} > {ligPdb_noH}"
@@ -181,7 +181,7 @@ def rename_hydrogens(pdbFile,outFile):
     for index, row in hDf.iterrows():
         pdbDf.loc[index,"ATOM_NAME"] = newNameHs[count]
         count += 1
-    df2Pdb(pdbDf,outFile,chain=False)
+    df2pdb(pdbDf,outFile,chain=False)
 #####################################################################################
 def prepare_protein_structure(config, outDir, prepLog):
     proteinDict = config["proteinInfo"]["proteins"]
@@ -255,6 +255,4 @@ def run_with_log(command, prepLog):
     process = run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     with open(prepLog,"a") as log:
         log.write(process.stdout)
-        
-
 #####################################################################################

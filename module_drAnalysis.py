@@ -4,79 +4,107 @@ import pandas as pd
 import mdtraj as md
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
-##########################################################################################################################
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.image as mpimg
+from PIL import Image
+import numpy as np
+from scipy.spatial import distance
+
+### drMD modules ###
+from module_pdbUtils import pdb2df
+#############################################################################################
+def check_RMSD(traj):
+    rmsd = md.rmsd(traj, traj, 0)
+    rmsdDf = pd.DataFrame(rmsd, columns = ["RMSD"])
+    return rmsdDf
+#############################################################################################
+def check_RMSF(traj):
+    rmsf = md.rmsf(traj, traj, 0)
+    rmsfDf = pd.DataFrame(rmsf, columns = ["RMSF"])
+    return rmsfDf
+#############################################################################################
+def find_contacts(traj, pdbFile, keyResidues):
+    contactsPerTarget = find_nearby_residues(keyResidues, pdbFile)
+    for resTag in contactsPerTarget:
+        pairwiseContacts = contactsPerTarget[resTag]
+        ## compute contacts
+        contactDistances, residuePairs = md.compute_contacts(traj, pairwiseContacts)
+        contactIds = residuePairs[:, 1].tolist()
+        contactIds = [x+1 for x in contactIds] # un-Zero index
+        contactDf = pd.DataFrame(contactDistances, columns = contactIds)
+        #print(contactDf)
+        ## calculate radial distribution function for pairs
+        radii, rdf = md.compute_rdf(traj, pairwiseContacts, bin_width = 0.05)
+        rdfDf = pd.DataFrame({'Radii': radii, 'RDF': rdf})
+        peak_distances = [rdfDf['Radii'][i] for i in range(len(rdfDf['RDF'])) if rdfDf['RDF'][i] > 500]
+
+
+        some_tolerance = 0.0025
+        for i, pair in enumerate(pairwiseContacts):
+            pair_distances = contactDistances[i, :]
+            for peak_distance in peak_distances:
+                # Check if this pair often has a distance close to the peak distance
+                close_to_peak = np.isclose(pair_distances, peak_distance, atol=0.1)
+                if close_to_peak.mean() > 0.05:
+                    print(f"Pair {pair} is associated with peak at distance {round(peak_distance,4)}")
+                else:
+                    print(f"WONK {pair} distance {round(peak_distance,4)}")
+
+        plot_rdf(rdfDf)
+
+#############################################################################################
+def plot_rdf(rdfDf):
+    # Plot the RDF
+    plt.figure(figsize=(10, 6))
+    plt.plot(rdfDf['Radii'], rdfDf['RDF'], label='RDF')
+    plt.xlabel('Radii')
+    plt.ylabel('Radial Distribution Function')
+    plt.title('Radial Distribution Function vs Radii')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    plt.close()
+#############################################################################################
+def find_nearby_residues(keyResidues, pdbFile, cutoff = 6.2):
+    pdbDf = pdb2df(pdbFile)
+    pdbDf = pdbDf[pdbDf["RES_NAME"] != "HOH"]
+    pdbDf = pdbDf[pdbDf["ELEMENT"] != "H"]
+    contactsPerTarget = {}
+    for resTag in keyResidues:
+        resId = keyResidues[resTag]["RES_ID"]
+        resDf = pdbDf[pdbDf["RES_ID"] == resId]
+        searchDf = pdbDf[pdbDf["RES_ID"] != resId].copy()
+        resCoords = resDf[["X", "Y", "Z"]].values
+        searchCoords = searchDf[["X", "Y", "Z"]].values
+        distances = distance.cdist(resCoords, searchCoords, "euclidean")
+        minDists = np.amin(distances, axis=0)
+        searchDf.loc[:,"MIN_DIST"] = minDists
+        searchDf = searchDf[searchDf["MIN_DIST"] <= cutoff] 
+        potentialContacts = searchDf["RES_ID"].unique().tolist()
+        pairwiseContacts = [(resId - 1, nearbyResidue -1) for nearbyResidue in potentialContacts] # Zero Index
+        contactsPerTarget.update({resTag: pairwiseContacts})
+    return contactsPerTarget
+
+#############################################################################################
 def main():
-    vitalsCsv = "/home/eugene/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/02_NVT_pre-equilibraition/vitals_report.csv"
-    outDir = "/home/eugene/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/02_NVT_pre-equilibraition"
+    simDir = "/home/esp/scriptDevelopment/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/04_NpT_equilibriation"
+    pdbFile = p.join(simDir, "NpT_final_geom.pdb")
+    dcdFile = p.join(simDir, "trajectory.dcd")
 
-    energyList = ["Potential Energy (kJ/mole)","Kinetic Energy (kJ/mole)","Total Energy (kJ/mole)"]
-    plot_vitals(vitalsCsv, outDir, energyList, "Energies")
-    propertiesList = ["Temperature (K)", "Box Volume (nm^3)", "Density (g/mL)"]
-    plot_vitals(vitalsCsv, outDir, propertiesList, "Properties")
-##########################################################################################################################
-def plot_vitals(vitalsCsv, outDir, yData, tag):
-    offRed = to_rgba((204/255, 102/255, 102/255), alpha=1)
+    traj = md.load_dcd(dcdFile, top = pdbFile)
 
-    vitalsDf = pd.read_csv(vitalsCsv)
-    # Set up the figure and axis
-    fig, ax1 = plt.subplots(figsize=(10, 6))
+    keyResidues = {"C372": {"CHAIN_ID": "A",
+                            "RES_ID": 372,
+                            "RES_NAME": "CYS"},
+                    "R391": {"CHAIN_ID": "A",
+                            "RES_ID": 391,
+                            "RES_NAME": "ARG"}}
 
-    vitalsColors = init_colors()
-
-    # Plot First line on ax1
-    color = vitalsColors[0]
-    ax1.set_xlabel('Time (ps)')
-    ax1.set_ylabel(yData[0], color=color)
-    ax1.plot(vitalsDf['Time (ps)'], vitalsDf[yData[0]], label=yData[0], linestyle='-', color=color, linewidth=2)
-    ax1.tick_params(axis='y', labelcolor=color)
-
-    # get labels
-    lines, labels = ax1.get_legend_handles_labels()
-
-    for i in range(1,len(yData)):
-        data = yData[i]
-        lineColor = vitalsColors[i]
-    # Create a new  y-axis 
-        ax2 = ax1.twinx()
-        color = lineColor
-
-         # Adjusting the position of the new y-axis to avoid overlap
-        offset = 80 * (i-1)  # Adjusting this value changes how far away each subsequent axis is
-        ax2.spines['right'].set_position(('outward', offset))
-        ax2.set_ylabel(data, color=color)
-        ax2.plot(vitalsDf['Time (ps)'], vitalsDf[data], label=data, linestyle='-', color=color, linewidth=2)
-        ax2.tick_params(axis='y', labelcolor=color)
-
-        # get labels and append
-        lines2, labels2 = ax2.get_legend_handles_labels()
-        lines += lines2
-        labels += labels2
-
-    # Customize the appearance to resemble an ECG readout
-    ax1.set_title(f'Simulation {tag} vs Time')
-    ax1.grid(True, linestyle='--', alpha=0.7, color=offRed,linewidth=0.5, which='both')
-
-    # legend
-    ax1.legend(lines, labels, loc='upper left')
-    # save
-    plt.savefig(p.join(outDir, f"Vitals_{tag}.png"), bbox_inches="tight")
-    fig.clf()
-##########################################################################################################################
-def init_colors():
-    black = to_rgba((0, 0, 0, 1.0))  # Black
-    darkRed = to_rgba((0.545, 0, 0, 1.0))  # Dark Red
-    brightRed = to_rgba((1.0, 0, 0, 1.0))  # Bright Red
-    darkBlue = to_rgba((0, 0, 0.545, 1.0))  # Dark Blue
-    brightBlue = to_rgba((0, 0, 1.0, 1.0))  # Bright Blue
-    darkGreen = to_rgba((0, 0.5, 0, 1.0))  # Dark Green
-    brightGreen = to_rgba((0, 1.0, 0, 1.0))  # Bright Green
-    purple = to_rgba((0.5, 0, 0.5, 1.0))  # Purple
-    orange = to_rgba((1.0, 0.5, 0, 1.0))  # Orange
-
-    vitalsColors = [black, darkRed, brightRed, darkBlue, brightBlue, darkGreen, brightGreen, purple, orange]
-    return vitalsColors
+    find_contacts(traj, pdbFile, keyResidues)
+    check_RMSD(traj)
+    check_RMSF(traj)
 
 
-##########################################################################################################################
-if __name__ == "__main__":
+#############################################################################################
+if not __name__ == main():
     main()

@@ -18,7 +18,7 @@ def left_aligned(pdbList, textList):
 
 
 ########################## write pdb dataframe to pdb file
-def df2Pdb(df, outFile,
+def df2pdb(df, outFile,
            chain=True):
     with open(outFile,"w") as f:
         for _, row in df.iterrows():
@@ -92,7 +92,7 @@ def mergePdbs(pdbList,outFile):
         df = pdb2df(pdbFile)
         dfList.append(df)
     mergedDf = pd.concat(dfList,axis=0)
-    df2Pdb(df=mergedDf, outFile=outFile, chain=True)
+    df2pdb(df=mergedDf, outFile=outFile, chain=True)
 
 ############################### apply a a bunch of fixes to a pdb dataframe
 def fix_atom_names(df): 

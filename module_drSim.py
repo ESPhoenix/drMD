@@ -2,29 +2,29 @@
 import os
 from os import path as p
 ## OPEN MM LIBS
-from simtk.openmm.app import *
-from simtk.openmm import *
-from simtk.unit import *
+import simtk.openmm.app as app
+import simtk.openmm as openmm
+import  simtk.unit  as unit
 from sys import stdout
 ## CUSTOM LIBS
-from constraints_drMD import heavy_atom_position_restraints, constrain_all_atom_names_except_list
-import analysis_drMD as analysis 
+import module_drConstraints as drConstraints
+import module_drCheckup as drCheckup
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams):
     # set up simple unit translator
-    timescale = {"fs":femtoseconds,
-                 "ps":picoseconds,
-                 "ns":nanoseconds}
+    timescale = {"fs":unit.femtoseconds,
+                 "ps":unit.picoseconds,
+                 "ns":unit.nanoseconds}
     ## set up gpu
-    platform=Platform.getPlatformByName("OpenCL")
-
+    platform=openmm.Platform.getPlatformByName("CUDA")
     # load amber files, create system
-    prmtop = AmberPrmtopFile(amberParams)
-    inpcrd = AmberInpcrdFile(inputCoords)  
 
-    system = prmtop.createSystem(nonbondedMethod=PME,
-                                    nonbondedCutoff=1*nanometer,
-                                    constraints = HBonds)
+    prmtop = app.AmberPrmtopFile(amberParams)
+    inpcrd = app.AmberInpcrdFile(inputCoords)  
+
+    system = prmtop.createSystem(nonbondedMethod=app.PME,
+                                    nonbondedCutoff=1*unit.nanometer,
+                                    constraints = app.HBonds)
     # set up simple boolean to check for whether we need to continue
     isInitialSim = True
     simulations = config["simulationInfo"]
@@ -48,20 +48,20 @@ def run_simulation(config, outDir, inputCoords, amberParams):
 ###########################################################################################
 def init_reporters(simDir, nSteps, nLogSteps):
     vitalsCsv = p.join(simDir, "vitals_report.csv")
-    vitalsStateReporter = StateDataReporter(file = vitalsCsv, reportInterval = nLogSteps, step = True,
+    vitalsStateReporter = app.StateDataReporter(file = vitalsCsv, reportInterval = nLogSteps, step = True,
                                             time = True, potentialEnergy = True, kineticEnergy = True,
                                             totalEnergy = True, temperature = True, volume = True,
                                             density = True)
     progressCsv = p.join(simDir, "progress_report.csv")
-    progressStateReporter = StateDataReporter(file = progressCsv, progress = True, remainingTime = True,
+    progressStateReporter = app.StateDataReporter(file = progressCsv, progress = True, remainingTime = True,
                                             speed = True, elapsedTime = True, totalSteps = nSteps,
                                             reportInterval = nLogSteps)
 
     dcdFile = p.join(simDir, "trajectory.dcd")
-    dcdTrajectoryReporter = DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
+    dcdTrajectoryReporter = app.DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
 
 
-    return vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv
+    return vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv, progressCsv
 ###########################################################################################
 def process_sim_data(sim,timescale):
     # Reads simulation variables from config file and processes them
@@ -72,7 +72,7 @@ def process_sim_data(sim,timescale):
     nSteps = int(duration / timestep)
     print(nSteps)
     nLogSteps = round(nSteps / 500)
-    temp = sim["temp"] * kelvin
+    temp = sim["temp"] *unit.kelvin
 
     sim.update({"timeStep":timestep,
                 "duration": duration,
@@ -83,18 +83,18 @@ def process_sim_data(sim,timescale):
 ###########################################################################################
 def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     # add constant pressure force to system (makes this an NpT simulation)
-    system.addForce(MonteCarloBarostat(1*bar, sim["temp"]))
+    system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
     if sim["freezeHeavy"]:
         print("Adding position restraints to heavy atoms!")
-        system = heavy_atom_position_restraints(system,prmtop,inpcrd)
+        system = drConstraints.heavy_atom_position_restraints(system,prmtop,inpcrd)
     # set up intergrator and system
-    integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
-    simulation = Simulation(prmtop.topology, system, integrator, platform)
+    integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
+    simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
-    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv = init_reporters(simDir = simDir,
+    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv, progressCsv = init_reporters(simDir = simDir,
                                                                                         nSteps =  totalSteps,
                                                                                         nLogSteps = sim["nLogSteps"])
 
@@ -113,25 +113,25 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     # save result as pdb
     state = simulation.context.getState(getPositions=True, getEnergy=True)
     with open(p.join(simDir,"NpT_final_geom.pdb"), 'w') as output:
-        PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
 
-    analysis.plot_vitals(vitalsCsv = p.join(outDir), outDir = simDir)
+    drCheckup.check_vitals(simDir,vitalsCsv, progressCsv)
     return saveXml
 ###########################################################################################
 def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     ## Add position restraints to heavy atoms if instructed
     if sim["freezeHeavy"]:
         print("Adding position restraints to heavy atoms!")
-        system = heavy_atom_position_restraints(system,prmtop,inpcrd)
+        system = drConstraints.heavy_atom_position_restraints(system,prmtop,inpcrd)
       
     # set up intergrator and system
-    integrator = LangevinMiddleIntegrator(sim["temp"], 1/picosecond, sim["timeStep"])
-    simulation = Simulation(prmtop.topology, system, integrator, platform)
+    integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
+    simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # load state from previous simulation
     simulation.loadState(saveXml)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
-    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv = init_reporters(simDir = simDir,
+    vitalsStateReporter, progressStateReporter, dcdTrajectoryReporter, vitalsCsv, progressCsv = init_reporters(simDir = simDir,
                                                                                         nSteps =  totalSteps,
                                                                                         nLogSteps = sim["nLogSteps"])
 
@@ -150,28 +150,27 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     # save result as pdb
     state = simulation.context.getState(getPositions=True, getEnergy=True)
     with open(p.join(simDir,"NVT_final_geom.pdb"), 'w') as output:
-        PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-
+        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+    drCheckup.check_vitals(simDir,vitalsCsv, progressCsv)
     return saveXml
 
 ###########################################################################################
 def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir,platform):
-    
     if "relaxAtomSymbolList" in sim:
         print(f"Constraining all atoms execept {sim['relaxAtomSymbolList']}")
-        system = constrain_all_atom_names_except_list(system,prmtop,sim['relaxAtomSymbolList'])
+        system = drConstraints.constrain_all_atom_names_except_list(system,prmtop,sim['relaxAtomSymbolList'])
 
     print("Running Energy Minimisation!")
     # set up intergrator and simulation
-    integrator = LangevinMiddleIntegrator(300*kelvin, 1/picosecond, 0.004*picoseconds)
-    simulation = Simulation(prmtop.topology, system, integrator, platform)
+    integrator = openmm.LangevinMiddleIntegrator(300*unit.kelvin, 1/unit.picosecond, 0.004*unit.picoseconds)
+    simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     simulation.context.setPositions(inpcrd.positions)
-    # run eneregy minimisation
+    # run energy minimisation
     simulation.minimizeEnergy(maxIterations=sim['maxIterations']) 
     # save result as pdb
     state = simulation.context.getState(getPositions=True, getEnergy=True)
     with open(p.join(simDir,"minimised_geom.pdb"), 'w') as output:
-        PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     # save simulation as XML
     saveXml = p.join(simDir,"energy_minimisation.xml")
     simulation.saveState(saveXml)
