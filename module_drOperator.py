@@ -37,6 +37,27 @@ def drMD_protocol(configYaml):
     ## MAKE OUTPUT DIRECTORY
     outDir = config["pathInfo"]["outputDir"]
     prepDir = p.join(outDir,"00_prep")
+
+    amberParams = False
+    inputCoords = False
+
+    ## skip prep if complete
+    wholeDir = p.join(prepDir,"WHOLE")
+    if p.isdir(p.join(wholeDir)):
+        for file in os.listdir(wholeDir):
+            if p.splitext(file)[1] == ".prmtop":
+                amberParams = p.join(wholeDir,file)
+            elif p.splitext(file)[1] == ".inpcrd":
+                inputCoords = p.join(wholeDir,file)
+
+    if amberParams and inputCoords:
+        drSim.run_simulation(config = config,
+                outDir = outDir,
+                inputCoords=inputCoords,
+                amberParams=amberParams)
+        return
+
+    ## MAIN PREP PROTOCOL
     os.makedirs(outDir,exist_ok=True)
     os.makedirs(prepDir,exist_ok=True)
     
