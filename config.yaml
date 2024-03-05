@@ -24,29 +24,27 @@ simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
-    relaxAtomSymbolList: [] # "O","H"
-    maxIterations: 200
+    maxIterations: 300
 
   - stepName: "02_NVT_pre-equilibraition"
     type: "NVT"
-    duration: "5 ps"
+    duration: "1 ps"
     timestep: "2 fs"
-    freezeHeavy: True
+    relaxWaters: True
     temp: 300
 
   - stepName: "03_NpT_pre-equilibriation"
     type: "NpT"
-    duration: "5 ps"
+    duration: "1 ps"
     timestep: "2 fs"
-    freezeHeavy: True
+    relaxWaters: False
     temp: 300
 
-  - stepName: "04_NpT_equilibriation"
-    type: "NpT"
-    duration: "500 ps"
-    timestep: "2 fs"
-    freezeHeavy: False
-    temp: 300
+  # - stepName: "04_NpT_equilibriation"
+  #   type: "NpT"
+  #   duration: "1 ps"
+  #   timestep: "2 fs"
+  #   temp: 300
 #
 #  - stepName: "05_NpT_production MD"
 #    type: "NpT"
