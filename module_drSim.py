@@ -21,12 +21,6 @@ def run_simulation(config, outDir, inputCoords, amberParams):
 
     prmtop = app.AmberPrmtopFile(amberParams)
     inpcrd = app.AmberInpcrdFile(inputCoords)  
-
-    system = prmtop.createSystem(nonbondedMethod=app.PME,
-                                    nonbondedCutoff=1*unit.nanometer,
-                                    constraints = app.HBonds)
-    # set up simple boolean to check for whether we need to continue
-    isInitialSim = True
     simulations = config["simulationInfo"]
     for sim in simulations:
         # sort out directories
@@ -35,16 +29,20 @@ def run_simulation(config, outDir, inputCoords, amberParams):
         os.chdir(simDir)
         # Check for simulation type, run as needed:
         if sim["type"] == "EM":
-            saveXml = run_energy_minimisation(prmtop, inpcrd, system, sim, simDir, platform)
-
+            saveXml = run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform)
         elif sim["type"] == "NVT":
             sim = process_sim_data(sim,timescale)
-            saveXml = run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform)
+            saveXml = run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform)
 
         elif sim["type"] in ["NpT","NPT"]:
             sim = process_sim_data(sim,timescale)
-            saveXml = run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform)
-
+            saveXml = run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform)
+###########################################################################################
+def init_system(prmtop):
+    system = prmtop.createSystem(nonbondedMethod=app.PME,
+                                    nonbondedCutoff=1*unit.nanometer,
+                                    constraints = app.HBonds)
+    return system
 ###########################################################################################
 def init_reporters(simDir, nSteps, nLogSteps):
     vitalsCsv = p.join(simDir, "vitals_report.csv")
@@ -70,7 +68,6 @@ def process_sim_data(sim,timescale):
     durationData = sim["duration"].split()
     duration = int(durationData[0]) * timescale[durationData[1]]
     nSteps = int(duration / timestep)
-    print(nSteps)
     nLogSteps = round(nSteps / 500)
     temp = sim["temp"] *unit.kelvin
 
@@ -81,12 +78,16 @@ def process_sim_data(sim,timescale):
                 "temp":temp})
     return sim
 ###########################################################################################
-def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
+def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform):
+    print("Running NpT Step!")
+    ## initialise a new system from parameters
+    system = init_system(prmtop)
     # add constant pressure force to system (makes this an NpT simulation)
     system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
-    if sim["freezeHeavy"]:
-        print("Adding position restraints to heavy atoms!")
-        system = drConstraints.heavy_atom_position_restraints(system,prmtop,inpcrd)
+
+    ## deal with any constraints
+    system = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveXml)
+
     # set up intergrator and system
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
@@ -118,11 +119,13 @@ def run_npt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     drCheckup.check_vitals(simDir,vitalsCsv, progressCsv)
     return saveXml
 ###########################################################################################
-def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
-    ## Add position restraints to heavy atoms if instructed
-    if sim["freezeHeavy"]:
-        print("Adding position restraints to heavy atoms!")
-        system = drConstraints.heavy_atom_position_restraints(system,prmtop,inpcrd)
+def run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform):
+    print("Running NVT Step!")
+    ## initialise a new system from parameters
+    system = init_system(prmtop)
+
+    ## deal with any constraints
+    system = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveXml)
       
     # set up intergrator and system
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
@@ -155,12 +158,9 @@ def run_nvt(system, prmtop, inpcrd, sim, saveXml, simDir, platform):
     return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop, inpcrd, system, sim, simDir,platform):
-    if "relaxAtomSymbolList" in sim:
-        print(f"Constraining all atoms execept {sim['relaxAtomSymbolList']}")
-        system = drConstraints.constrain_all_atom_names_except_list(system,prmtop,sim['relaxAtomSymbolList'])
-
+def run_energy_minimisation(prmtop, inpcrd, sim, simDir,platform):
     print("Running Energy Minimisation!")
+    system = init_system(prmtop)
     # set up intergrator and simulation
     integrator = openmm.LangevinMiddleIntegrator(300*unit.kelvin, 1/unit.picosecond, 0.004*unit.picoseconds)
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)

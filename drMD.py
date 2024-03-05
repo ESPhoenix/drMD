@@ -109,7 +109,7 @@ def run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir
                 continue
             executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
    ## CLEAN UP
-    clean_up_handler(batchConfig)
+    # clean_up_handler(batchConfig)
 
 ######################################################################################################
 def clean_up_handler(batchConfig):
