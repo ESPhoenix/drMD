@@ -13,12 +13,12 @@ def constraints_handler(system, prmtop,inpcrd, sim, saveXml):
             print("Relaxing water positions...")
             clearRestraints = False
             system = restrain_protein(system, prmtop, inpcrd)
-            return system
+            return system, clearRestraints
     
     if clearRestraints:
         print("Running with no restraints...")
         clear_all_restraints(saveXml)
-        return system
+        return system, clearRestraints
 
 ###########################################################################################
 def restrain_protein(system, prmtop, inpcrd):

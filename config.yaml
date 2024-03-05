@@ -24,34 +24,40 @@ simulationInfo:
   - stepName: "01_energy_minimisation"
     type: "EM"
     temp: 300
-    maxIterations: 300
+    maxIterations: 1000
 
   - stepName: "02_NVT_pre-equilibraition"
     type: "NVT"
-    duration: "1 ps"
+    duration: "100 ps"
     timestep: "2 fs"
     relaxWaters: True
     temp: 300
 
   - stepName: "03_NpT_pre-equilibriation"
     type: "NpT"
-    duration: "1 ps"
+    duration: "300 ps"
     timestep: "2 fs"
-    relaxWaters: False
+    relaxWaters: True
     temp: 300
 
-  # - stepName: "04_NpT_equilibriation"
-  #   type: "NpT"
-  #   duration: "1 ps"
-  #   timestep: "2 fs"
-  #   temp: 300
-#
-#  - stepName: "05_NpT_production MD"
-#    type: "NpT"
-#    duration: "50 ns"
-#    timestep: "2 fs"
-#    freezeHeavy: False
-#    temp: 300
+  - stepName: "04_NpT_slowIntergrator"
+    type: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temp: 300
+
+  - stepName: "05_NpT_equilibriation"
+    type: "NpT"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 300
+
+  - stepName: "05_NpT_production MD"
+    type: "NpT"
+    duration: 10 ns"
+    timestep: "2 fs"
+    freezeHeavy: False
+    temp: 300
 
 ########################################################################
 cleanUpInfo:

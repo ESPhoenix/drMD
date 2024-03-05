@@ -26,6 +26,7 @@ def check_RMSF(traj):
 def find_contacts(traj, pdbFile, keyResidues):
     contactsPerTarget = find_nearby_residues(keyResidues, pdbFile)
     for resTag in contactsPerTarget:
+        print(f"-->{resTag}")
         pairwiseContacts = contactsPerTarget[resTag]
         ## compute contacts
         contactDistances, residuePairs = md.compute_contacts(traj, pairwiseContacts)
@@ -36,19 +37,16 @@ def find_contacts(traj, pdbFile, keyResidues):
         ## calculate radial distribution function for pairs
         radii, rdf = md.compute_rdf(traj, pairwiseContacts, bin_width = 0.05)
         rdfDf = pd.DataFrame({'Radii': radii, 'RDF': rdf})
+        # peak detection with a cutoff of 500
         peak_distances = [rdfDf['Radii'][i] for i in range(len(rdfDf['RDF'])) if rdfDf['RDF'][i] > 500]
-
-
-        some_tolerance = 0.0025
         for i, pair in enumerate(pairwiseContacts):
             pair_distances = contactDistances[i, :]
             for peak_distance in peak_distances:
                 # Check if this pair often has a distance close to the peak distance
-                close_to_peak = np.isclose(pair_distances, peak_distance, atol=0.1)
+                close_to_peak = np.isclose(pair_distances, peak_distance, atol=0.01)
                 if close_to_peak.mean() > 0.05:
                     print(f"Pair {pair} is associated with peak at distance {round(peak_distance,4)}")
-                else:
-                    print(f"WONK {pair} distance {round(peak_distance,4)}")
+
 
         plot_rdf(rdfDf)
 
@@ -81,13 +79,13 @@ def find_nearby_residues(keyResidues, pdbFile, cutoff = 6.2):
         searchDf.loc[:,"MIN_DIST"] = minDists
         searchDf = searchDf[searchDf["MIN_DIST"] <= cutoff] 
         potentialContacts = searchDf["RES_ID"].unique().tolist()
-        pairwiseContacts = [(resId - 1, nearbyResidue -1) for nearbyResidue in potentialContacts] # Zero Index
+        pairwiseContacts = [(resId , nearbyResidue) for nearbyResidue in potentialContacts] # Zero Index
         contactsPerTarget.update({resTag: pairwiseContacts})
     return contactsPerTarget
 
 #############################################################################################
 def main():
-    simDir = "/home/esp/scriptDevelopment/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/04_NpT_equilibriation"
+    simDir = "/home/esp/scriptDevelopment/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/05_NpT_equilibriation"
     pdbFile = p.join(simDir, "NpT_final_geom.pdb")
     dcdFile = p.join(simDir, "trajectory.dcd")
 
@@ -106,5 +104,5 @@ def main():
 
 
 #############################################################################################
-if not __name__ == main():
+if  __name__ == "__main__":
     main()
