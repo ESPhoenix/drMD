@@ -16,11 +16,13 @@ from module_pdbUtils import pdb2df
 def check_RMSD(traj):
     rmsd = md.rmsd(traj, traj, 0)
     rmsdDf = pd.DataFrame(rmsd, columns = ["RMSD"])
+    plot_rmsd(rmsdDf)
     return rmsdDf
 #############################################################################################
 def check_RMSF(traj):
     rmsf = md.rmsf(traj, traj, 0)
     rmsfDf = pd.DataFrame(rmsf, columns = ["RMSF"])
+    plot_rmsf(rmsfDf)
     return rmsfDf
 #############################################################################################
 def find_contacts(traj, pdbFile, keyResidues):
@@ -49,6 +51,28 @@ def find_contacts(traj, pdbFile, keyResidues):
 
 
         plot_rdf(rdfDf)
+
+def plot_rmsf(df):
+            # Plot the RMSF
+    plt.figure(figsize=(8, 6))
+    plt.plot(df["RMSF"], label="RMSF")
+    plt.xlabel("Residue Index")
+    plt.ylabel("RMSF (Å)")
+    plt.title("Root Mean Square Fluctuation (RMSF) vs. Residue Index")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+#############################################################################################
+def plot_rmsd(df):
+    # Plot the RMSD
+    plt.figure(figsize=(8, 6))
+    plt.plot(df["RMSD"], label="RMSD")
+    plt.xlabel("Frame Index")
+    plt.ylabel("RMSD (Å)")
+    plt.title("Root Mean Square Deviation (RMSD) vs. Frame Index")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 #############################################################################################
 def plot_rdf(rdfDf):
@@ -90,6 +114,7 @@ def main():
     dcdFile = p.join(simDir, "trajectory.dcd")
 
     traj = md.load_dcd(dcdFile, top = pdbFile)
+    traj.remove_solvent([],True)
 
     keyResidues = {"C372": {"CHAIN_ID": "A",
                             "RES_ID": 372,
@@ -97,10 +122,11 @@ def main():
                     "R391": {"CHAIN_ID": "A",
                             "RES_ID": 391,
                             "RES_NAME": "ARG"}}
-
-    find_contacts(traj, pdbFile, keyResidues)
-    check_RMSD(traj)
+    
     check_RMSF(traj)
+    check_RMSD(traj)
+    exit()
+    find_contacts(traj, pdbFile, keyResidues)
 
 
 #############################################################################################
