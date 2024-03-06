@@ -104,11 +104,6 @@ def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform):
     system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
-
-    # if clearRestraints:
-    #     print("WONK")
-    #     simulation.context.setParameter("k", (0 *unit.kilocalories_per_mole/unit.angstroms**2))
-
     # set up intergrator and system
     # load state from previous simulation
     simulation.loadState(saveXml)
@@ -119,19 +114,11 @@ def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform):
                                 nLogSteps = sim["nLogSteps"])
     for rep in reporters:
         simulation.reporters.append(reporters[rep][0])
-    # set restraints constant to 0 
-
-
-    # # set up periodic boundary conditions
-    # if inpcrd.boxVectors is not None:
-    #     simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
-
     # run NVT simulation
     simulation.step(sim["nSteps"])
     # save simulation as XML
     saveXml = p.join(simDir,"NpT_step.xml")
     simulation.saveState(saveXml)
-
     # save result as pdb
     state = simulation.context.getState(getPositions=True, getEnergy=True)
     with open(p.join(simDir,"NpT_final_geom.pdb"), 'w') as output:
