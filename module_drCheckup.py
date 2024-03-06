@@ -8,30 +8,160 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.image as mpimg
 from PIL import Image
 import numpy as np
+from fpdf import FPDF
+######################################################################
+def create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesConvTable, propertiesPlot):
+    # Create instance of FPDF class
+    pdf = FPDF()
+    # Add a page
+    pdf.add_page()
+    # Set font
+    pdf.set_font("Arial", size = 36)
+    ##### TITLE ####
+    pdf.cell(200, 10, txt = "Simulation Vitals", ln = True, align = 'L')
+    ##### BASIC INFO #####
+    # Open the image file
+    with Image.open(basicPng) as bI:
+        bI_width, bI_height = bI.size
+    # Calculate the desired width and height in mm
+    desired_width = pdf.w * 0.6 # 90% of the page width
+    desired_height = pdf.h  # 2nd to 5th of the page height
+    # Calculate scale factors
+    scale_width = desired_width / bI_width
+    scale_height = desired_height / bI_height
+    # Use the smaller scale factor to ensure the image fits both dimensions
+    scale = min(scale_width, scale_height)
+    # Calculate the scaled dimensions
+    bI_width *= scale
+    bI_height *= scale
+    # Add the image to the pdf
+    pdf.image(basicPng, 30, 25, bI_width, bI_height)
+
+    nowHeight = 15 + bI_height
+    # ##### ENERGY CONV #####
+    with Image.open(energyConvTable) as eC:
+        eC_width, eC_height = eC.size
+    desired_width  = pdf.w * 0.3
+    desired_height  = pdf.h
+    scale_width = desired_width / eC_width
+    scale_height = desired_height / eC_height
+    scale = min(scale_width, scale_height)
+    # Calculate the scaled dimensions
+    eC_width *= scale
+    eC_height *= scale
+    pdf.image(energyConvTable, 30 , nowHeight, eC_width, eC_height)
+
+    ##### PROPERTIES CONV #####
+    with Image.open(propertiesConvTable) as pC:
+        pC_width, pC_height = pC.size
+    desired_width  = pdf.w * 0.3
+    desired_height  = pdf.h
+    scale_width = desired_width / pC_width
+    scale_height = desired_height / pC_height
+    scale = min(scale_width, scale_height)
+    # Calculate the scaled dimensions
+    pC_width *= scale
+    pC_height *= scale
+    pdf.image(propertiesConvTable, 35 + eC_width, nowHeight, pC_width, pC_height)
+
+    nowHeight = nowHeight + 2 + eC_height
+   ##### ENERGY PLOT #####
+    with Image.open(energyPlot) as eP:
+        eP_width, eP_height = eP.size
+    desired_width  = pdf.w * 0.75
+    desired_height  = pdf.h
+    scale_width = desired_width / eP_width
+    scale_height = desired_height / eP_height
+    scale = min(scale_width, scale_height)
+    # Calculate the scaled dimensions
+    eP_width *= scale
+    eP_height *= scale
+    pdf.image(energyPlot, 15, nowHeight, eP_width, eP_height)
+
+    nowHeight = nowHeight + 2 + eP_height
+    ##### PROPERTIES PLOT #####
+    with Image.open(propertiesPlot) as pP:
+        pP_width, pP_height = pP.size
+    desired_width  = pdf.w * 0.75
+    desired_height  = pdf.h
+    scale_width = desired_width / pP_width
+    scale_height = desired_height / pP_height
+    scale = min(scale_width, scale_height)
+    # Calculate the scaled dimensions
+    pP_width *= scale
+    pP_height *= scale
+    pdf.image(propertiesPlot, 15, nowHeight, pP_width, pP_height)
+
+
+    ##### SAVE PDF #####
+    pdf.output(p.join(simDir,"Simulation_Vitals.pdf"), "F")
+
+
+
+######################################################################
+def check_convergance(df, columns, simDir, tag, windowSize = 5,):
+    convergedDict = {}
+    for column in columns:
+        dataRange = df[column].max() - df[column].min()
+        converganceTolerance = dataRange * 0.05 
+        runningAverage = df[column].rolling(window=windowSize).mean()
+        lastTwoAverages = runningAverage.tail(2).values
+        isConverged = np.abs(lastTwoAverages[0] - lastTwoAverages[1]) < converganceTolerance
+        entryLabel = column.split("(")[0].split()[0]
+        convergedDict.update({entryLabel:isConverged})
+
+    convergedData = [(key, value) for key, value in convergedDict.items()]
+    convergedDf = pd.DataFrame(convergedData, columns=["Property", "Converged?"])    
+
+    fig, ax = plt.subplots(figsize=(2, 2))
+    ax.axis('off')
+    table = ax.table(cellText=convergedDf.values, colLabels=convergedDf.columns, loc='center',
+                     cellLoc='center', rowLoc='center')
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+    table.scale(1.5, 2)
+
+    for key, cell in table.get_celld().items():
+        cell.set_linewidth(0.5)
+
+    for i in range(len(convergedDf.columns)):
+        table[(0, i)].set_facecolor("#40466e")
+        table[(0, i)].get_text().set_color('white')
+
+    for key, cell in table.get_celld().items():
+        cell.set_linewidth(0.5)
+
+
+    # Save the plot as a PNG file
+    savePng = p.join(simDir, f"{tag}.png")
+    plt.savefig(savePng, bbox_inches='tight')
+
+    return savePng
 
 ######################################################################
 def convert_seconds(seconds):
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     return "{:02}:{:02}:{:02}".format(int(hours), int(minutes), int(seconds))
-
 ######################################################################
 def check_vitals(simDir, vitalsCsv, progressCsv):
 
-    basicPng = extract_basic_data(vitalsCsv, progressCsv, simDir)
-    energyList = ["Potential Energy (kJ/mole)","Kinetic Energy (kJ/mole)","Total Energy (kJ/mole)"]
-    energyPng = plot_vitals(vitalsCsv, simDir, energyList, "Energies", colorOffset=0)
-
-    propertiesList = ["Temperature (K)", "Box Volume (nm^3)", "Density (g/mL)"]
-    propertiesPng = plot_vitals(vitalsCsv, simDir, propertiesList, "Properties", colorOffset=3)
-
-    pngFiles = [basicPng, energyPng, propertiesPng]
-
-    create_vitals_pdf(simDir, pngFiles)
-######################################################################
-def extract_basic_data(vitalsCsv, progressCsv, outDir):
     vitalsDf = pd.read_csv(vitalsCsv)
     progressDf = pd.read_csv(progressCsv)
+
+    basicPng = extract_basic_data(vitalsDf, progressDf, simDir)
+    energyList = ["Potential Energy (kJ/mole)","Kinetic Energy (kJ/mole)","Total Energy (kJ/mole)"]
+    energyConvTable = check_convergance(vitalsDf,energyList,simDir,"energy_convergance")
+    energyPlot = plot_vitals(vitalsDf, simDir, energyList, "Energies", colorOffset=0)
+
+    propertiesList = ["Temperature (K)", "Box Volume (nm^3)", "Density (g/mL)"]
+    propertiesConvTable = check_convergance(vitalsDf, propertiesList, simDir, "properties_convergance")
+    propertiesPlot = plot_vitals(vitalsDf, simDir, propertiesList, "Properties", colorOffset=3)
+
+
+    create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesConvTable, propertiesPlot)
+######################################################################
+def extract_basic_data(vitalsDf, progressDf, outDir):
     # get elapsed time
     timeElapsed = progressDf["Elapsed Time (s)"].tail(1).values[0]
     timeElapsed = convert_seconds(timeElapsed)
@@ -52,11 +182,11 @@ def extract_basic_data(vitalsCsv, progressCsv, outDir):
     df.columns = ['Value']  # rename the column
     df.reset_index(level=0, inplace=True)  # reset the index
 
-    fig, ax = plt.subplots(figsize=(10, 1))
+    fig, ax = plt.subplots(figsize=(5, 2))
     ax.axis('off')
     table = ax.table(cellText=df.values, cellLoc = 'center', loc='center')
     table.auto_set_font_size(False)
-    table.set_fontsize(10)
+    table.set_fontsize(12)
     table.scale(1.2, 1.2)
 
     # save the plot as a png image
@@ -64,21 +194,10 @@ def extract_basic_data(vitalsCsv, progressCsv, outDir):
     plt.savefig(savePng,bbox_inches="tight")
 
     return savePng
-######################################################################
-def create_vitals_pdf(outDir, pngFiles):
-    titleTag = p.basename(outDir)
-    savePng = p.join(outDir, "Simulation_Vitals.png")
 
-    basicTable = mpimg.imread(pngFiles[0])
-    h, w, _ = basicTable.shape  # get dimensions of image
 
-    vitalsPng = Image.new("RGB", (2480, 3508))
-    vitalsPng.paste(Image.fromarray((basicTable * 255).astype(np.uint8)),(100, 100, 100+w, 100+h))
-    vitalsPng.save(savePng)
 ######################################################################
-def plot_vitals(vitalsCsv, outDir, yData, tag, colorOffset):
-    offRed = to_rgba((204/255, 102/255, 102/255), alpha=1)
-    vitalsDf = pd.read_csv(vitalsCsv)
+def plot_vitals(vitalsDf, outDir, yData, tag, colorOffset):
     # Set up the figure and axis
     fig, ax1 = plt.subplots(figsize=(10, 6))
 
@@ -134,7 +253,8 @@ def init_colors():
     vitalsColors = [black, darkRed, brightRed, darkBlue, brightBlue, darkGreen, brightGreen, purple, orange]
     return vitalsColors
 ######################################################################
-# simDir = "/home/esp/scriptDevelopment/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/03_NpT_pre-equilibriation"
-# vitalsCsv = p.join(simDir,"vitals_report.csv")
-# progressCsv = p.join(simDir,"progress_report.csv")
-# check_vitals(simDir, vitalsCsv, progressCsv)
+if __name__ == "__main__":
+    simDir = "/home/esp/scriptDevelopment/drMD/02_outputs/cvFAP_WT_PLM_FAD_3/05_NpT_equilibriation"
+    vitalsCsv = p.join(simDir,"vitals_report.csv")
+    progressCsv = p.join(simDir,"progress_report.csv")
+    check_vitals(simDir, vitalsCsv, progressCsv)
