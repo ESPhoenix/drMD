@@ -3,12 +3,15 @@ from os import path as p
 import pandas as pd
 import mdtraj as md
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.colors import to_rgba
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.image as mpimg
 from PIL import Image
 import numpy as np
 from fpdf import FPDF
+from mplfonts import use_font
+
 ######################################################################
 def create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesConvTable, propertiesPlot):
     # Create instance of FPDF class
@@ -199,15 +202,18 @@ def extract_basic_data(vitalsDf, progressDf, outDir):
 ######################################################################
 def plot_vitals(vitalsDf, outDir, yData, tag, colorOffset):
     # Set up the figure and axis
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-
+    fig, ax1 = plt.subplots(figsize=(12, 6))
     vitalsColors = init_colors()
     # Plot First line on ax1
     lineColor = vitalsColors[0]
-    ax1.set_xlabel('Time (ps)')
-    ax1.set_ylabel(yData[0], color=lineColor)
+    ax1.set_xlabel('Time (ps)', fontsize=18)
+    ax1.set_ylabel(yData[0], color=lineColor, fontsize=18)
     ax1.plot(vitalsDf['Time (ps)'], vitalsDf[yData[0]], label=yData[0], linestyle='-', color=lineColor, linewidth=2)
     ax1.tick_params(axis='y', labelcolor=lineColor)
+    for label in ax1.get_xticklabels():
+        label.set_fontsize(18)
+    for label in ax1.get_yticklabels():
+        label.set_fontsize(18)
     # get labels
     lines, labels = ax1.get_legend_handles_labels()
     for i in range(1,len(yData)):
@@ -216,23 +222,24 @@ def plot_vitals(vitalsDf, outDir, yData, tag, colorOffset):
     # Create a new  y-axis 
         ax2 = ax1.twinx()
          # Adjusting the position of the new y-axis to avoid overlap
-        offset = 80 * (i-1)  # Adjusting this value changes how far away each subsequent axis is
+        offset = 120 * (i-1)  # Adjusting this value changes how far away each subsequent axis is
         ax2.spines['right'].set_position(('outward', offset))
-        ax2.set_ylabel(data, color=lineColor)
+        ax2.set_ylabel(data, color=lineColor, fontsize=18)
         ax2.plot(vitalsDf['Time (ps)'], vitalsDf[data], label=data, linestyle='-', color=lineColor, linewidth=2)
         ax2.tick_params(axis='y', labelcolor=lineColor)
-
+        for label in ax2.get_xticklabels():
+            label.set_fontsize(18)
+        for label in ax2.get_yticklabels():
+            label.set_fontsize(18)
         # get labels and append
         lines2, labels2 = ax2.get_legend_handles_labels()
         lines += lines2
         labels += labels2
     # Customize the appearance to resemble an ECG readout
-    ax1.set_title(f'Simulation {tag} vs Time')
+    ax1.set_title(f'Simulation {tag} vs Time', loc = "right", fontsize=25)
     ax1.grid(True, linestyle='--', alpha=0.7, color=vitalsColors[1],linewidth=0.5, which='both')
-
     # legend
-    ax1.legend(lines, labels, loc='upper right', bbox_to_anchor=(0.35, 1.2))
-
+    ax1.legend(lines, labels, loc='upper right', bbox_to_anchor=(0.35, 1.35), fontsize=18)
     # save
     savePng = p.join(outDir, f"Vitals_{tag}.png")
     plt.savefig(savePng, bbox_inches="tight")
