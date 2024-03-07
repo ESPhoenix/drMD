@@ -26,7 +26,7 @@ def df2pdb(df, outFile,
             pdbList = [" " for _ in range(80)]
             pdbList[0:6]    = left_aligned(pdbList[0:6],list(row['ATOM']))
             pdbList[6:11]   = right_aligned(pdbList[6:11],list(str(row['ATOM_ID'])))
-            pdbList[12:16]  = right_aligned(pdbList[12:16], list(row['ATOM_NAME']))
+            pdbList[12:16]  = left_aligned(pdbList[13:17], list(row['ATOM_NAME']))
             pdbList[17:20]  = right_aligned(pdbList[17:20], list(row['RES_NAME']))
             try: 
                 pdbList[21]  = row['CHAIN_ID']
