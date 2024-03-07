@@ -13,8 +13,8 @@ import module_drCleanup as drCleanup
 import module_drOperator as drOperator
 ## Multiprocessing
 from concurrent.futures import ThreadPoolExecutor
-
-
+import multiprocessing as mp
+from tqdm import tqdm
 #####################################################################################################
 def read_inputs():
     ## create an argpass parser, read config file, snip off ".py" if on the end of file
@@ -71,7 +71,6 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     configYaml = p.join(yamlDir, f"{protName}_config.yaml")
     with open(configYaml, "w") as f:
         yaml.dump(config, f, default_flow_style=False)
-
     drOperator.drMD_protocol(configYaml)
 
 
@@ -84,12 +83,12 @@ def main():
     yamlDir = p.join(outDir,"00_configs")
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
-    cpuCount = batchConfig["generalInfo"]["cpuCount"]
+    parallelCpus = batchConfig["generalInfo"]["parallelCpus"]
     os.makedirs(yamlDir,exist_ok=True)
-    if cpuCount == 1:
+    if parallelCpus == 1:
         run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-    elif cpuCount > 1:
-        run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    elif parallelCpus > 1:
+        run_paralell(parallelCpus, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
@@ -101,13 +100,19 @@ def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
     ## CLEAN UP
     clean_up_handler(batchConfig)
 ######################################################################################################
-def run_paralell(cpuCount, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
-    with ThreadPoolExecutor(max_workers=min(os.cpu_count(),cpuCount)) as executor:
-        for pdbFile in os.listdir(pdbDir):
-            fileData = p.splitext(pdbFile)
-            if not fileData[1] == ".pdb":
-                continue
-            executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
+def run_paralell(parallelCpus, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+    with mp.Pool(processes=parallelCpus) as pool:
+        pool.starmap(process_pdb_file,
+                     tqdm( [(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig) for pdbFile in os.listdir(pdbDir)],
+                     total = len(os.listdir(pdbDir))))
+
+
+    # with ThreadPoolExecutor(max_workers=parallelCpus) as executor:
+    #     for pdbFile in os.listdir(pdbDir):
+    #         fileData = p.splitext(pdbFile)
+    #         if not fileData[1] == ".pdb":
+    #             continue
+    #         executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
    ## CLEAN UP
     # clean_up_handler(batchConfig)
 

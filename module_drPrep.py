@@ -74,24 +74,28 @@ def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, prepLog):
         ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
     else:
-        # find pdb ligand pdb file
+        # # find pdb ligand pdb file
         ligPdb = p.join(ligPrepDir,f"{ligandName}.pdb")
-        # fix atom names 
-        ligDf = pdb2df(ligPdb)
-        ligDf = fix_atom_names(ligDf)
-        ligPdb_fixNames = p.join(ligPrepDir,f"{ligandName}_fixNames.pdb")
-        df2pdb(ligDf, ligPdb_fixNames,chain = False)
-        # remove pre-existing protons with reduce
-        ligPdb_noH = p.join(ligPrepDir,f"{ligandName}_noH.pdb")
-        trimCommand = f"reduce -Trim {ligPdb_fixNames} > {ligPdb_noH}"
-        run_with_log(trimCommand,prepLog)
-        # add protons with reduce
-        ligPdb_h = p.join(ligPrepDir,f"{ligandName}_H.pdb")
-        reduceCommand = f"reduce {ligPdb_noH} > {ligPdb_h}"
-        run_with_log(reduceCommand,prepLog)
+        # # fix atom names 
+        # ligDf = pdb2df(ligPdb)
+        # ligDf = fix_atom_names(ligDf)
+        # ligPdb_fixNames = p.join(ligPrepDir,f"{ligandName}_fixNames.pdb")
+        # df2pdb(ligDf, ligPdb_fixNames,chain = False)
+        # # remove pre-existing protons with reduce
+        # ligPdb_noH = p.join(ligPrepDir,f"{ligandName}_noH.pdb")
+        # trimCommand = f"reduce -Trim {ligPdb_fixNames} > {ligPdb_noH}"
+        # run_with_log(trimCommand,prepLog)
+        # # add protons with reduce
+        # ligPdb_h = p.join(ligPrepDir,f"{ligandName}_H.pdb")
+        # reduceCommand = f"reduce {ligPdb_noH} > {ligPdb_h}"
+        # run_with_log(reduceCommand,prepLog)
         # rename all new hydrogens H1, H2, H3 ... (fixes 4-character names)
+        # ligPdb_newH = p.join(ligPrepDir,f"{ligandName}_newH.pdb")
+        ligPdb_H = p.join(ligPrepDir,f"{ligandName}_H.pdb")
+        obabelCommand = f"obabel {ligPdb} -O {ligPdb_H} -h"
+        run_with_log(obabelCommand, prepLog)
         ligPdb_newH = p.join(ligPrepDir,f"{ligandName}_newH.pdb")
-        rename_hydrogens(ligPdb_h,ligPdb_newH)
+        rename_hydrogens(ligPdb_H,ligPdb_newH)
         # run pdb4amber to get compatable types and fix atom numbering
         ligPdb_amber = p.join(ligPrepDir,f"{ligandName}_amber.pdb")
         pdb4amberCommand = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"

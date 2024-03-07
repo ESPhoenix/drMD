@@ -15,8 +15,19 @@ def run_simulation(config, outDir, inputCoords, amberParams):
     timescale = {"fs":unit.femtoseconds,
                  "ps":unit.picoseconds,
                  "ns":unit.nanoseconds}
-    ## set up gpu
-    platform=openmm.Platform.getPlatformByName("CUDA")
+    ## set up paltform
+    usePlatform = config["generalInfo"]["platform"]
+    cpusPerRun = config["generalInfo"]["cpusPerRun"]
+    if usePlatform == "CUDA":
+        platform=openmm.Platform.getPlatformByName("CUDA")
+    elif usePlatform == "OpenCL":
+        platform=openmm.Platform.getPlatformByName("OpenCL")
+    elif usePlatform == "CPU":
+        platform=openmm.Platform.getPlatformByName("CPU")
+    platform.setNumThreads(cpusPerRun)
+
+
+    
     # load amber files, create system
     prmtop = app.AmberPrmtopFile(amberParams)
     inpcrd = app.AmberInpcrdFile(inputCoords)  
