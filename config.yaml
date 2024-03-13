@@ -1,10 +1,10 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
-  outputDir: "/home/esp/scriptDevelopment/drMD/02_outputs"
+  inputDir: "/home/eugene/drMD/01_inputs"
+  outputDir: "/scratch/cvFAP_MD"
 ########################################################################
 generalInfo:
-  cpuCount: 1
+  cpuCount: 9
 ########################################################################
 ligandInfo:
   nLigands: 2
@@ -21,40 +21,40 @@ ligandInfo:
       mol2: False
 ########################################################################
 simulationInfo:
-  - stepName: "01_energy_minimisation"
+  - stepName: "1_energy_minimisation"
     type: "EM"
     temp: 300
     maxIterations: 1000
 
-  - stepName: "02_NVT_pre-equilibraition"
+  - stepName: "2_NVT_pre-equilibraition"
     type: "NVT"
     duration: "100 ps"
     timestep: "2 fs"
     relaxWaters: True
     temp: 300
 
-  - stepName: "03_NpT_pre-equilibriation"
+  - stepName: "3_NpT_pre-equilibriation"
     type: "NpT"
     duration: "300 ps"
     timestep: "2 fs"
     relaxWaters: True
     temp: 300
 
-  - stepName: "04_NpT_slowIntergrator"
+  - stepName: "4_NpT_slowIntergrator"
     type: "NpT"
     duration: "10 ps"
     timestep: "0.5 fs"
     temp: 300
 
-  - stepName: "05_NpT_equilibriation"
+  - stepName: "5_NpT_equilibriation"
     type: "NpT"
     duration: "1 ns"
     timestep: "2 fs"
     temp: 300
 
-  - stepName: "05_NpT_production MD"
+  - stepName: "6_NpT_production"
     type: "NpT"
-    duration: 10 ns"
+    duration: "50 ns"
     timestep: "2 fs"
     freezeHeavy: False
     temp: 300

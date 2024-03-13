@@ -16,7 +16,7 @@ def run_simulation(config, outDir, inputCoords, amberParams):
                  "ps":unit.picoseconds,
                  "ns":unit.nanoseconds}
     ## set up gpu
-    platform=openmm.Platform.getPlatformByName("CUDA")
+    platform=openmm.Platform.getPlatformByName("OpenCL")
     # load amber files, create system
     prmtop = app.AmberPrmtopFile(amberParams)
     inpcrd = app.AmberInpcrdFile(inputCoords)  
