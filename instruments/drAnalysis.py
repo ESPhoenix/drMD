@@ -3,10 +3,6 @@ from os import path as p
 import pandas as pd
 import mdtraj as md
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.image as mpimg
-from PIL import Image
 import numpy as np
 from scipy.spatial import distance
 

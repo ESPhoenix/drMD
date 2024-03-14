@@ -1,16 +1,10 @@
-import os
 from os import path as p
 import pandas as pd
-import mdtraj as md
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 from matplotlib.colors import to_rgba
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.image as mpimg
 from PIL import Image
 import numpy as np
 from fpdf import FPDF
-from mplfonts import use_font
 
 ######################################################################
 def create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesConvTable, propertiesPlot):

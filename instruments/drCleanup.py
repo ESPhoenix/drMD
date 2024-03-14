@@ -1,7 +1,7 @@
 import os
 from os import path as p 
 from shutil import copy, rmtree
-from module_pdbUtils import pdb2df, df2pdb
+from instruments.pdbUtils import pdb2df, df2pdb
 
 ######################################################################################################
 def get_endpoint_pdbs(simulationInfo, outDir, cleanUpInfo):
