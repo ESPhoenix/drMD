@@ -1,20 +1,20 @@
 ## BASIC LIBS
 import os
 from os import path as p
-from shutil import copy, rmtree
-from subprocess import run
 ## INPUT LIBS
 import yaml
 import argpass
 ## CUSTOM DR MD MODULES
-from module_pdbUtils import pdb2df
-import module_drPrep as drPrep
-import module_drCleanup as drCleanup
-import module_drOperator as drOperator
+from instruments.pdbUtils import pdb2df
+import instruments.drPrep as drPrep
+import instruments.drCleanup as drCleanup
+import instruments.drOperator as drOperator
 ## Multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing as mp
 from tqdm import tqdm
+import instruments.drConfigInspector as drConfigInspector
+
 #####################################################################################################
 def read_inputs():
     ## create an argpass parser, read config file, snip off ".py" if on the end of file
@@ -43,7 +43,7 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
 
     # Convert to DataFrame, extract rest of info
     pdbDf = pdb2df(pdbPath)
-    proteinInfo, ligandInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
+    proteinInfo, ligandInfo, generalInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
 
     # Get path info
     pathInfo = {
@@ -57,12 +57,14 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     if ligandInfo is None:
         config = {
             "pathInfo": pathInfo,
+            "generalInfo": generalInfo,
             "proteinInfo": proteinInfo,
             "simulationInfo": simInfo
         }
     else:
         config = {
             "pathInfo": pathInfo,
+            "generalInfo": generalInfo,
             "proteinInfo": proteinInfo,
             "ligandInfo": ligandInfo,
             "simulationInfo": simInfo
@@ -79,16 +81,17 @@ def main():
     ## SORT OUT DIRECTORIES
     topDir = os.getcwd()
     batchConfig = read_inputs()
+    drConfigInspector.validate_config(batchConfig)
     outDir = batchConfig["pathInfo"]["outputDir"]
     yamlDir = p.join(outDir,"00_configs")
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
-    parallelCpus = batchConfig["generalInfo"]["parallelCpus"]
+    parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
     os.makedirs(yamlDir,exist_ok=True)
-    if parallelCpus == 1:
+    if parallelCPU == 1:
         run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-    elif parallelCpus > 1:
-        run_paralell(parallelCpus, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    elif parallelCPU > 1:
+        run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
@@ -100,14 +103,14 @@ def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
     ## CLEAN UP
     clean_up_handler(batchConfig)
 ######################################################################################################
-def run_paralell(parallelCpus, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
-    with mp.Pool(processes=parallelCpus) as pool:
+def run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+    with mp.Pool(processes=parallelCPU) as pool:
         pool.starmap(process_pdb_file,
                      tqdm( [(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig) for pdbFile in os.listdir(pdbDir)],
                      total = len(os.listdir(pdbDir))))
 
 
-    # with ThreadPoolExecutor(max_workers=parallelCpus) as executor:
+    # with ThreadPoolExecutor(max_workers=parallelCPU) as executor:
     #     for pdbFile in os.listdir(pdbDir):
     #         fileData = p.splitext(pdbFile)
     #         if not fileData[1] == ".pdb":
@@ -133,6 +136,8 @@ def clean_up_handler(batchConfig):
 
 ######################################################################################################
 def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from pdb file, writes a config file
+    generalInfo = batchConfig["generalInfo"]
+    
     ## GET PROTEIN INFORMATION
     aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
                     'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
@@ -154,7 +159,7 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
     ## SKIP IF NOT LIGAND
     if len(ligNames) == 0:
         ligandInfo = None
-        return proteinInfo, ligandInfo
+        return proteinInfo, ligandInfo, generalInfo 
     
     ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
     if "ligandInfo" in batchConfig:
@@ -193,6 +198,6 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
         ligandInfo = {"nLigands":nLigands,
                     "ligands":ligList}
 
-        return proteinInfo, ligandInfo
+        return proteinInfo, ligandInfo, generalInfo
 ######################################################################################################
 main()
