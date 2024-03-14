@@ -2,11 +2,13 @@
 pathInfo:
   inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
 ########################################################################
 generalInfo:
-  parallelCpus: 1
+  parallelCPU: 2
   platform: "CPU"
-  cpusPerSim: 1
+  cpusPerRun: 1
+
 ########################################################################
 ligandInfo:
   nLigands: 2
@@ -21,6 +23,8 @@ ligandInfo:
       charge: -2
       toppar: False
       mol2: False
+  
+
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
@@ -28,38 +32,38 @@ simulationInfo:
     temp: 300
     maxIterations: 1000
 
-  # - stepName: "02_NVT_pre-equilibraition"
-  #   type: "NVT"
-  #   duration: "100 ps"
-  #   timestep: "2 fs"
-  #   relaxWaters: True
-  #   temp: 300
+  - stepName: "02_NVT_pre-equilibraition"
+    type: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    relaxWaters: True
+    temp: 300
 
-  # - stepName: "03_NpT_pre-equilibriation"
-  #   type: "NpT"
-  #   duration: "300 ps"
-  #   timestep: "2 fs"
-  #   relaxWaters: True
-  #   temp: 300
+  - stepName: "03_NpT_pre-equilibriation"
+    type: "NpT"
+    duration: "300 ps"
+    timestep: "2 fs"
+    relaxWaters: True
+    temp: 300
 
-  # - stepName: "04_NpT_slowIntergrator"
-  #   type: "NpT"
-  #   duration: "10 ps"
-  #   timestep: "0.5 fs"
-  #   temp: 300
+  - stepName: "04_NpT_slowIntergrator"
+    type: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temp: 300
 
-  # - stepName: "05_NpT_equilibriation"
-  #   type: "NpT"
-  #   duration: "1 ns"
-  #   timestep: "2 fs"
-  #   temp: 300
+  - stepName: "05_NpT_equilibriation"
+    type: "NpT"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 300
 
-  # - stepName: "05_NpT_production MD"
-  #   type: "NpT"
-  #   duration: 10 ns"
-  #   timestep: "2 fs"
-  #   freezeHeavy: False
-  #   temp: 300
+  - stepName: "05_NpT_production MD"
+    type: "NpT"
+    duration: 10 ns"
+    timestep: "2 fs"
+    freezeHeavy: False
+    temp: 300
 
 ########################################################################
 cleanUpInfo:
