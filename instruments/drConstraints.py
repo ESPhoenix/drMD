@@ -1,5 +1,4 @@
 ## OPENMM LIBS
-import simtk.openmm.app as app
 import simtk.openmm as openmm
 import simtk.unit as unit
 import xml.etree.ElementTree as ET

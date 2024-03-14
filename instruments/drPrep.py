@@ -1,13 +1,13 @@
 ## BASIC LIBS
 import os
 from os import path as p
-import pandas as pd
 import subprocess
 from subprocess import run
 import string
 from shutil import copy
 ## drMD UTILS
-from module_pdbUtils import pdb2df, df2pdb, fix_atom_names
+from instruments.pdbUtils import pdb2df, df2pdb, fix_atom_names
+
 #####################################################################################
 def find_ligand_charge(ligDf,ligName,outDir,pH,prepLog):
     ## uses propka to identify charges on a ligand

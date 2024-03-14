@@ -1,5 +1,4 @@
 ## BASIC LIBS
-import os
 from os import path as p
 import pandas as pd
 
