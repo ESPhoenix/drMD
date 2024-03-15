@@ -9,12 +9,12 @@ from instruments.pdbUtils import pdb2df
 import instruments.drPrep as drPrep
 import instruments.drCleanup as drCleanup
 import instruments.drOperator as drOperator
-## Multiprocessing
-from concurrent.futures import ThreadPoolExecutor
-import multiprocessing as mp
-from tqdm import tqdm
 import instruments.drConfigInspector as drConfigInspector
 
+## Multiprocessing
+import multiprocessing as mp
+from tqdm import tqdm
+from subprocess import run
 #####################################################################################################
 def read_inputs():
     ## create an argpass parser, read config file, snip off ".py" if on the end of file
@@ -38,11 +38,23 @@ def main():
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
     parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
+    cpusPerRun = batchConfig["generalInfo"]["cpusPerRun"]
+
+    ## limit cpu useage for antechamber and openMM
+    run(f"export OMP_NUM_THREADS={cpusPerRun}", shell=True)
+    run(f"export OPENMM_CPU_THREADS={cpusPerRun}", shell=True)
+
+
+
     os.makedirs(yamlDir,exist_ok=True)
     if parallelCPU == 1:
         run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
     elif parallelCPU > 1:
         run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+
+    # remove cpu useage limits
+    run(f"unset OMP_NUM_THREADS", shell=True)
+    run(f"unset OPENMM_CPU_THREADS", shell=True)
 #####################################################################################################
 def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig):
     # Skip if not a PDB file
