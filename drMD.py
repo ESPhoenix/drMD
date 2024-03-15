@@ -44,8 +44,6 @@ def main():
     run(f"export OMP_NUM_THREADS={cpusPerRun}", shell=True)
     run(f"export OPENMM_CPU_THREADS={cpusPerRun}", shell=True)
 
-
-
     os.makedirs(yamlDir,exist_ok=True)
     if parallelCPU == 1:
         run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
@@ -61,7 +59,6 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     fileData = p.splitext(pdbFile)
     if not fileData[1] == ".pdb":
         return
-
     # Extract basic info, make dirs
     protName = fileData[0]
     pdbPath = p.join(pdbDir, pdbFile)
@@ -102,9 +99,6 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
         yaml.dump(config, f, default_flow_style=False)
     drOperator.drMD_protocol(configYaml)
 
-
-
-
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
     for pdbFile in os.listdir(pdbDir):
@@ -113,7 +107,7 @@ def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
             continue  
         process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
     ## CLEAN UP
-    clean_up_handler(batchConfig)
+    drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
 def run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
     with mp.Pool(processes=parallelCPU) as pool:
@@ -121,31 +115,8 @@ def run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, top
                      tqdm( [(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig) for pdbFile in os.listdir(pdbDir)],
                      total = len(os.listdir(pdbDir))))
 
-
-    # with ThreadPoolExecutor(max_workers=parallelCPU) as executor:
-    #     for pdbFile in os.listdir(pdbDir):
-    #         fileData = p.splitext(pdbFile)
-    #         if not fileData[1] == ".pdb":
-    #             continue
-    #         executor.submit(process_pdb_file, pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
    ## CLEAN UP
-    # clean_up_handler(batchConfig)
-
-######################################################################################################
-def clean_up_handler(batchConfig):
-    # READ FROM batchConfig
-    simulationInfo = batchConfig["simulationInfo"]
-    outDir = batchConfig["pathInfo"]["outputDir"]
-    # RUN THROUGH OPTIONS IN cleanUpInfo
-    if  not "cleanUpInfo" in batchConfig:
-        return 
-    cleanUpInfo = batchConfig["cleanUpInfo"]
-    if "getEndpointPdbs" in cleanUpInfo:
-        if cleanUpInfo["getEndpointPdbs"]:
-            drCleanup.get_endpoint_pdbs(simulationInfo, outDir,cleanUpInfo)
-            if any(key in cleanUpInfo for key in ["removeWaters","removeIons"]):
-                drCleanup.remove_atoms_from_pdb(simulationInfo, cleanUpInfo, outDir)
-
+    drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
 def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from pdb file, writes a config file
     generalInfo = batchConfig["generalInfo"]
