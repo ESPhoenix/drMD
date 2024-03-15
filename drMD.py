@@ -27,7 +27,22 @@ def read_inputs():
     with open(batchConfig,"r") as yamlFile:
         batchConfig = yaml.safe_load(yamlFile) 
     return batchConfig
-
+######################################################################################################
+def main():
+    ## SORT OUT DIRECTORIES
+    topDir = os.getcwd()
+    batchConfig = read_inputs()
+    drConfigInspector.validate_config(batchConfig)
+    outDir = batchConfig["pathInfo"]["outputDir"]
+    yamlDir = p.join(outDir,"00_configs")
+    pdbDir = batchConfig["pathInfo"]["inputDir"]
+    simInfo = batchConfig["simulationInfo"]
+    parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
+    os.makedirs(yamlDir,exist_ok=True)
+    if parallelCPU == 1:
+        run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+    elif parallelCPU > 1:
+        run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
 #####################################################################################################
 def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig):
     # Skip if not a PDB file
@@ -76,22 +91,7 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     drOperator.drMD_protocol(configYaml)
 
 
-######################################################################################################
-def main():
-    ## SORT OUT DIRECTORIES
-    topDir = os.getcwd()
-    batchConfig = read_inputs()
-    drConfigInspector.validate_config(batchConfig)
-    outDir = batchConfig["pathInfo"]["outputDir"]
-    yamlDir = p.join(outDir,"00_configs")
-    pdbDir = batchConfig["pathInfo"]["inputDir"]
-    simInfo = batchConfig["simulationInfo"]
-    parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
-    os.makedirs(yamlDir,exist_ok=True)
-    if parallelCPU == 1:
-        run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
-    elif parallelCPU > 1:
-        run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+
 
 ###################################################################################################### 
 def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
@@ -164,7 +164,7 @@ def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from p
     ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
     if "ligandInfo" in batchConfig:
         ligandInfo = batchConfig["ligandInfo"]
-        return proteinInfo, ligandInfo
+        return proteinInfo, ligandInfo, generalInfo
     ## CREATE ligandInfo AUTOMATICALLY (WORKS FOR SIMPLE LIGANDS)
     else:
         ligList = []
