@@ -1,0 +1,52 @@
+keyResidues:
+  C432:
+    CHAIN_ID: "A"
+    RES_ID: "372"
+    RES_NAME: "CYS"
+  R451:
+    CHAIN_ID: "A"
+    RES_ID:   "391"
+    RES_NAME:   "ARG" 
+  A171:
+    CHAIN_ID: "A"
+    RES_ID: "111"
+    RES_NAME: "ALA"
+  A171C:
+    CHAIN_ID: "A"
+    RES_ID: "111"
+    RES_NAME: "CYS"
+  T169:
+    CHAIN_ID: "A"
+    RES_ID: "109"
+    RES_NAME:  "THR" 
+  T169C:
+    CHAIN_ID: "A"
+    RES_ID: "109"
+    RES_NAME:  "CYS"
+  
+analysisMenu:
+  keyResidueAnalysis:
+    contactDistances: True
+    radialDistributions: False
+  wholeProteinAnalysis:
+    RMSD: True
+    RMSF: True
+    radiusOfGyration: False
+
+pathInfo:
+  mdDir: "/scratch/cvFAP_MD/"
+  analDir: "/scratch/cvFAP_MD/Analysis"
+  stepName: "6_NpT_production"
+  repeats:
+    cvFAP_WT:
+    - "cvFAP_WT_PLM_FAD_1"
+    - "cvFAP_WT_PLM_FAD_2"
+    - "cvFAP_WT_PLM_FAD_3"
+    cvFAP_A171C:
+    - "cvFAP_A171C_PLM_FAD_1"
+    - "cvFAP_A171C_PLM_FAD_2"
+    - "cvFAP_A171C_PLM_FAD_3"
+    cvFAP_T169C:
+    - "cvFAP_T169C_PLM_FAD_1"
+    - "cvFAP_T169C_PLM_FAD_2"
+    - "cvFAP_T169C_PLM_FAD_3"
