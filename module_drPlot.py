@@ -50,6 +50,7 @@ def plot_distance_hist(sysAnalDir, resTag):
 
     plt.tight_layout()
     plt.savefig(p.join(sysAnalDir, f"distances_{resTag}.png"), bbox_inches="tight")
+    plt.close()
 #############################################################################################
 def plot_rmsf(df, outDir):
         # Plot the RMSF

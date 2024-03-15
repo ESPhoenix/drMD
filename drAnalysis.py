@@ -126,12 +126,11 @@ def main():
     for sysTag in repeats:
         sysAnalDir = p.join(analDir, sysTag)
         os.makedirs(sysAnalDir,exist_ok=True)
-        plotting_protocol(analMenu, sysAnalDir, keyResidues)
 
-        # for inputDirName in repeats[sysTag]:
-        #     simDir = p.join(mdDir,inputDirName,stepName)
-        #     analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
-        # plotting_protocol(analMenu, sysAnalDir, keyResidues)
+        for inputDirName in repeats[sysTag]:
+            simDir = p.join(mdDir,inputDirName,stepName)
+            analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
+        plotting_protocol(analMenu, sysAnalDir, keyResidues)
 
         
 def plotting_protocol(analMenu, sysAnalDir, keyResidues):

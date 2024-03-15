@@ -7,11 +7,19 @@ keyResidues:
     CHAIN_ID: "A"
     RES_ID:   "391"
     RES_NAME:   "ARG" 
+  A171:
+    CHAIN_ID: "A"
+    RES_ID: "111"
+    RES_NAME: "ALA"
   A171C:
     CHAIN_ID: "A"
     RES_ID: "111"
     RES_NAME: "CYS"
-  Y169C:
+  T169:
+    CHAIN_ID: "A"
+    RES_ID: "109"
+    RES_NAME:  "THR" 
+  T169C:
     CHAIN_ID: "A"
     RES_ID: "109"
     RES_NAME:  "CYS"
