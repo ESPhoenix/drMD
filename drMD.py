@@ -39,6 +39,7 @@ def main():
     simInfo = batchConfig["simulationInfo"]
     parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
     subprocessCpus = batchConfig["generalInfo"]["subprocessCpus"]
+    
     manage_cpu_usage_for_subprocesses("ON",subprocessCpus)
 
     os.makedirs(yamlDir,exist_ok=True)
@@ -53,9 +54,12 @@ def main():
 ######################################################################################################
 def manage_cpu_usage_for_subprocesses(mode , subprocessCpus = None):
     if mode == "ON":
-        ## limit cpu useage for antechamber and openMM
-        run(f"export OMP_NUM_THREADS={subprocessCpus}", shell=True)
-        run(f"export OPENMM_CPU_THREADS={subprocessCpus}", shell=True)
+        # Set environment variables directly in Python
+        os.environ['OMP_NUM_THREADS'] = str(subprocessCpus)
+        os.environ['OPENMM_CPU_THREADS'] = str(subprocessCpus)
+
+        omp_num_threads = os.environ.get('OMP_NUM_THREADS')
+        print("OMP_NUM_THREADS:", omp_num_threads)
     elif mode == "OFF":
         # remove cpu useage limits
         run(f"unset OMP_NUM_THREADS", shell=True)

@@ -42,7 +42,7 @@ def validate_config(config):
     assert 'parallelCPU' in config['generalInfo'], "Missing parallelCPU in generalInfo"
     assert isinstance(config['generalInfo']['parallelCPU'], int), "parallelCPU must be an integer"
     assert 'platform' in config['generalInfo'], "Missing platform in generalInfo"
-    assert config['generalInfo']['platform'] in ["CPU", "CUDA", "OpenCl"], "Platform must be either 'CPU', 'OpenCl' or 'CUDA'"
+    assert config['generalInfo']['platform'] in ["CPU", "CUDA", "OpenCL"], "Platform must be either 'CPU', 'OpenCL' or 'CUDA'"
     assert 'subprocessCpus' in config['generalInfo'], "Missing subprocessCpus in generalInfo"
     assert isinstance(config['generalInfo']['subprocessCpus'], int), "subprocessCpus must be an integer"
 

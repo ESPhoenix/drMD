@@ -5,6 +5,7 @@ import subprocess
 from subprocess import run
 import string
 from shutil import copy
+import time
 ## drMD UTILS
 from instruments.pdbUtils import pdb2df, df2pdb, fix_atom_names
 
@@ -18,7 +19,7 @@ def find_ligand_charge(ligDf,ligName,outDir,pH):
     df2pdb(ligDf,tmpPdb,chain=False)
     # run propka 
     proPkaCommand = f"propka3 {tmpPdb}"
-    run_with_log(proPkaCommand,False)
+    run_with_log(proPkaCommand,False,None)
 
     proPkaFile = f"{ligName}.pka"
     # read propka output to extract charge at specified pH
@@ -93,13 +94,13 @@ def ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, prepLog):
         # ligPdb_newH = p.join(ligPrepDir,f"{ligandName}_newH.pdb")
         ligPdb_H = p.join(ligPrepDir,f"{ligandName}_H.pdb")
         obabelCommand = f"obabel {ligPdb} -O {ligPdb_H} -h"
-        run_with_log(obabelCommand, prepLog)
+        run_with_log(obabelCommand, prepLog,ligPdb_H)
         ligPdb_newH = p.join(ligPrepDir,f"{ligandName}_newH.pdb")
         rename_hydrogens(ligPdb_H,ligPdb_newH)
         # run pdb4amber to get compatable types and fix atom numbering
         ligPdb_amber = p.join(ligPrepDir,f"{ligandName}_amber.pdb")
         pdb4amberCommand = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
-        run_with_log(pdb4amberCommand,prepLog)
+        run_with_log(pdb4amberCommand,prepLog,ligPdb_amber)
         ligPdb = ligPdb_amber
         ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
@@ -116,7 +117,7 @@ def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFil
         charge = ligand["charge"]
         ligMol2 = p.join(ligPrepDir,f"{ligandName}.mol2")
         antechamberCommand = f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
-        run_with_log(antechamberCommand,prepLog)
+        run_with_log(antechamberCommand,prepLog,ligMol2)
         # copy to ligParamDir for future use
         copy(ligMol2,p.join(ligParamDir,f"{ligandName}.mol2"))
     # add mol2  path to ligFileDict 
@@ -133,7 +134,7 @@ def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligF
     else :    # use mol2 to generate amber parameters with parmchk2
         ligFrcmod = p.join(ligPrepDir,f"{ligandName}.frcmod")
         parmchk2Command = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
-        run_with_log(parmchk2Command,prepLog)
+        run_with_log(parmchk2Command,prepLog,ligFrcmod)
         copy(ligFrcmod,p.join(ligParamDir,f"{ligandName}.frcmod"))
     # add frcmod path to ligFileDict
     ligFileDict.update({"frcmod":ligFrcmod})
@@ -205,12 +206,12 @@ def prepare_protein_structure(config, outDir, prepLog):
             # add protons with reduce
             protPdb_h = p.join(protPrepDir,"PROT_h.pdb")
             reduceCommand = f"reduce {protPdb} > {protPdb_h}"
-            run_with_log(reduceCommand,prepLog)
+            run_with_log(reduceCommand,prepLog,protPdb_h)
           
              #run pdb4amber to get compatable types and fix atom numbering
             protPdb_amber = p.join(protPrepDir,"PROT_amber.pdb")
             pdb4amberCommand = f"pdb4amber -i {protPdb_h} -o {protPdb_amber}"
-            run_with_log(pdb4amberCommand,prepLog)
+            run_with_log(pdb4amberCommand,prepLog,protPdb_amber)
  
             proteinPdbs.append(protPdb)
     return proteinPdbs
@@ -244,20 +245,34 @@ def make_amber_params(outDir, pdbFile, outName,prepLog,ligandFileDict=False):
         # save solvated pdb file
         f.write(f"savepdb mol {outName}.pdb\n")
         # save parameter files
-        f.write(f"saveamberparm mol {outName}.prmtop {outName}.inpcrd\n")
+        prmTop = p.join(outDir,f"{outName}.prmtop")
+        inputCoords =  p.join(outDir,f"{outName}.inpcrd")
+        f.write(f"saveamberparm mol {prmTop} {inputCoords}\n")
         f.write("quit\n")
     tleapOutput = p.join(outDir,"TLEAP.out")
+    amberParams = p.join(outDir, f"{outName}.prmtop")
     tleapCommand = f"tleap -f {tleapInput} > {tleapOutput}"
-    run_with_log(tleapCommand,prepLog)
+    run_with_log(tleapCommand,prepLog,amberParams)
 
     inputCoords = p.join(outDir, f"{outName}.inpcrd")
-    amberParams = p.join(outDir, f"{outName}.prmtop")
 
     return inputCoords, amberParams
 #####################################################################################
-def run_with_log(command, prepLog):
-    process = run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    if prepLog:
-        with open(prepLog,"a") as log:
-            log.write(process.stdout)
+def run_with_log(command, prepLog, expectedOutput):
+    maxRetries = 5
+    retries = 0
+
+    while retries < maxRetries:
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        if prepLog:
+            with open(prepLog, "a") as log:
+                log.write(process.stdout)
+        if expectedOutput is None or p.isfile(expectedOutput):
+            return
+        else:
+            print(f"Expected output:\n\t {expectedOutput}\n\t\t not found. Retrying...")
+            retries += 1
+            time.sleep(5)
+    print("Maximum retries reached. Exiting...")
+
 #####################################################################################

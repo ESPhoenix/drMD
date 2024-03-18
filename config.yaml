@@ -6,8 +6,8 @@ pathInfo:
 ########################################################################
 generalInfo:
   parallelCPU: 5
-  platform: "CUDA"
-  subprocessCpus: 2
+  platform: "CPU"
+  subprocessCpus: 1
 
 ########################################################################
 # ligandInfo:
