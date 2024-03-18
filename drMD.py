@@ -12,7 +12,7 @@ import instruments.drOperator as drOperator
 import instruments.drConfigInspector as drConfigInspector
 
 ## Multiprocessing
-import multiprocessing as mp
+import concurrent.futures as cf
 from tqdm import tqdm
 from subprocess import run
 #####################################################################################################
@@ -38,23 +38,31 @@ def main():
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     simInfo = batchConfig["simulationInfo"]
     parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
-    cpusPerRun = batchConfig["generalInfo"]["cpusPerRun"]
-
-    ## limit cpu useage for antechamber and openMM
-    run(f"export OMP_NUM_THREADS={cpusPerRun}", shell=True)
-    run(f"export OPENMM_CPU_THREADS={cpusPerRun}", shell=True)
+    subprocessCpus = batchConfig["generalInfo"]["subprocessCpus"]
+    manage_cpu_usage_for_subprocesses("ON",subprocessCpus)
 
     os.makedirs(yamlDir,exist_ok=True)
     if parallelCPU == 1:
-        run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+        run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo)
     elif parallelCPU > 1:
-        run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir)
+        run_parallel(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo)
 
-    # remove cpu useage limits
-    run(f"unset OMP_NUM_THREADS", shell=True)
-    run(f"unset OPENMM_CPU_THREADS", shell=True)
+
+    manage_cpu_usage_for_subprocesses("OFF")
+
+######################################################################################################
+def manage_cpu_usage_for_subprocesses(mode , subprocessCpus = None):
+    if mode == "ON":
+        ## limit cpu useage for antechamber and openMM
+        run(f"export OMP_NUM_THREADS={subprocessCpus}", shell=True)
+        run(f"export OPENMM_CPU_THREADS={subprocessCpus}", shell=True)
+    elif mode == "OFF":
+        # remove cpu useage limits
+        run(f"unset OMP_NUM_THREADS", shell=True)
+        run(f"unset OPENMM_CPU_THREADS", shell=True)
+
 #####################################################################################################
-def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig):
+def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig):
     # Skip if not a PDB file
     fileData = p.splitext(pdbFile)
     if not fileData[1] == ".pdb":
@@ -100,22 +108,28 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchCon
     drOperator.drMD_protocol(configYaml)
 
 ###################################################################################################### 
-def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
+def run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo):
     for pdbFile in os.listdir(pdbDir):
         fileData = p.splitext(pdbFile)
         if not fileData[1] == ".pdb":
             continue  
-        process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig)
+        process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig)
     ## CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
-def run_paralell(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo, topDir):
-    with mp.Pool(processes=parallelCPU) as pool:
-        pool.starmap(process_pdb_file,
-                     tqdm( [(pdbFile, pdbDir, outDir, yamlDir, simInfo, topDir, batchConfig) for pdbFile in os.listdir(pdbDir)],
-                     total = len(os.listdir(pdbDir))))
+def run_parallel(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo):
 
-   ## CLEAN UP
+    pdbFiles = [pdbFile for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
+
+    # Create a ThreadPoolExecutor with the desired number of worker threads
+    with cf.ThreadPoolExecutor(max_workers=parallelCPU) as executor:
+        # Prepare the arguments for process_pdb_file
+        inputArgs = [(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig) for pdbFile in pdbFiles]
+
+        # Use starmap to apply process_pdb_file to each PDB file
+        list(tqdm(executor.map(lambda args: process_pdb_file(*args), inputArgs), total=len(inputArgs)))
+
+    # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
 def extract_info(pdbDf,pdbDir,protName,yamlDir,batchConfig): ## gets info from pdb file, writes a config file

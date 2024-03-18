@@ -1,15 +1,13 @@
 ## BASIC LIBS
 import os
 from os import path as p
+import psutil
 ## drMD UTILS
 import instruments.drPrep as drPrep
 ## drMD simulation
 import instruments.drSim as drSim
 from instruments.pdbUtils import mergePdbs
 import instruments.drConfigInspector as drConfigInspector
-    
-
-#####################################################################################
 #####################################################################################
 def drMD_protocol(configYaml):
     config = drConfigInspector.read_config(configYaml)
@@ -21,7 +19,7 @@ def drMD_protocol(configYaml):
     amberParams = False
     inputCoords = False
 
-    ## skip prep if complete
+    ###### skip prep if complete ######
     wholeDir = p.join(prepDir,"WHOLE")
     if p.isdir(p.join(wholeDir)):
         for file in os.listdir(wholeDir):
@@ -36,7 +34,7 @@ def drMD_protocol(configYaml):
                 inputCoords=inputCoords,
                 amberParams=amberParams)
         return
-
+    #####################################
     ## MAIN PREP PROTOCOL
     os.makedirs(outDir,exist_ok=True)
     os.makedirs(prepDir,exist_ok=True)
@@ -84,5 +82,4 @@ def drMD_protocol(configYaml):
                    outDir = outDir,
                    inputCoords=inputCoords,
                    amberParams=amberParams)
-#####################################################################################
 #####################################################################################

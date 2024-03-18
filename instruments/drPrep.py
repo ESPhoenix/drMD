@@ -9,7 +9,7 @@ from shutil import copy
 from instruments.pdbUtils import pdb2df, df2pdb, fix_atom_names
 
 #####################################################################################
-def find_ligand_charge(ligDf,ligName,outDir,pH,prepLog):
+def find_ligand_charge(ligDf,ligName,outDir,pH):
     ## uses propka to identify charges on a ligand
     #make a temportaty pdb file from the ligand dataframe
     os.chdir(outDir)
@@ -18,7 +18,7 @@ def find_ligand_charge(ligDf,ligName,outDir,pH,prepLog):
     df2pdb(ligDf,tmpPdb,chain=False)
     # run propka 
     proPkaCommand = f"propka3 {tmpPdb}"
-    run_with_log(proPkaCommand,prepLog)
+    run_with_log(proPkaCommand,False)
 
     proPkaFile = f"{ligName}.pka"
     # read propka output to extract charge at specified pH
@@ -257,6 +257,7 @@ def make_amber_params(outDir, pdbFile, outName,prepLog,ligandFileDict=False):
 #####################################################################################
 def run_with_log(command, prepLog):
     process = run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    with open(prepLog,"a") as log:
-        log.write(process.stdout)
+    if prepLog:
+        with open(prepLog,"a") as log:
+            log.write(process.stdout)
 #####################################################################################

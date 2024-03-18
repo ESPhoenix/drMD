@@ -25,7 +25,7 @@ def validate_config(config):
         exit()   
 
 
-
+#####################################################################################
 def validate_config(config):
     # Assert the presence of main sections
     required_sections = ['pathInfo', 'generalInfo','simulationInfo','cleanUpInfo']
@@ -43,8 +43,8 @@ def validate_config(config):
     assert isinstance(config['generalInfo']['parallelCPU'], int), "parallelCPU must be an integer"
     assert 'platform' in config['generalInfo'], "Missing platform in generalInfo"
     assert config['generalInfo']['platform'] in ["CPU", "CUDA", "OpenCl"], "Platform must be either 'CPU', 'OpenCl' or 'CUDA'"
-    assert 'cpusPerRun' in config['generalInfo'], "Missing cpusPerRun in generalInfo"
-    assert isinstance(config['generalInfo']['cpusPerRun'], int), "cpusPerRun must be an integer"
+    assert 'subprocessCpus' in config['generalInfo'], "Missing subprocessCpus in generalInfo"
+    assert isinstance(config['generalInfo']['subprocessCpus'], int), "subprocessCpus must be an integer"
 
     # Validate ligandInfo
     if 'ligandInfo' in config:
