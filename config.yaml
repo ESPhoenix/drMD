@@ -5,24 +5,24 @@ pathInfo:
   
 ########################################################################
 generalInfo:
-  parallelCPU: 1
+  parallelCPU: 5
   platform: "CUDA"
-  cpusPerRun: 1
+  subprocessCpus: 2
 
 ########################################################################
-ligandInfo:
-  nLigands: 2
-  ligands:
-    - ligandName: "PLM"
-      protons: True
-      charge: -1
-      toppar: False
-      mol2: False
-    - ligandName: "FAD"
-      protons: True
-      charge: -2
-      toppar: False
-      mol2: False
+# ligandInfo:
+#   nLigands: 2
+#   ligands:
+#     - ligandName: "PLM"
+#       protons: True
+#       charge: -1
+#       toppar: False
+#       mol2: False
+#     - ligandName: "FAD"
+#       protons: True
+#       charge: -2
+#       toppar: False
+#       mol2: False
   
 
 ########################################################################
@@ -32,12 +32,12 @@ simulationInfo:
     temp: 300
     maxIterations: 1000
 
-  - stepName: "02_NVT_pre-equilibraition"
-    type: "NVT"
-    duration: "100 ps"
-    timestep: "2 fs"
-    relaxWaters: True
-    temp: 300
+  # - stepName: "02_NVT_pre-equilibraition"
+  #   type: "NVT"
+  #   duration: "100 ps"
+  #   timestep: "2 fs"
+  #   relaxWaters: True
+  #   temp: 300
 
   # - stepName: "03_NpT_pre-equilibriation"
   #   type: "NpT"
