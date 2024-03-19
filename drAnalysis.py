@@ -7,78 +7,13 @@ import yaml
 ### drMD modules ###
 from instruments.pdbUtils import pdb2df
 import instruments.drPlot as drPlot
-#############################################################################################
-def check_RMSD(traj, outDir):
-    rmsd = md.rmsd(traj, traj, 0)
-    rmsdDf = pd.DataFrame(rmsd, columns = ["RMSD"])
-    drPlot.plot_rmsd(rmsdDf, outDir)
-    return rmsdDf
-#############################################################################################
-def check_RMSF(traj, pdbDf, outDir):
-    rmsf = md.rmsf(traj, traj, 0)
-    rmsfDf = pd.DataFrame(rmsf, columns = ["RMSF"])
-    pdbDf["RMSF"] = rmsfDf
-    perResidueRMSF = pdbDf.groupby("RES_ID")["RMSF"].mean()
-    perResidueRMSF = perResidueRMSF.to_frame()
-    perResidueRMSF.columns = ["RMSF"]
-    print(perResidueRMSF)
-    drPlot.plot_rmsf(perResidueRMSF,  outDir)
-    return rmsfDf
+import instruments.drDiagnosis as drDiagnosis
 
-#############################################################################################
-def init_atoms_of_interest():
-    interestingAtoms = {
-        "ALA": ["CB"],
-        "LEU": ["CB", "CG", "CD1", "CD2"],
-        "GLY": [],
-        "ILE": ["CB", "CG1", "CG2", "CD1"],
-        "VAL": ["CB", "CG1", "CG2"],
-        "PHE": ["CB", "CG", "CD1", "CD2", "CE1", "CE2", "CZ"],
-        "TRP": ["CB", "CG", "CD1", "CD2", "NE1", "CE2", "CE3", "CZ2", "CZ3", "CH2"],
-        "TYR": ["CB", "CG", "CD1", "CD2", "CE1", "CE2", "CZ", "OH"],
-        "ASP": ["CB", "CG", "OD1", "OD2"],
-        "GLU": ["CB", "CG", "CD", "OE1", "OE2"],
-        "ARG": ["CB", "CG", "CD", "NE", "CZ", "NH1", "NH2"],
-        "HIS": ["CB", "CG", "ND1", "CD2", "CE1", "NE2"],
-        "LYS": ["CB", "CG", "CD", "CE", "NZ"],
-        "SER": ["CB", "OG"],
-        "THR": ["CB", "OG1", "CG2"],
-        "ASN": ["CB", "CG", "OD1", "ND2"],
-        "GLN": ["CB", "CG", "CD", "OE1", "NE2"],
-        "CYS": ["CB", "SG"],
-        "MET": ["CB", "CG", "SD", "CE"],
-        "PRO": ["CB", "CG", "CD"]
-    }
-    return interestingAtoms
-#############################################################################################
-def find_contacts(traj, pdbDf, keyResidues, outDir):
-    interestingAtoms = init_atoms_of_interest()
-   # contactsPerTarget = find_nearby_residues(keyResidues, pdbFile)
-    for resTag in keyResidues:
-        print(f"-->{resTag}")
-        ## find nearby residues 
-        resId = keyResidues[resTag]["RES_ID"] 
-        resName = keyResidues[resTag]["RES_NAME"]
-        resDf = pdbDf[(pdbDf["RES_ID"] == resId) & (pdbDf["ATOM_NAME"].isin(interestingAtoms[resName]))]
-        queryIndecies = resDf["ATOM_ID"].values -  1 ## zero-index
-        neighbors = md.compute_neighbors(traj, 0.5, queryIndecies)
-        uniqueNeighborAtoms = list(set([item + 1 for sublist in neighbors for item in sublist])) ## one-index!
-        # exclue query residue and 2 residues adjacent
-        exclueResidues = range(resId -2, resId +3)#[resId - 1, resId, resId + 1]
-        neighborDf = pdbDf[(pdbDf["ATOM_ID"].isin(uniqueNeighborAtoms)) & (~pdbDf["RES_ID"].isin(exclueResidues))]
-        nearbyResidues = neighborDf["RES_ID"].unique()
-        # drop query residue from neighbors
-        neighborDf = neighborDf.copy()
-        neighborDf.loc[:,"plotLabels"] = neighborDf["RES_NAME"] + "_" + neighborDf["RES_ID"].astype(str)
-        plotLabels = neighborDf["plotLabels"].unique().tolist()
-        ## compute contacts
-        pairwiseContacts = [(resId -1, targetIndex - 1) for targetIndex in nearbyResidues] ## zero-index!
-        contactDistances, residuePairs = md.compute_contacts(traj, pairwiseContacts)
-        contactIds = residuePairs[:, 1].tolist()
-        contactIds = [x+1 for x in contactIds] # un-Zero index
-        contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
-        drPlot.plot_distance_hist(contactDf, outDir, resTag, plotLabels)        
-        continue
+
+
+#####################################################################################################
+def  compute_radial_dristrubution_function():
+    return
         ### OFF FOR NOW - DON'T UNDERSTAND RDFs
         ## calculate radial distribution function for pairs
         # radii, rdf = md.compute_rdf(traj, pairwiseContacts, bin_width = 0.05)
@@ -114,7 +49,8 @@ def main():
     analMenu = config["analysisMenu"]
     os.makedirs(analDir,exist_ok=True)
     keyResidues = config["keyResidues"]
-
+    # plotting_protocol(analMenu, analDir, keyResidues)
+    # return
     # reconstruct file structure from config
     mdDir = pathInfo["mdDir"]
     stepName = pathInfo["stepName"]
@@ -122,21 +58,36 @@ def main():
     for sysTag in repeats:
         sysAnalDir = p.join(analDir, sysTag)
         os.makedirs(sysAnalDir,exist_ok=True)
-
         for inputDirName in repeats[sysTag]:
             simDir = p.join(mdDir,inputDirName,stepName)
             analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
-        plotting_protocol(analMenu, sysAnalDir, keyResidues)
+    plotting_protocol(analMenu, analDir, keyResidues)
 
-        
-def plotting_protocol(analMenu, sysAnalDir, keyResidues):
+#############################################################################################
+def plotting_protocol(analMenu, analDir, keyResidues):
     ############ read analysis menu and do  plotting that has been ordered ############
     keyResiAnal = analMenu["keyResidueAnalysis"]
     wholeAnal = analMenu["wholeProteinAnalysis"]
+    sysAnalDirs = [p.join(analDir,dir) for dir in os.listdir(analDir) if p.isdir(p.join(analDir,dir))]
+    print(sysAnalDirs)
+    referenceSystem = analMenu["referenceSystem"]
+    ## for interesting residues
     if keyResiAnal["contactDistances"]:
-        for resTag in keyResidues: 
-            drPlot.plot_distance_hist(sysAnalDir, resTag)
+        for sysAnalDir in sysAnalDirs:
+            for resTag in keyResidues: 
+                drPlot.plot_distance_hist(sysAnalDir, resTag)
+    ## for whole protein properties
+    ## FOR WHOLE PROTEIN PROPERTIES
+    if wholeAnal["RMSD"]:
+        for sysAnalDir in sysAnalDirs:
 
+            drPlot.plot_RMSD(sysAnalDir)
+    if wholeAnal["RMSF"]:
+        for sysAnalDir in sysAnalDirs:
+            drPlot.plot_RMSF(sysAnalDir)
+        drDiagnosis.compute_delta_RMSF(analDir,referenceSystem)
+        if wholeAnal["deltaRMSF"]:
+            drPlot.plot_delta_RMSF(analDir, referenceSystem)
 
 
 ########################################################################
@@ -169,66 +120,17 @@ def analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName):
     ############ read analysis menu and do ordered analysis ############
     keyResiAnal = analMenu["keyResidueAnalysis"]
     wholeAnal = analMenu["wholeProteinAnalysis"]
+
+    ## FOR INTERESTING RESIDUES
     if any(job for job in keyResiAnal.values() if job):
-        residuePairs = find_pairwise_contacts(traj, pdbDf, keyResidues)
+        residuePairs = drDiagnosis.find_pairwise_contacts(traj, pdbDf, keyResidues)
         if keyResiAnal["contactDistances"]:
-            compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
-
-#############################################################################################
-def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
-    print("---->\tCalculating contact distances!")
-    for resTag in residuePairs:
-        print(f"-------->{resTag}")
-        print(resTag)
-        print(residuePairs[resTag].keys())
-        # get contacts and labels from residuePairs dict
-        pairwiseContacts = residuePairs[resTag]["contacts"]
-        plotLabels = residuePairs[resTag]["labels"]
-        ## calculate contact distances
-        contactDistances, residueIds = md.compute_contacts(traj, pairwiseContacts)
-        contactIds = residueIds[:, 1].tolist()
-        contactIds = [x+1 for x in contactIds] # un-Zero index
-        contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
-        outCsv = p.join(sysAnalDir, f"contacts_{resTag}_{inputDirName}.csv")
-        contactDf.to_csv(outCsv)
-
-
-
-#############################################################################################
-def find_pairwise_contacts(traj, pdbDf, keyResidues):
-    print("---->\t Finding pairwise contacts!")
-    interestingAtoms = init_atoms_of_interest()
-    residuePairs = {}
-    for resTag in keyResidues:
-        print(f"--------> {resTag}")
-
-        ## find nearby residues 
-        targetResId = int(keyResidues[resTag]["RES_ID"])
-        targetResName = keyResidues[resTag]["RES_NAME"]
-        resName = keyResidues[resTag]["RES_NAME"]
-        resDf = pdbDf[(pdbDf["RES_ID"] == targetResId) &
-                       (pdbDf["ATOM_NAME"].isin(interestingAtoms[resName])) &
-                       (pdbDf["RES_NAME"] == targetResName)]
-        if len(resDf) == 0:
-            print(f"--------> No {resTag} in pdb")
-            continue
-        queryIndecies = resDf["ATOM_ID"].values -  1 ## zero-index
-        neighbors = md.compute_neighbors(traj, 0.5, queryIndecies)
-        uniqueNeighborAtoms = list(set([item + 1 for sublist in neighbors for item in sublist])) ## one-index!
-        # exclue query residue and 2 residues adjacent
-        exclueResidues = range(targetResId -2, targetResId +3)#[resId - 2, resId, resId + 2]
-        neighborDf = pdbDf[(pdbDf["ATOM_ID"].isin(uniqueNeighborAtoms)) & (~pdbDf["RES_ID"].isin(exclueResidues))]
-        nearbyResidues = neighborDf["RES_ID"].unique()
-        # drop query residue from neighbors
-        neighborDf = neighborDf.copy()
-        neighborDf.loc[:,"plotLabels"] = neighborDf["RES_NAME"] + "_" + neighborDf["RES_ID"].astype(str)
-        plotLabels = neighborDf["plotLabels"].unique().tolist()
-        ## compute contacts, returns a list of [(X, Y), (X, Z)] contacts
-        pairwiseContacts = [(targetResId -1, targetIndex - 1) for targetIndex in nearbyResidues] ## zero-index!
-        residuePairs.update({resTag:{"contacts": pairwiseContacts,
-                                             "labels": plotLabels}})
-    return residuePairs
-
+            drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
+    ## FOR WHOLE PROTEIN PROPERTIES
+    if wholeAnal["RMSD"]:
+        drDiagnosis.check_RMSD(traj,sysAnalDir, inputDirName)
+    if wholeAnal["RMSF"]:
+        drDiagnosis.check_RMSF(traj,pdbDf, sysAnalDir, inputDirName)
 #############################################################################################
 if  __name__ == "__main__":
     main()
