@@ -61,7 +61,7 @@ def main():
         for inputDirName in repeats[sysTag]:
             simDir = p.join(mdDir,inputDirName,stepName)
             analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
-    plotting_protocol(analMenu, analDir, keyResidues)
+    # plotting_protocol(analMenu, analDir, keyResidues)
 
 #############################################################################################
 def plotting_protocol(analMenu, analDir, keyResidues):
@@ -125,7 +125,9 @@ def analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName):
     if any(job for job in keyResiAnal.values() if job):
         residuePairs = drDiagnosis.find_pairwise_contacts(traj, pdbDf, keyResidues)
         if keyResiAnal["contactDistances"]:
-            drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
+            contactDf = drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
+            if keyResiAnal["radialDistribution"]:
+                drDiagnosis.compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName)
     ## FOR WHOLE PROTEIN PROPERTIES
     if wholeAnal["RMSD"]:
         drDiagnosis.check_RMSD(traj,sysAnalDir, inputDirName)
