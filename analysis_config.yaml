@@ -26,13 +26,16 @@ keyResidues:
   
 analysisMenu:
   keyResidueAnalysis:
-    contactDistances: True
+    contactDistances: False
     radialDistributions: False
   wholeProteinAnalysis:
-    RMSD: True
+    RMSD: False
     RMSF: True
+    deltaRMSF: True
     radiusOfGyration: False
+  referenceSystem: "cvFAP_WT"
 
+  
 pathInfo:
   mdDir: "/scratch/cvFAP_MD/"
   analDir: "/scratch/cvFAP_MD/Analysis"

@@ -4,6 +4,42 @@ from os import path as p
 import pandas as pd
 import numpy as np
 import math
+import yaml
+from adjustText  import adjust_text
+#########################################################################################################
+def plot_delta_RMSF(analDir, referenceSystem):
+    deltaDf = pd.read_csv(p.join(analDir, "delta_RMSF.csv"),index_col="RES_ID")
+    peaksYaml = p.join(analDir,"delta_RMSF_peaks.yaml")
+    with open(peaksYaml,"r") as file:
+        deltaPeaks = yaml.safe_load(file)
+
+    # Create a figure and axes
+    nSubplots = len(deltaDf.columns)
+    fig, axs = plt.subplots(nSubplots, figsize=(8, 6*nSubplots))
+
+    # Plot each column on a different axis and annotate the peaks
+    for ax, col in zip(axs, deltaDf.columns):
+        texts = []  # to store all the text objects
+        ax.plot(deltaDf[col], label=col)
+        if col in deltaPeaks:
+            for peak in deltaPeaks[col]:
+                if deltaDf[col].iloc[peak] > 0:
+                    va = 'bottom'
+                else:
+                    va = 'top'
+                texts.append(ax.text(peak, deltaDf[col].iloc[peak], str(peak), color='red', fontsize=8, ha='left', va=va))
+                adjust_text(texts, ax = ax, x = deltaDf.index, y = deltaDf[col])
+        ax.set_xlabel('Residue Number')
+        ax.set_ylabel('RMSF Values')
+        if referenceSystem:
+            ax.set_title(f'Delta RMSF of {col} compared to {referenceSystem}')
+        else:
+            ax.set_title(f'Delta RMSF of {col}')
+        ax.legend()
+
+    rmsfPng = p.join(analDir,"delta_RMSF.png")
+    plt.savefig(rmsfPng,bbox_inches="tight")
+
 #########################################################################################################
 def plot_distance_hist(sysAnalDir, resTag):
     print(sysAnalDir)
@@ -14,7 +50,6 @@ def plot_distance_hist(sysAnalDir, resTag):
         if not p.splitext(file)[1] == ".csv":
             continue
         if  file.startswith("contacts") and file.split("_")[1] == resTag:
-            print(file)
             runDf = pd.read_csv(p.join(sysAnalDir,file))
     
             dfsToConcat.append(runDf)
@@ -52,27 +87,73 @@ def plot_distance_hist(sysAnalDir, resTag):
     plt.savefig(p.join(sysAnalDir, f"distances_{resTag}.png"), bbox_inches="tight")
     plt.close()
 #############################################################################################
-def plot_rmsf(df, outDir):
-        # Plot the RMSF
-    plt.figure(figsize=(8, 6))
-    plt.plot(df["RMSF"], label="RMSF")
-    plt.xlabel("Residue Index")
-    plt.ylabel("RMSF (Å)")
-    plt.title("Root Mean Square Fluctuation (RMSF) vs. Residue Index")
-    plt.grid(True)
+def plot_RMSF(sysAnalDir):
+    print(sysAnalDir)
+    ## load contact dfs from sysAnalDir | concat into one big df
+    dfsToConcat = []
+    for file in os.listdir(sysAnalDir):
+        if not p.splitext(file)[1] == ".csv":
+            continue
+        if  file.startswith("RMSF"):
+            runDf = pd.read_csv(p.join(sysAnalDir,file),index_col="RES_ID")
+            dfsToConcat.append(runDf)
+    if len(dfsToConcat) == 0:
+        return
+    df = pd.concat(dfsToConcat, axis = 1, ignore_index=False) 
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Plot each column with a different color
+    for col in df:
+        plt.plot(df[col], label=col)
+
+    # Calculate the mean for each row
+    mean_values = df.mean(axis=1)
+
+    # Plot the mean in bold black
+    plt.plot(mean_values, color='black', linewidth=2, label='Mean')
+
+    # Customize the plot
+    plt.xlabel('Residue Number')
+    plt.ylabel('RMSF Values')
+    plt.title('RMSF Per Residue')
     plt.legend()
-    plt.savefig(p.join(outDir,"RMSF.png"))
+    rmsfPng = p.join(sysAnalDir,"RMSF.png")
+    plt.savefig(rmsfPng,bbox_inches="tight")
+
 #############################################################################################
-def plot_rmsd(df, outDir):
-    # Plot the RMSD
-    plt.figure(figsize=(8, 6))
-    plt.plot(df["RMSD"], label="RMSD")
-    plt.xlabel("Frame Index")
-    plt.ylabel("RMSD (Å)")
-    plt.title("Root Mean Square Deviation (RMSD) vs. Frame Index")
-    plt.grid(True)
+def plot_RMSD(sysAnalDir):
+    ## load contact dfs from sysAnalDir | concat into one big df
+    dfsToConcat = []
+    for file in os.listdir(sysAnalDir):
+        if not p.splitext(file)[1] == ".csv":
+            continue
+        if  file.startswith("RMSD"):
+            runDf = pd.read_csv(p.join(sysAnalDir,file),index_col="Unnamed: 0")
+            dfsToConcat.append(runDf)
+    if len(dfsToConcat) == 0:
+        return
+    df = pd.concat(dfsToConcat, axis = 1, ignore_index=False) 
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Plot each column with a different color
+    for col in df:
+        plt.plot(df[col], label=col)
+
+    # Calculate the mean for each row
+    mean_values = df.mean(axis=1)
+
+    # Plot the mean in bold black
+    plt.plot(mean_values, color='black', linewidth=2, label='Mean')
+
+    # Customize the plot
+    plt.xlabel('Data Points')
+    plt.ylabel('RMSD Values')
+    plt.title('RMSD Values Over Time')
     plt.legend()
-    plt.savefig(p.join(outDir,"RMSD.png"))
+    rmsdPng = p.join(sysAnalDir,"RMSD.png")
+    plt.savefig(rmsdPng,bbox_inches="tight")
 
 #############################################################################################
 def plot_rdf(rdfDf, outDir, resTag):
