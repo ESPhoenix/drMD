@@ -26,12 +26,12 @@ keyResidues:
   
 analysisMenu:
   keyResidueAnalysis:
-    contactDistances: False
-    radialDistributions: False
+    contactDistances: True
+    radialDistribution: True
   wholeProteinAnalysis:
     RMSD: False
-    RMSF: True
-    deltaRMSF: True
+    RMSF: False
+    deltaRMSF: False
     radiusOfGyration: False
   referenceSystem: "cvFAP_WT"
 

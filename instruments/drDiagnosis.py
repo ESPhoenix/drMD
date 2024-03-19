@@ -4,8 +4,42 @@ import pandas as pd
 import mdtraj as md
 from scipy.signal import find_peaks
 import yaml
+import numpy as np
+#############################################################################################
+def compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName):
+    print("---->\tCalculating radial basis function!")
+    for resTag in residuePairs:
+        print(f"--------> RDF for {resTag}")
+        # unpack contacts from residuePairs
+        pairwiseContacts = residuePairs[resTag]["contacts"]
+        colNames = residuePairs[resTag]["labels"]
+        # calculate radial distribution function for pairs
+        radii, rdf = md.compute_rdf(traj, pairwiseContacts, bin_width = 0.01)
+        rdfDf = pd.DataFrame({'Radii': radii, 'RDF': rdf})
+        # peak detection with a cutoff of 500
+        rdfPeaks, _ = find_peaks(rdfDf["RDF"], distance = 3)
+        rdfPeaks = rdfPeaks.tolist()
+        rdfInteractions = {}
+        for rdfPeak in rdfPeaks:
+            interactingResidues = []
+            for colName in contactDf:
+                peakDistance = rdfDf.loc[rdfPeak,"Radii"]
+                # Check if this pair often has a distance close to the peak distance
+                close_to_peak = np.isclose(contactDf[colName],peakDistance , atol=0.1)
+                if close_to_peak.mean() > 0.30:
+                    interactingResidues.append(colName)
+            rdfInteractions[str(peakDistance)] = interactingResidues
+        ## save rdf as csv 
+        rdfCsv = p.join(sysAnalDir,f"RDF_{resTag}_{inputDirName}.csv")
+        rdfDf.to_csv(rdfCsv)
+        ## save interactions as yaml
+        rdfYaml = p.join(sysAnalDir, f"RDF_interactions_{resTag}_{inputDirName}.yaml")
+        with open(rdfYaml,"w") as file:
+            yaml.dump(rdfInteractions,file, default_flow_style=False)
+
 #############################################################################################
 def compute_delta_RMSF(analDir, referenceSystem = False):
+    print("---->\tCalculating delta RMSF!")
     resultDfsToConcat =[]
     sysNames = [name for name in os.listdir(analDir) if p.isdir(p.join(analDir,name))]
     for sysName in sysNames:
@@ -62,16 +96,20 @@ def compute_delta_RMSF(analDir, referenceSystem = False):
 
     rmsfPeaksYaml = p.join(analDir, "delta_RMSF_peaks.yaml")
     with open(rmsfPeaksYaml,"w") as file:
-        yaml.dump(rmsfPeaks,file)
+        yaml.dump(rmsfPeaks,file,default_flow_style=False)
 
 #############################################################################################
 def check_RMSD(traj, outDir, inputDirName):
+    print("---->\tCalculating RMSD!")
+
     rmsd = md.rmsd(traj, traj, 0)
     rmsdDf = pd.DataFrame(rmsd, columns = [f"RMSD_{inputDirName}"])
     rmsdCsv = p.join(outDir, f"RMSD_{inputDirName}.csv")
     rmsdDf.to_csv(rmsdCsv)
 #############################################################################################
 def check_RMSF(traj, pdbDf, outDir,inputDirName):
+    print("---->\tCalculating per residue RMSF!")
+
     rmsf = md.rmsf(traj, traj, 0)
     rmsfDf = pd.DataFrame(rmsf, columns = ["RMSF"])
     pdbDf["RMSF"] = rmsfDf
@@ -80,38 +118,12 @@ def check_RMSF(traj, pdbDf, outDir,inputDirName):
     perResidueRMSF.columns = [f"RMSF_{inputDirName}"]
     rmsfCsv = p.join(outDir, f"RMSF_{inputDirName}.csv")
     perResidueRMSF.to_csv(rmsfCsv)
-#############################################################################################
-def init_atoms_of_interest():
-    interestingAtoms = {
-        "ALA": ["CB"],
-        "LEU": ["CB", "CG", "CD1", "CD2"],
-        "GLY": [],
-        "ILE": ["CB", "CG1", "CG2", "CD1"],
-        "VAL": ["CB", "CG1", "CG2"],
-        "PHE": ["CB", "CG", "CD1", "CD2", "CE1", "CE2", "CZ"],
-        "TRP": ["CB", "CG", "CD1", "CD2", "NE1", "CE2", "CE3", "CZ2", "CZ3", "CH2"],
-        "TYR": ["CB", "CG", "CD1", "CD2", "CE1", "CE2", "CZ", "OH"],
-        "ASP": ["CB", "CG", "OD1", "OD2"],
-        "GLU": ["CB", "CG", "CD", "OE1", "OE2"],
-        "ARG": ["CB", "CG", "CD", "NE", "CZ", "NH1", "NH2"],
-        "HIS": ["CB", "CG", "ND1", "CD2", "CE1", "NE2"],
-        "LYS": ["CB", "CG", "CD", "CE", "NZ"],
-        "SER": ["CB", "OG"],
-        "THR": ["CB", "OG1", "CG2"],
-        "ASN": ["CB", "CG", "OD1", "ND2"],
-        "GLN": ["CB", "CG", "CD", "OE1", "NE2"],
-        "CYS": ["CB", "SG"],
-        "MET": ["CB", "CG", "SD", "CE"],
-        "PRO": ["CB", "CG", "CD"]
-    }
-    return interestingAtoms
+
 #############################################################################################
 def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
     print("---->\tCalculating contact distances!")
     for resTag in residuePairs:
         print(f"-------->{resTag}")
-        print(resTag)
-        print(residuePairs[resTag].keys())
         # get contacts and labels from residuePairs dict
         pairwiseContacts = residuePairs[resTag]["contacts"]
         plotLabels = residuePairs[resTag]["labels"]
@@ -122,6 +134,7 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
         contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
         outCsv = p.join(sysAnalDir, f"contacts_{resTag}_{inputDirName}.csv")
         contactDf.to_csv(outCsv)
+        return contactDf
 #############################################################################################
 def find_pairwise_contacts(traj, pdbDf, keyResidues):
     print("---->\t Finding pairwise contacts!")
@@ -156,3 +169,28 @@ def find_pairwise_contacts(traj, pdbDf, keyResidues):
         residuePairs.update({resTag:{"contacts": pairwiseContacts,
                                              "labels": plotLabels}})
     return residuePairs
+#############################################################################################
+def init_atoms_of_interest():
+    interestingAtoms = {
+        "ALA": ["CB"],
+        "LEU": ["CB", "CG", "CD1", "CD2"],
+        "GLY": [],
+        "ILE": ["CB", "CG1", "CG2", "CD1"],
+        "VAL": ["CB", "CG1", "CG2"],
+        "PHE": ["CB", "CG", "CD1", "CD2", "CE1", "CE2", "CZ"],
+        "TRP": ["CB", "CG", "CD1", "CD2", "NE1", "CE2", "CE3", "CZ2", "CZ3", "CH2"],
+        "TYR": ["CB", "CG", "CD1", "CD2", "CE1", "CE2", "CZ", "OH"],
+        "ASP": ["CB", "CG", "OD1", "OD2"],
+        "GLU": ["CB", "CG", "CD", "OE1", "OE2"],
+        "ARG": ["CB", "CG", "CD", "NE", "CZ", "NH1", "NH2"],
+        "HIS": ["CB", "CG", "ND1", "CD2", "CE1", "NE2"],
+        "LYS": ["CB", "CG", "CD", "CE", "NZ"],
+        "SER": ["CB", "OG"],
+        "THR": ["CB", "OG1", "CG2"],
+        "ASN": ["CB", "CG", "OD1", "ND2"],
+        "GLN": ["CB", "CG", "CD", "OE1", "NE2"],
+        "CYS": ["CB", "SG"],
+        "MET": ["CB", "CG", "SD", "CE"],
+        "PRO": ["CB", "CG", "CD"]
+    }
+    return interestingAtoms
