@@ -1,7 +1,6 @@
 ## BASIC LIBS
 import os
 from os import path as p
-import psutil
 ## drMD UTILS
 import instruments.drPrep as drPrep
 ## drMD simulation
