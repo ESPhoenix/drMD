@@ -26,7 +26,6 @@ def run_simulation(config, outDir, inputCoords, amberParams):
         platform=openmm.Platform.getPlatformByName("CPU")
 
     omp_num_threads = os.environ.get('OMP_NUM_THREADS')
-    print("OMP_NUM_THREADS:", omp_num_threads)
     
     # load amber files, create system
     prmtop = app.AmberPrmtopFile(amberParams)
