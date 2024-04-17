@@ -8,8 +8,9 @@ import  simtk.unit  as unit
 ## CUSTOM LIBS
 import instruments.drConstraints as drConstraints
 import instruments.drCheckup as drCheckup
+import instruments.drMeta as drMeta
 ###########################################################################################
-def run_simulation(config, outDir, inputCoords, amberParams):
+def run_simulation(config, outDir, inputCoords, amberParams, pdbFile):
     # set up simple unit translator
     timescale = {"fs":unit.femtoseconds,
                  "ps":unit.picoseconds,
@@ -59,6 +60,11 @@ def run_simulation(config, outDir, inputCoords, amberParams):
         elif sim["type"].upper() == "NPT":
             sim = process_sim_data(sim,timescale)
             saveXml = run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform)
+        elif sim["type"].upper() == "META":
+            sim = process_sim_data(sim, timescale)
+            saveXml = drMeta.run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
+
+
 ###########################################################################################
 def init_system(prmtop):
     system = prmtop.createSystem(nonbondedMethod=app.PME,

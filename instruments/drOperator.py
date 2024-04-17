@@ -80,5 +80,6 @@ def drMD_protocol(configYaml):
     drSim.run_simulation(config = config,
                    outDir = outDir,
                    inputCoords=inputCoords,
-                   amberParams=amberParams)
+                   amberParams=amberParams,
+                   pdbFile = mergedPdb)
 #####################################################################################

@@ -65,7 +65,7 @@ def pdb2df(protPdb):
                 res_name = line[17:20].strip()
                 chain_id = line[21:22].strip()
                 if chain_id == '':
-                    chain_id = None
+                    chain_id = "A"
                 try:
                     res_id = int(line[22:26].strip())
                 except:

@@ -124,7 +124,6 @@ def  ligand_mol2(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligPdb,ligFil
     ligFileDict.update({"mol2":ligMol2})
     return ligMol2, ligFileDict
 ######################### TOPPAR CREATION ##########################################
-
 def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligFileDict, prepLog):
     # look for frcmod from config, then in ligParamDir, if not found, create new frcmod
     if ligand["toppar"]: # look in config
@@ -140,8 +139,6 @@ def ligand_toppar(ligand,inputDir,ligandName,ligParamDir,ligPrepDir,ligMol2,ligF
     ligFileDict.update({"frcmod":ligFrcmod})
 
     return ligFileDict
-
-
 #####################################################################################
 def prepare_ligand_parameters(config, outDir, prepLog):
     # read inputs from config file

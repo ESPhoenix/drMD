@@ -61,7 +61,7 @@ def validate_config(config):
     # Validate simulationInfo
     filename_invalid_chars_pattern = re.compile(r'[^\w-]') # Allows letters, numbers, underscores, and hyphens
     required_keys = ['stepName', 'type', 'temp']
-    permittedSimulationTypes = ["EM","NVT","NPT"]
+    permittedSimulationTypes = ["EM","NVT","NPT","META"]
     for step in config['simulationInfo']:
         
         for key in required_keys:
