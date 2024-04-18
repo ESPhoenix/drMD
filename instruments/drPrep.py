@@ -206,9 +206,9 @@ def prepare_protein_structure(config, outDir, prepLog):
             run_with_log(reduceCommand,prepLog,protPdb_h)
           
              #run pdb4amber to get compatable types and fix atom numbering
-            protPdb_amber = p.join(protPrepDir,"PROT_amber.pdb")
-            pdb4amberCommand = f"pdb4amber -i {protPdb_h} -o {protPdb_amber}"
-            run_with_log(pdb4amberCommand,prepLog,protPdb_amber)
+            # protPdb_amber = p.join(protPrepDir,"PROT_amber.pdb")
+            # pdb4amberCommand = f"pdb4amber -i {protPdb_h} -o {protPdb_amber}"
+            # run_with_log(pdb4amberCommand,prepLog,protPdb_amber)
  
             proteinPdbs.append(protPdb)
     return proteinPdbs
