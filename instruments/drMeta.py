@@ -18,6 +18,12 @@ def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
     system = drSim.init_system(prmtop)
     ## deal with restraints (clear all lurking restraints and constants)
     system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveXml)
+    # Add a Monte Carlo Barostat to maintain constant pressure
+    barostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
+    system.addForce(barostat)
+
+
+
     ## create bias variable
     biasVariables = []
     if sim["biasVar"].upper() == "RMSF":
@@ -25,13 +31,14 @@ def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
         biasVariables.append(biasVariable)
     elif sim["biasVar"].upper() == "DIHEDRAL":
         biasVariable = gen_dihedral_bias_variable(prmtop, inpcrd, sim, pdbFile)
+        biasVariables.append(biasVariable)
+
     ## create metadynamics object -- adds bias variable as a force to the system
     meta = metadynamics.Metadynamics(system = system,
                                      variables = biasVariables,
                                      temperature = sim["temp"],
                                      biasFactor = 5,
                                      height = 1,
-                                     width = 0.05, 
                                      frequency = 50,
                                      saveFrequency = 50,
                                      biasDir = simDir)
@@ -73,28 +80,20 @@ def gen_dihedral_bias_variable(prmtop, inpcrd, sim, pdbFile):
 
     pdbDf = pdbUtils.pdb2df(pdbFile)
     for atomInfo in dihedralAtomsInput:
-        print(atomInfo)
         atomDf = pdbDf[(pdbDf["CHAIN_ID"].astype(str) == atomInfo[0]) &
                         (pdbDf["RES_NAME"].astype(str) == atomInfo[1]) &
-                        (pdbDf["RES_ID"].astype(str) == atomInfo[2])]# &
-        #                (pdbDf["ATOM_NAME"].astype(str) == atomInfo[3]) ]
-        print(atomDf)
-        continue
+                        (pdbDf["RES_ID"].astype(str) == atomInfo[2]) &
+                       (pdbDf["ATOM_NAME"].astype(str) == atomInfo[3]) ]
+        atomIndex  = atomDf.index.values[0]
+        atomIndecies.append(atomIndex)
 
-    #         if (atom.residue.chain.id == chain_id and 
-    #             atom.residue.name == res_name and 
-    #             atom.residue.id == res_id):# and 
-    #             # atom.name == atom_name):
-    #             atomIndecies.append(i)
-    # print(atomIndecies)
-    exit()
     ## generate a dihedral bias force:
-    dihedralForce = openmm.CustomTorsionForce("k*(theta-theta0)^2")
+    dihedralForce = openmm.CustomTorsionForce("theta")
+
     dihedralForce.addTorsion(atomIndecies[0],
                               atomIndecies[1],
                                 atomIndecies[2],
-                                  atomIndecies[3],
-                                    [], 0, 0)
+                                  atomIndecies[3])
 
     dihedralBiasVariable = metadynamics.BiasVariable(force = dihedralForce,
                                                      minValue = -180 * unit.degrees,

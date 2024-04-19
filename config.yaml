@@ -32,38 +32,40 @@ simulationInfo:
     temp: 300
     maxIterations: 1000
 
-  # - stepName: "02_Dihedral_Metadynamics"
-  #   type: "Meta"
-  #   duration: "1 ns"
-  #   timestep: "2 fs"
-  #   temp: 300 
-  #   # biasVar: "RMSF"
-  #   biasVar: "Dihedral"
-  #   biasAtoms: 
-  #     - ["A","SER","226","OG"]
-  #     - ["A","SER","226","CB"]
-  #     - ["A","SER","226","CA"]
-  #     - ["A","SER","226","N"]
+  - stepName: "02_NVT_pre-equilibraition"
+    type: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    relaxWaters: True
+    temp: 300
 
-  # - stepName: "02_NVT_pre-equilibraition"
-  #   type: "NVT"
-  #   duration: "100 ps"
-  #   timestep: "2 fs"
-  #   relaxWaters: True
-  #   temp: 300
+  - stepName: "03_NpT_pre-equilibriation"
+    type: "NpT"
+    duration: "300 ps"
+    timestep: "2 fs"
+    relaxWaters: True
+    temp: 300
 
-  # - stepName: "03_NpT_pre-equilibriation"
-  #   type: "NpT"
-  #   duration: "300 ps"
-  #   timestep: "2 fs"
-  #   relaxWaters: True
-  #   temp: 300
+  - stepName: "04_NpT_slowIntergrator"
+    type: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temp: 300
 
-  # - stepName: "04_NpT_slowIntergrator"
-  #   type: "NpT"
-  #   duration: "10 ps"
-  #   timestep: "0.5 fs"
-  #   temp: 300
+  - stepName: "05_Dihedral_Metadynamics"
+    type: "Meta"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 300 
+    # biasVar: "RMSF"
+    biasVar: "Dihedral"
+    biasAtoms: 
+      - ["B","GLN","6","O"]
+      - ["B","GLN","6","C"]
+      - ["B","GLN","6","CA"]
+      - ["B","GLN","6","CB"]
+
+
 
   # - stepName: "05_NpT_equilibriation"
   #   type: "NpT"
