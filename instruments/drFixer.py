@@ -5,18 +5,26 @@ from instruments import pdbUtils
 import pandas as pd
 
 ##################################################################################################
-def openMM_pdb_fix(goodPdb, badPdb):
+def reset_chains_residues(goodPdb, badPdb):
     ## load pdb files as dataframes - separate out waters and ions
     goodDf = pdbUtils.pdb2df(goodPdb)
     badDf = pdbUtils.pdb2df(badPdb)
+
+
+    hetAtomNames = ["HOH", "WAT", "TIP3",
+                    "Na+", "Cl-", "Mg2+", "Ca2+"]
+    
     goodDf = goodDf[goodDf["ATOM"] == "ATOM"]
-    badHetAtoms = badDf[badDf["ATOM"] == "HETATM"]
-    badDf = badDf[badDf["ATOM"] == "ATOM"]
+    badHetAtoms = badDf[(badDf["ATOM"] == "HETATM") | (badDf["RES_NAME"].isin(hetAtomNames))]
+
+    badDf = badDf.drop(badHetAtoms.index, errors='ignore')
+
     chainIds = goodDf["CHAIN_ID"].unique().tolist()
     ## create a list of lists containing residue numbers and associated chains
     goodResidues = []       ## stores unique residue ids for each chain
     goodChains = []     ## stores chain ids associated with the above
     for chainId in chainIds:
+        print(chainId)
         goodChainDf = goodDf[goodDf["CHAIN_ID"] == chainId]
         goodChainResidues = list(set(goodChainDf["RES_ID"].to_list()))
         goodResidues.append(goodChainResidues)
@@ -75,7 +83,7 @@ def openMM_pdb_fix(goodPdb, badPdb):
 
     outputDf = pd.concat([outputDf, badHetAtoms], axis = 0)
 
-    outPdb = p.splitext(badPdb)[0] + "_copy.pdb"
-    pdbUtils.df2pdb(outputDf, outPdb)
+    pdbUtils.df2pdb(outputDf, badPdb)
+    return badPdb
 
 ##################################################################################################

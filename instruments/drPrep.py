@@ -8,7 +8,7 @@ from shutil import copy
 import time
 ## drMD UTILS
 from instruments.pdbUtils import pdb2df, df2pdb, fix_atom_names
-
+from instruments import drFixer 
 #####################################################################################
 def find_ligand_charge(ligDf,ligName,outDir,pH):
     ## uses propka to identify charges on a ligand
@@ -200,17 +200,21 @@ def prepare_protein_structure(config, outDir, prepLog):
             copy(config["pathInfo"]["inputPdb"],protPdb)
 
         if not protein["protons"]:
-            # add protons with reduce
-            protPdb_h = p.join(protPrepDir,"PROT_h.pdb")
-            reduceCommand = f"reduce {protPdb} > {protPdb_h}"
-            run_with_log(reduceCommand,prepLog,protPdb_h)
-          
-             #run pdb4amber to get compatable types and fix atom numbering
+            # print("adding protons to protein!")
+            # # add protons with reduce
+            # protPdb_h = p.join(protPrepDir,"PROT_h.pdb")
+            # reduceCommand = f"reduce {protPdb} > {protPdb_h}"
+            # run_with_log(reduceCommand,prepLog,protPdb_h)
+            # proteinPdbs.append(protPdb_h)
+            # openMM_pdb_fix(protPdb, protPdb_h)
+            # proteinPdbs.append(protPdb_h) 
+            print("nothing to do here!")
+            #run pdb4amber to get compatable types and fix atom numbering
             # protPdb_amber = p.join(protPrepDir,"PROT_amber.pdb")
             # pdb4amberCommand = f"pdb4amber -i {protPdb_h} -o {protPdb_amber}"
             # run_with_log(pdb4amberCommand,prepLog,protPdb_amber)
- 
-            proteinPdbs.append(protPdb)
+        proteinPdbs.append(protPdb)
+    
     return proteinPdbs
 
 
@@ -240,19 +244,22 @@ def make_amber_params(outDir, pdbFile, outName,prepLog,ligandFileDict=False):
         f.write("addions mol Na+ 0\n")
         f.write("addions mol Cl- 0\n")
         # save solvated pdb file
-        f.write(f"savepdb mol {outName}.pdb\n")
+        solvatedPdb = f"{outName}.pdb"
+        f.write(f"savepdb mol {solvatedPdb}\n")
         # save parameter files
         prmTop = p.join(outDir,f"{outName}.prmtop")
         inputCoords =  p.join(outDir,f"{outName}.inpcrd")
         f.write(f"saveamberparm mol {prmTop} {inputCoords}\n")
         f.write("quit\n")
+
     tleapOutput = p.join(outDir,"TLEAP.out")
     amberParams = p.join(outDir, f"{outName}.prmtop")
     tleapCommand = f"tleap -f {tleapInput} > {tleapOutput}"
     run_with_log(tleapCommand,prepLog,amberParams)
 
     inputCoords = p.join(outDir, f"{outName}.inpcrd")
-
+    ## reset chain and residue IDs in amber PDB
+    drFixer.reset_chains_residues(pdbFile, solvatedPdb)
     return inputCoords, amberParams
 #####################################################################################
 def run_with_log(command, prepLog, expectedOutput):

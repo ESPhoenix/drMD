@@ -19,8 +19,14 @@ def left_aligned(pdbList, textList):
 def df2pdb(df, outFile,
            chain=True):
     with open(outFile,"w") as f:
+        previousChainId = df.head(1)["CHAIN_ID"].values[0]
         for _, row in df.iterrows():
-
+            ## write TER between chains
+            chainId = row['CHAIN_ID']
+            if chainId != previousChainId:
+                f.write("TER\n")
+            previousChainId = chainId
+        
             pdbList = [" " for _ in range(80)]
             pdbList[0:6]    = left_aligned(pdbList[0:6],list(row['ATOM']))
             pdbList[6:11]   = right_aligned(pdbList[6:11],list(str(row['ATOM_ID'])))
@@ -47,7 +53,7 @@ def df2pdb(df, outFile,
             pdbLine = "".join(pdbList)
             f.write(f"{pdbLine}\n")
         f.write("TER")
-
+#####################################################################################################################################
 
 def pdb2multiDfs(protPdb):
     columns = ['ATOM', 'ATOM_ID', 'ATOM_NAME', 'RES_NAME', 'CHAIN_ID', 'RES_ID', 'X', 'Y', 'Z', 'OCCUPANCY', 'BETAFACTOR', 'ELEMENT']
@@ -131,8 +137,12 @@ def mergePdbs(pdbList,outFile):
     dfList=[]
     for pdbFile in pdbList:
         df = pdb2df(pdbFile)
+        print(df)
         dfList.append(df)
+
     mergedDf = pd.concat(dfList,axis=0)
+    print(mergedDf)
+    print(outFile)
     df2pdb(df=mergedDf, outFile=outFile, chain=True)
 
 ############################### apply a a bunch of fixes to a pdb dataframe
@@ -152,83 +162,8 @@ def fix_atom_names(df):
 
     return df 
 
-
-############################### renumber residues starting with a given number 
-def reset_residues(targetPdb, inputPdb):
-    ## load pdb files as dataframes
-    targetDf = pdb2df(targetPdb)
-    inputDf = pdb2df(inputPdb)
-    ## get starting RES_IDs from target for each CHAIN_ID
-    chainIds = targetDf["CHAIN_ID"].unique().tolist()
-    dfsToConcat = []
-    hetatomsDf = inputDf[inputDf["ATOM"] == "HETATM"]
-    atomsDf = inputDf[inputDf["ATOM"] == "ATOM"]
-    for chainId in chainIds:
-        # get first res number in each chain for target and input pdbDf
-        targetChainDf = targetDf[targetDf['CHAIN_ID'] == chainId]
-        targetFirstResId = targetChainDf.head(1)["RES_ID"].values[0]
-
-        inputChainDf = atomsDf[atomsDf["CHAIN_ID"] == chainId]
-        inputFirstResId = inputChainDf.head(1)["RES_ID"].values[0]
-        ## calculate the correction
-        resIdCorrection = targetFirstResId - inputFirstResId
-
-        print(inputChainDf["RES_ID"])
-        print(inputChainDf)
-        dfsToConcat.append(inputChainDf)
-    dfsToConcat.append(hetatomsDf)
-    outputDf = pd.concat(dfsToConcat, axis = 0)
-
-
 ########################################################################################
 
-def reset_chains_residues(targetPdb, inputPdb):
-    ## load pdb files as dataframes
-    targetDf = pdb2df(targetPdb)
-    inputDf = pdb2df(inputPdb)
-    ## get starting RES_IDs from target for each CHAIN_ID
-    chainIds = targetDf["CHAIN_ID"].unique().tolist()
-
-    firstResis = []
-    lastResis = []
-    resiRanges = []
-    for chainId in chainIds:
-        targetChainDf = targetDf[targetDf["CHAIN_ID"] == chainId]
-        firstRes = targetChainDf.head(1)["RES_ID"].values[0]
-        firstResis.append(firstRes)
-        lastRes = targetChainDf.tail(1)["RES_ID"].values[0]
-        lastResis.append(lastRes)
-        resiRange = range(firstRes,lastRes+1)
-        resiRanges.append(resiRange)
-
-
-
-    outputDf = inputDf[inputDf["ATOM"] == "ATOM"].copy()
-
-    chainCount = 0 
-    resiCount = 0
-    wait = False
-    previousResId = False
-    # print(outputDf)
-
-
-    resiDfs = []
-    dfsToConcat = []
-    previousResId = outputDf.head(1)["RES_ID"].values[0]
-    for idx, row in outputDf.iterrows():
-        if row["RES_ID"] != previousResId:
-            resiDf = pd.DataFrame(dfsToConcat)
-            resiDfs.append(resiDf)        
-            dfsToConcat = []
-            dfsToConcat.append(row)
-        else:
-            dfsToConcat.append(row)
-
-    for resiDf in resiDfs:
-        print(resiDf)
-
-
-    df2pdb(outputDf, f"{inputPdb}_copy")
 
 
 
