@@ -24,7 +24,6 @@ def reset_chains_residues(goodPdb, badPdb):
     goodResidues = []       ## stores unique residue ids for each chain
     goodChains = []     ## stores chain ids associated with the above
     for chainId in chainIds:
-        print(chainId)
         goodChainDf = goodDf[goodDf["CHAIN_ID"] == chainId]
         goodChainResidues = list(set(goodChainDf["RES_ID"].to_list()))
         goodResidues.append(goodChainResidues)
@@ -41,31 +40,21 @@ def reset_chains_residues(goodPdb, badPdb):
     residueCount = 0
     chainCount = 0
 
-    for resList in goodResidues:
-        print(len(resList))
+
     for badResidue in badResidues:
         if residueCount == len(goodResidues[chainCount]):
-            print("#########")
-            print(f"chainCount: {chainCount}")
-            print(f"resiCount: {residueCount}")
-            print("chain count up")
-            print("#########")
-
             if chainCount  + 1 < len(goodResidues):
                 chainCount += 1
                 residueCount = 0
                 residueMapping.update({previousBadResidue:goodResidues[chainCount][residueCount]})
                 chainMapping.update({previousBadResidue:goodChains[chainCount][residueCount]})
             else:
-                print("wonk")
                 residueMapping.update({previousBadResidue:goodResidues[chainCount][residueCount]})
                 chainMapping.update({previousBadResidue:goodChains[chainCount][residueCount]})
                 break
 
         elif badResidue != previousBadResidue:
-            # print(f"chainCount: {chainCount}")
-        
-            # print(f"resiCount: {residueCount}")
+
             residueMapping.update({previousBadResidue:goodResidues[chainCount][residueCount]})
             chainMapping.update({previousBadResidue:goodChains[chainCount][residueCount]})
             residueCount += 1
@@ -73,9 +62,7 @@ def reset_chains_residues(goodPdb, badPdb):
 
     residueMapping.update({badResidue:goodResidues[chainCount][residueCount]})
     chainMapping.update({badResidue:goodChains[chainCount][residueCount]})
-    # for map in residueMapping:
-    #     print([map, residueMapping[map]])
-    # exit()
+
     outputDf = badDf.copy()
     outputDf["CHAIN_ID"] = outputDf["RES_ID"].map(chainMapping)
 
