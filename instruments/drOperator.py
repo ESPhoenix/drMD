@@ -2,11 +2,12 @@
 import os
 from os import path as p
 ## drMD UTILS
-import instruments.drPrep as drPrep
+from instruments import drPrep
 ## drMD simulation
-import instruments.drSim as drSim
+from instruments import drSim
 from instruments.pdbUtils import mergePdbs
 import instruments.drConfigInspector as drConfigInspector
+from instruments import pdbUtils
 #####################################################################################
 def drMD_protocol(configYaml):
     config = drConfigInspector.read_config(configYaml)
@@ -55,7 +56,7 @@ def drMD_protocol(configYaml):
         os.makedirs(wholePrepDir,exist_ok=True)
         allPdbs = proteinPdbs + ligandPdbs
         outName = config["pathInfo"]["outputName"]
-        mergedPdb = p.join(wholePrepDir,f"{outName}.pdb")
+        mergedPdb = p.join(wholePrepDir,"MERGED.pdb")
         mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = drPrep.make_amber_params(outDir = wholePrepDir,
@@ -69,7 +70,7 @@ def drMD_protocol(configYaml):
         proteinPdbs = drPrep.prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
         ## MERGE PROTEIN PDBS
         outName = config["pathInfo"]["outputName"]
-        mergedPdb = p.join(p.join(prepDir,"PROT",f"{outName}.pdb"))
+        mergedPdb = p.join(p.join(prepDir,"PROT","MERGED.pdb"))
         mergePdbs(pdbList=proteinPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = drPrep.make_amber_params(outDir = p.join(prepDir,"PROT"),
