@@ -9,6 +9,7 @@ import  simtk.unit  as unit
 import instruments.drConstraints as drConstraints
 import instruments.drCheckup as drCheckup
 import instruments.drMeta as drMeta
+from instruments import drFixer
 ###########################################################################################
 def run_simulation(config, outDir, inputCoords, amberParams, pdbFile):
     # set up simple unit translator
@@ -53,13 +54,13 @@ def run_simulation(config, outDir, inputCoords, amberParams, pdbFile):
         os.chdir(simDir)
         # Check for simulation type, run as needed:
         if sim["type"].upper() == "EM":
-            saveXml = run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform)
+            saveXml = run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform, pdbFile)
         elif sim["type"].upper() == "NVT":
             sim = process_sim_data(sim,timescale)
-            saveXml = run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform)
+            saveXml = run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
         elif sim["type"].upper() == "NPT":
             sim = process_sim_data(sim,timescale)
-            saveXml = run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform)
+            saveXml = run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
         elif sim["type"].upper() == "META":
             sim = process_sim_data(sim, timescale)
             saveXml = drMeta.run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
@@ -109,7 +110,7 @@ def process_sim_data(sim,timescale):
                 "temp":temp})
     return sim
 ###########################################################################################
-def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform):
+def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform, refPdb):
     print("Running NpT Step!")
     ## initialise a new system from parameters
     system = init_system(prmtop)
@@ -131,18 +132,24 @@ def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform):
         simulation.reporters.append(reporters[rep][0])
     # run NVT simulation
     simulation.step(sim["nSteps"])
+
+    # save result as pdb - reset chain and residue Ids
+    state = simulation.context.getState(getPositions=True, getEnergy=True)
+    nptPdb = p.join(simDir,"NpT_final_geom.pdb")
+    with open(nptPdb, 'w') as output:
+        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+    drFixer.reset_chains_residues(refPdb,nptPdb)
+
+    # run drCheckup
+    drCheckup.check_vitals(simDir,reporters["vitals"][1], reporters["progress"][1])
+
+
     # save simulation as XML
     saveXml = p.join(simDir,"NpT_step.xml")
     simulation.saveState(saveXml)
-    # save result as pdb
-    state = simulation.context.getState(getPositions=True, getEnergy=True)
-    with open(p.join(simDir,"NpT_final_geom.pdb"), 'w') as output:
-        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-
-    drCheckup.check_vitals(simDir,reporters["vitals"][1], reporters["progress"][1])
     return saveXml
 ###########################################################################################
-def run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform):
+def run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform, refPdb):
     print("Running NVT Step!")
     ## initialise a new system from parameters
     system = init_system(prmtop)
@@ -165,19 +172,25 @@ def run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform):
 
     # run NVT simulation
     simulation.step(sim["nSteps"])
+
+    # save result as pdb - reset chain and residue Ids
+    state = simulation.context.getState(getPositions=True, getEnergy=True)
+    nvtPdb = p.join(simDir,"NVT_final_geom.pdb")
+    with open(nvtPdb, 'w') as output:
+        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+    drFixer.reset_chains_residues(refPdb, nvtPdb)
+
+    ## run drCheckup    
+    drCheckup.check_vitals(simDir,reporters["vitals"][1], reporters["progress"][1])
+
     # save simulation as XML
     saveXml = p.join(simDir,"NVT_step.xml")
     simulation.saveState(saveXml)
 
-    # save result as pdb
-    state = simulation.context.getState(getPositions=True, getEnergy=True)
-    with open(p.join(simDir,"NVT_final_geom.pdb"), 'w') as output:
-        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-    drCheckup.check_vitals(simDir,reporters["vitals"][1], reporters["progress"][1])
     return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop, inpcrd, sim, simDir,platform):
+def run_energy_minimisation(prmtop, inpcrd, sim, simDir,platform, refPdb):
     print("Running Energy Minimisation!")
     system = init_system(prmtop)
     # set up intergrator and simulation
@@ -197,10 +210,15 @@ def run_energy_minimisation(prmtop, inpcrd, sim, simDir,platform):
         simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
     # run energy minimisation
     simulation.minimizeEnergy(maxIterations=sim['maxIterations']) 
-    # save result as pdb
+
+    # save result as pdb - reset chain and residue Ids
     state = simulation.context.getState(getPositions=True, getEnergy=True)
-    with open(p.join(simDir,"minimised_geom.pdb"), 'w') as output:
+    minimisedPdb = p.join(simDir,"minimised_geom.pdb")
+    with open(minimisedPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+    drFixer.reset_chains_residues(refPdb, minimisedPdb)
+
+    
     # save simulation as XML
     saveXml = p.join(simDir,"energy_minimisation.xml")
     simulation.saveState(saveXml)
