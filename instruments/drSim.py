@@ -200,14 +200,6 @@ def run_energy_minimisation(prmtop, inpcrd, sim, simDir,platform, refPdb):
     integrator = openmm.LangevinMiddleIntegrator(300*unit.kelvin, 1/unit.picosecond, 0.004*unit.picoseconds)
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     simulation.context.setPositions(inpcrd.positions)
-
-    # set up reporters
-    totalSteps = simulation.currentStep + sim["maxIterations"]
-    reporters = init_reporters(simDir = simDir,
-                                nSteps =  totalSteps,
-                                nLogSteps = 100)
-    
-    simulation.reporters.append(reporters["vitals"][0])
     # box vectors
     if inpcrd.boxVectors is not None:
         simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
