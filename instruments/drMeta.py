@@ -22,8 +22,6 @@ def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
     barostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
 
-
-
     ## create bias variable
     biasVariables = []
     if sim["biasVar"].upper() == "RMSF":
@@ -66,9 +64,9 @@ def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     ## run drCheckup to assess simulation health (will this work for METADYNAMICS???)
     drCheckup.check_vitals(simDir,reporters["vitals"][1], reporters["progress"][1])
+
+    
     ## return checkpoint file for continuing simulation
-
-
     return saveXml
 ########################################################################################################
 def gen_dihedral_bias_variable(prmtop, inpcrd, sim, pdbFile):
