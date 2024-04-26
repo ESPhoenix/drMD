@@ -87,9 +87,12 @@ def init_reporters(simDir, nSteps, nLogSteps):
     dcdFile = p.join(simDir, "trajectory.dcd")
     dcdTrajectoryReporter = app.DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
 
+    chkFile = p.join(simDir, "checkpoint.chk")
+    chkReporter = app.CheckpointReporter(file = chkFile, reportInterval = nLogSteps, writeState = False) 
     reporters = {"vitals":[vitalsStateReporter,vitalsCsv],
                 "progress": [progressStateReporter,progressCsv],
-                 "trajectory": [dcdTrajectoryReporter, dcdFile]}
+                 "trajectory": [dcdTrajectoryReporter, dcdFile],
+                 "checkpoint": [chkReporter, chkFile]}
 
     return  reporters
 ###########################################################################################
