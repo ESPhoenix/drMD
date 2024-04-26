@@ -212,7 +212,6 @@ def run_energy_minimisation(prmtop, inpcrd, sim, simDir,platform, refPdb):
     with open(minimisedPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     drFixer.reset_chains_residues(refPdb, minimisedPdb)
-
     
     # save simulation as XML
     saveXml = p.join(simDir,"energy_minimisation.xml")
