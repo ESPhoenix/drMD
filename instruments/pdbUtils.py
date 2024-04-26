@@ -137,12 +137,8 @@ def mergePdbs(pdbList,outFile):
     dfList=[]
     for pdbFile in pdbList:
         df = pdb2df(pdbFile)
-        print(df)
         dfList.append(df)
-
     mergedDf = pd.concat(dfList,axis=0)
-    print(mergedDf)
-    print(outFile)
     df2pdb(df=mergedDf, outFile=outFile, chain=True)
 
 ############################### apply a a bunch of fixes to a pdb dataframe
