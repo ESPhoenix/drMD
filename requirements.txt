@@ -10,3 +10,4 @@ lxml
 scipy
 adjustText
 tqdm
+pdbutils

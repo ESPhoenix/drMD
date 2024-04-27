@@ -5,29 +5,10 @@ import mdtraj as md
 import argpass
 import yaml
 ### drMD modules ###
-from instruments.pdbUtils import pdb2df
+from pdbUtils import pdbUtils
 import instruments.drPlot as drPlot
 import instruments.drDiagnosis as drDiagnosis
 
-
-
-#####################################################################################################
-def  compute_radial_dristrubution_function():
-    return
-        ### OFF FOR NOW - DON'T UNDERSTAND RDFs
-        ## calculate radial distribution function for pairs
-        # radii, rdf = md.compute_rdf(traj, pairwiseContacts, bin_width = 0.05)
-        # rdfDf = pd.DataFrame({'Radii': radii, 'RDF': rdf})
-        # # peak detection with a cutoff of 500
-        # peak_distances = [rdfDf['Radii'][i] for i in range(len(rdfDf['RDF'])) if rdfDf['RDF'][i] > 500]
-        # for i, pair in enumerate(pairwiseContacts):
-        #     pair_distances = contactDistances[i, :]
-        #     for peak_distance in peak_distances:
-        #         # Check if this pair often has a distance close to the peak distance
-        #         close_to_peak = np.isclose(pair_distances, peak_distance, atol=0.01)
-        #         if close_to_peak.mean() > 0.05:
-        #             print(f"Pair {pair} is associated with peak at distance {round(peak_distance,4)}")
-        # plot_rdf(rdfDf, outDir, tag = resTag)
 #####################################################################################################
 def read_inputs():
     parser = argpass.ArgumentParser()
@@ -49,8 +30,6 @@ def main():
     analMenu = config["analysisMenu"]
     os.makedirs(analDir,exist_ok=True)
     keyResidues = config["keyResidues"]
-    # plotting_protocol(analMenu, analDir, keyResidues)
-    # return
     # reconstruct file structure from config
     mdDir = pathInfo["mdDir"]
     stepName = pathInfo["stepName"]
@@ -61,7 +40,7 @@ def main():
         for inputDirName in repeats[sysTag]:
             simDir = p.join(mdDir,inputDirName,stepName)
             analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
-    # plotting_protocol(analMenu, analDir, keyResidues)
+    plotting_protocol(analMenu, analDir, keyResidues)
 
 #############################################################################################
 def plotting_protocol(analMenu, analDir, keyResidues):
@@ -114,7 +93,7 @@ def analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName):
     traj = md.load_dcd(dcdFile, top = pdbFile)
     traj.remove_solvent([],True)
     ## load pdb file as a dataframe | remove solvent and ions
-    pdbDf = pdb2df(pdbFile)
+    pdbDf = pdbUtils.pdb2df(pdbFile)
     pdbDf = pdbDf[~pdbDf["RES_NAME"].isin(["Cl-","Na+","HOH"])].copy()
 
     ############ read analysis menu and do ordered analysis ############
