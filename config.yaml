@@ -39,18 +39,18 @@ simulationInfo:
     relaxWaters: True
     temp: 300
 
-  # - stepName: "03_NpT_pre-equilibriation"
-  #   type: "NpT"
-  #   duration: "300 ps"
-  #   timestep: "2 fs"
-  #   relaxWaters: True
-  #   temp: 300
+  - stepName: "03_NpT_pre-equilibriation"
+    type: "NpT"
+    duration: "300 ps"
+    timestep: "2 fs"
+    relaxWaters: True
+    temp: 300
 
-  # - stepName: "04_NpT_slowIntergrator"
-  #   type: "NpT"
-  #   duration: "10 ps"
-  #   timestep: "0.5 fs"
-  #   temp: 300
+  - stepName: "04_NpT_slowIntergrator"
+    type: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temp: 300
 
   # - stepName: "05_Dihedral_Metadynamics"
   #   type: "Meta"
@@ -65,20 +65,18 @@ simulationInfo:
   #     - ["B","GLN","6","CA"]
   #     - ["B","GLN","6","CB"]
 
+  - stepName: "05_NpT_equilibriation"
+    type: "NpT"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 300
 
-
-  # - stepName: "05_NpT_equilibriation"
-  #   type: "NpT"
-  #   duration: "1 ns"
-  #   timestep: "2 fs"
-  #   temp: 300
-
-  # - stepName: "05_NpT_production_MD"
-  #   type: "NpT"
-  #   duration: 10 ns"
-  #   timestep: "2 fs"
-  #   freezeHeavy: False
-  #   temp: 300
+  - stepName: "05_NpT_production_MD"
+    type: "NpT"
+    duration: "10 ns"
+    timestep: "2 fs"
+    freezeHeavy: False
+    temp: 300
 
 ########################################################################
 cleanUpInfo:

@@ -5,6 +5,10 @@ import mdtraj as md
 from scipy.signal import find_peaks
 import yaml
 import numpy as np
+
+
+
+
 #############################################################################################
 def compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName):
     print("---->\tCalculating radial basis function!")
@@ -118,7 +122,20 @@ def check_RMSF(traj, pdbDf, outDir,inputDirName):
     perResidueRMSF.columns = [f"RMSF_{inputDirName}"]
     rmsfCsv = p.join(outDir, f"RMSF_{inputDirName}.csv")
     perResidueRMSF.to_csv(rmsfCsv)
-
+#############################################################################################
+def compute_atomic_distances(traj, atomPairs, sysAnalDir, inputDirName, tag):
+    print("---->\tCalculating atomic distances!")
+    for atomTag in atomPairs:
+        print(f"-------->{tag} : {atomTag}")
+        # get contacts and labels from residuePairs dict
+        pairwiseContacts = atomPairs[atomTag]["contacts"]
+        plotLabels = atomPairs[atomTag]["labels"]
+        ## calculate contact distances
+        contactDistances  = md.compute_distances(traj, pairwiseContacts)
+        contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
+        outCsv = p.join(sysAnalDir, f"{tag}_{atomTag}_{inputDirName}.csv")
+        contactDf.to_csv(outCsv)
+    return contactDf
 #############################################################################################
 def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
     print("---->\tCalculating contact distances!")
@@ -129,8 +146,8 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
         plotLabels = residuePairs[resTag]["labels"]
         ## calculate contact distances
         contactDistances, residueIds = md.compute_contacts(traj, pairwiseContacts)
-        contactIds = residueIds[:, 1].tolist()
-        contactIds = [x+1 for x in contactIds] # un-Zero index
+        # contactIds = residueIds[:, 1].tolist()
+        # contactIds = [x+1 for x in contactIds] # un-Zero index
         contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
         outCsv = p.join(sysAnalDir, f"contacts_{resTag}_{inputDirName}.csv")
         contactDf.to_csv(outCsv)
@@ -138,11 +155,10 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
 #############################################################################################
 def find_pairwise_contacts(traj, pdbDf, keyResidues):
     print("---->\t Finding pairwise contacts!")
-    interestingAtoms = init_atoms_of_interest()
+    interestingAtoms, hydrogenBondDonors, hydrogenBondAcceptors = init_atoms_of_interest()
     residuePairs = {}
     for resTag in keyResidues:
         print(f"--------> {resTag}")
-
         ## find nearby residues 
         targetResId = int(keyResidues[resTag]["RES_ID"])
         targetResName = keyResidues[resTag]["RES_NAME"]
@@ -170,6 +186,82 @@ def find_pairwise_contacts(traj, pdbDf, keyResidues):
                                              "labels": plotLabels}})
     return residuePairs
 #############################################################################################
+def find_hydrogen_bonds(traj, pdbDf, keyResidues):
+    print("---->\t Finding hydrogen bonds!")
+    interestingAtoms, hydrogenBondDonors, hydrogenBondAcceptors = init_atoms_of_interest()
+    for resTag in keyResidues:
+        print(f"--------> {resTag}")
+        ## get dataframes with residue of interest's hydrogen bond donors and acceptors
+        targetResId = int(keyResidues[resTag]["RES_ID"])
+        targetResName = keyResidues[resTag]["RES_NAME"]
+        resName = keyResidues[resTag]["RES_NAME"]
+        hydrogenDonorDf = pdbDf[(pdbDf["RES_ID"] == targetResId) &
+                                (pdbDf["ATOM_NAME"].isin(hydrogenBondDonors[resName])) &
+                                (pdbDf["RES_NAME"] == targetResName)]
+        
+        hydrogenAcceptorDf = pdbDf[(pdbDf["RES_ID"] == targetResId) &
+                                    (pdbDf["ATOM_NAME"].isin(hydrogenBondAcceptors[resName])) &
+                                    (pdbDf["RES_NAME"] == targetResName)]
+        
+        ##########################################################
+        ## find neighbors for HBA's and HBD's in target residue
+        donorAcceptorPairs = {}
+        if len(hydrogenDonorDf) > 0:
+            for idx, donorRow in hydrogenDonorDf.iterrows():
+                ## compute neighboring atoms - get a unique list of them - produce a df 
+                queryIndex = np.array([donorRow["ATOM_ID"] -  1]) ## zero-index
+                neighbors = md.compute_neighbors(traj, 0.5, queryIndex)
+                uniqueNeighborAtoms = list(set([item + 1 for sublist in neighbors for item in sublist])) ## one-index!
+                neighborDf = pdbDf[(pdbDf["ATOM_ID"].isin(uniqueNeighborAtoms))]
+
+                ## drop non-hydrogen bond acceptor atoms
+                idxToDrop = []
+                for idx, acceptorRow in neighborDf.iterrows():
+                    if not acceptorRow["ATOM_NAME"] in hydrogenBondAcceptors[acceptorRow["RES_NAME"]]:
+                        idxToDrop.append(idx)
+                acceptorDf = neighborDf.drop(index=idxToDrop)
+
+                ## make plot labels
+                targetAtomTag = ":".join([donorRow["CHAIN_ID"], donorRow["RES_NAME"], str(donorRow["RES_ID"]), donorRow["ATOM_NAME"]])
+                acceptorDf["plotLabels"] =  acceptorDf["CHAIN_ID"] +":"+ acceptorDf["RES_NAME"] +":"+ acceptorDf["RES_ID"].astype(str) +":"+ acceptorDf["ATOM_NAME"]
+                acceptorDf["plotLabels"] = targetAtomTag + " -- H -- " + acceptorDf["plotLabels"]
+                plotLabels = acceptorDf["plotLabels"].unique().tolist()
+
+                ## create outputs to feed to compute_distances, returns a list of [(X, Y), (X, Z)] contacts
+                pairwiseContacts = [(donorRow["ATOM_ID"] -  1, acceptorIndex - 1) for acceptorIndex in acceptorDf["ATOM_ID"].to_list()] ## zero-index!
+                donorAcceptorPairs.update({targetAtomTag:{"contacts": pairwiseContacts,
+                                                    "labels": plotLabels}})
+                
+        ##########################################################
+        ## find neighbors for HBA's and HBD's in target residue
+        acceptorDonorPairs = {}
+        if len(hydrogenAcceptorDf) > 0:
+            for idx, acceptorRow in hydrogenAcceptorDf.iterrows():
+                queryIndex = np.array([acceptorRow["ATOM_ID"] -  1]) ## zero-index
+                neighbors = md.compute_neighbors(traj, 0.5, queryIndex)
+                uniqueNeighborAtoms = list(set([item + 1 for sublist in neighbors for item in sublist])) ## one-index!
+                neighborDf = pdbDf[(pdbDf["ATOM_ID"].isin(uniqueNeighborAtoms))]
+                ## drop non-hydrogen bond acceptor atoms
+                idxToDrop = []
+                for idx, donorRow in neighborDf.iterrows():
+                    if not donorRow["ATOM_NAME"] in hydrogenBondDonors[donorRow["RES_NAME"]]:
+                        idxToDrop.append(idx)
+                donorDf = neighborDf.drop(index=idxToDrop)
+                ## make plot labels
+                targetAtomTag = ":".join([acceptorRow["CHAIN_ID"], acceptorRow["RES_NAME"], str(acceptorRow["RES_ID"]), acceptorRow["ATOM_NAME"]])
+                donorDf["plotLabels"] =  donorDf["CHAIN_ID"] +":"+ donorDf["RES_NAME"] +":"+ donorDf["RES_ID"].astype(str) +":"+ donorDf["ATOM_NAME"]
+                donorDf["plotLabels"] = targetAtomTag + " -- H -- " + donorDf["plotLabels"]
+
+                plotLabels = donorDf["plotLabels"].unique().tolist()
+                ## compute contacts, returns a list of [(X, Y), (X, Z)] contacts
+                pairwiseContacts = [(acceptorRow["ATOM_ID"] -  1, donorIndex - 1) for donorIndex in donorDf["ATOM_ID"].to_list()] ## zero-index!
+                acceptorDonorPairs.update({targetAtomTag:{"contacts": pairwiseContacts,
+                                                    "labels": plotLabels}})
+
+    return donorAcceptorPairs, acceptorDonorPairs
+
+
+#############################################################################################
 def init_atoms_of_interest():
     interestingAtoms = {
         "ALA": ["CB"],
@@ -193,4 +285,51 @@ def init_atoms_of_interest():
         "MET": ["CB", "CG", "SD", "CE"],
         "PRO": ["CB", "CG", "CD"]
     }
-    return interestingAtoms
+
+    hydrogenBondDonors = {
+            "ALA": [],
+        "LEU": ["N"],
+        "GLY": ["N"],
+        "ILE": ["N"],
+        "VAL": ["N"],
+        "PHE": ["N"],
+        "TRP": ["N","NE1"],
+        "TYR": ["N","OH"],
+        "ASP": ["N"],
+        "GLU": ["N"],
+        "ARG": ["N","NH1", "NH2"],
+        "HIS": ["N","ND1", "NE2"],
+        "LYS": ["N","NZ"],
+        "SER": ["N", "OG"],
+        "THR": ["N","OG1"],
+        "ASN": ["N","ND2"],
+        "GLN": ["N","NE2"],
+        "CYS": ["N","SG"],
+        "MET": ["N"],
+        "PRO": ["N"]
+    }
+
+    hydrogenBondAcceptors = {
+        "ALA": ["O"],
+        "LEU": ["O"],
+        "GLY": ["O"],
+        "ILE": ["O"],
+        "VAL": ["O"],
+        "PHE": ["O"],
+        "TRP": ["O"],
+        "TYR": ["O"],
+        "ASP": ["O", "OD1", "OD2"],
+        "GLU": ["O", "OE1", "OE2"],
+        "ARG": ["O"],
+        "HIS": ["O", "ND1", "NE2"],
+        "LYS": ["O"],
+        "SER": ["O", "OG"],
+        "THR": ["O", "OG1"],
+        "ASN": ["O", "OD1"],
+        "GLN": ["O", "OE1"],
+        "CYS": ["O", "SG"],
+        "MET": ["O", "SD"],
+        "PRO": ["O"]
+    }
+
+    return interestingAtoms, hydrogenBondDonors, hydrogenBondAcceptors

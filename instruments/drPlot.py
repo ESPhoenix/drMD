@@ -41,15 +41,15 @@ def plot_delta_RMSF(analDir, referenceSystem):
     plt.savefig(rmsfPng,bbox_inches="tight")
 
 #########################################################################################################
-def plot_distance_hist(sysAnalDir, resTag):
+def plot_distance_hist(sysAnalDir, idTag,  dataTag):
     print(sysAnalDir)
-    print(resTag)
+    print(idTag)
     ## load contact dfs from sysAnalDir | concat into one big df
     dfsToConcat = []
     for file in os.listdir(sysAnalDir):
         if not p.splitext(file)[1] == ".csv":
             continue
-        if  file.startswith("contacts") and file.split("_")[1] == resTag:
+        if  file.startswith(dataTag) and file.split("_")[1] == idTag:
             runDf = pd.read_csv(p.join(sysAnalDir,file))
     
             dfsToConcat.append(runDf)
