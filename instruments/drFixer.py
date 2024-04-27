@@ -1,7 +1,7 @@
 
 import os
 from os import path as p
-from instruments import pdbUtils
+from pdbUtils import pdbUtils
 import pandas as pd
 
 ##################################################################################################
@@ -29,7 +29,6 @@ def reset_chains_residues(goodPdb, badPdb):
         goodResidues.append(goodChainResidues)
         goodChainChains = [chainId for _ in range(len(goodChainResidues))]
         goodChains.append(goodChainChains)
-
 
     ## get list of residues in bad pdb
     badResidues = badDf["RES_ID"].to_list()

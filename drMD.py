@@ -5,7 +5,7 @@ from os import path as p
 import yaml
 import argpass
 ## CUSTOM DR MD MODULES
-from instruments.pdbUtils import pdb2df
+from pdbUtils import pdbUtils
 import instruments.drPrep as drPrep
 import instruments.drCleanup as drCleanup
 import instruments.drOperator as drOperator
@@ -78,7 +78,7 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig):
     os.makedirs(runDir, exist_ok=True)
 
     # Convert to DataFrame, extract rest of info
-    pdbDf = pdb2df(pdbPath)
+    pdbDf = pdbUtils.pdb2df(pdbPath)
     proteinInfo, ligandInfo, generalInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
 
     # Get path info

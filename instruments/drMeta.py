@@ -10,7 +10,7 @@ import  simtk.unit  as unit
 import instruments.drSim as drSim
 import instruments.drConstraints as drConstraints
 import instruments.drCheckup as drCheckup
-import instruments.pdbUtils as pdbUtils
+from pdbUtils import pdbUtils
 ########################################################################################################
 def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
     print("Running MetaDynamics!")

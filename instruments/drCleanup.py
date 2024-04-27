@@ -1,7 +1,7 @@
 import os
 from os import path as p 
 from shutil import copy, rmtree
-from instruments.pdbUtils import pdb2df, df2pdb
+from pdbUtils import pdbUtils
 ######################################################################################################
 def clean_up_handler(batchConfig):
     # READ FROM batchConfig
@@ -52,13 +52,13 @@ def remove_atoms_from_pdb(simulationInfo, cleanUpInfo, pathInfo):
             if not p.splitext(file)[1] == ".pdb":
                 continue
             pdbFile = p.join(collateSubDir,file)
-            pdbDf = pdb2df(pdbFile)
+            pdbDf = pdbUtils.pdb2df(pdbFile)
             if "removeWaters" in cleanUpInfo:
                 if cleanUpInfo["removeWaters"]:
                     pdbDf = pdbDf[~pdbDf["RES_NAME"].isin(["HOH"])].copy()
             if "removeIons" in cleanUpInfo:
                 if cleanUpInfo["removeIons"]: ## PLACEHOLDER ION NAMES
                     pdbDf = pdbDf[~pdbDf["RES_NAME"].isin(["Na+","Cl-","Mg2+","F-"])].copy()
-            df2pdb(pdbDf, pdbFile)
+            pdbUtils.df2pdb(pdbDf, pdbFile)
 ######################################################################################################
 
