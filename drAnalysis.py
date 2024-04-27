@@ -40,7 +40,7 @@ def main():
         for inputDirName in repeats[sysTag]:
             simDir = p.join(mdDir,inputDirName,stepName)
             analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
-    plotting_protocol(analMenu, analDir, keyResidues)
+    # plotting_protocol(analMenu, analDir, keyResidues)
 
 #############################################################################################
 def plotting_protocol(analMenu, analDir, keyResidues):
@@ -48,13 +48,15 @@ def plotting_protocol(analMenu, analDir, keyResidues):
     keyResiAnal = analMenu["keyResidueAnalysis"]
     wholeAnal = analMenu["wholeProteinAnalysis"]
     sysAnalDirs = [p.join(analDir,dir) for dir in os.listdir(analDir) if p.isdir(p.join(analDir,dir))]
-    print(sysAnalDirs)
     referenceSystem = analMenu["referenceSystem"]
     ## for interesting residues
     if keyResiAnal["contactDistances"]:
         for sysAnalDir in sysAnalDirs:
             for resTag in keyResidues: 
-                drPlot.plot_distance_hist(sysAnalDir, resTag)
+                drPlot.plot_distance_hist(sysAnalDir, idTag = resTag, dataTag = "contacts")
+    if keyResiAnal["findHydrogenBonds"]:
+        continue
+            
     ## for whole protein properties
     ## FOR WHOLE PROTEIN PROPERTIES
     if wholeAnal["RMSD"]:
@@ -107,6 +109,11 @@ def analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName):
             contactDf = drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
             if keyResiAnal["radialDistribution"]:
                 drDiagnosis.compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName)
+        if keyResiAnal["findHydrogenBonds"]:
+            donorAcceptorPairs, acceptorDonorPairs = drDiagnosis.find_hydrogen_bonds(traj, pdbDf, keyResidues)
+            donorAcceptorDistancesDf = drDiagnosis.compute_atomic_distances(traj, donorAcceptorPairs, sysAnalDir, inputDirName, "donor")
+            acceptorDonorDistancesDf = drDiagnosis.compute_atomic_distances(traj, acceptorDonorPairs, sysAnalDir, inputDirName, "acceptor")
+
     ## FOR WHOLE PROTEIN PROPERTIES
     if wholeAnal["RMSD"]:
         drDiagnosis.check_RMSD(traj,sysAnalDir, inputDirName)
