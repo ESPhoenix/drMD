@@ -42,67 +42,85 @@ def plot_delta_RMSF(analDir, referenceSystem):
 
 #########################################################################################################
 def histogram_plotting_manager(sysAnalDir):
+    ## read through analysis output files | gather info from filenames | package into a dataframe
+    dfsToConcat = []
     for file in os.listdir(sysAnalDir):
         fileData = p.splitext(file)
         if not fileData[1] == ".csv":
             continue
         fileData = fileData[0].split("_")
         dataTag = fileData[0]                   ## get type of data
-        resAtomTag = "_".join(fileData[1:-1])   ## identifier of residue or atom of interest
-        protName = fileData[-1]                 ## protein name (contains repeats information)
+        resAtomTag = fileData[1]   ## identifier of residue or atom of interest
+        protName = "_".join(fileData[2:])                 ## protein name (contains repeats information)
+        csvFile = p.join(sysAnalDir,file)
 
+        if not dataTag in ["contacts", "donor", "acceptor"]:
+            continue
 
-
-
-    # ## load contact dfs from sysAnalDir | concat into one big df
-    # dfsToConcat = []
-    # for file in os.listdir(sysAnalDir):
-    #     if not p.splitext(file)[1] == ".csv":
-    #         continue
-    #     if  file.startswith(dataTag) and file.split("_")[1] == idTag:
-    #         runDf = pd.read_csv(p.join(sysAnalDir,file))
+        row = pd.DataFrame([[dataTag, resAtomTag, protName, csvFile]], columns=["dataTag", "resAtomTag", "protName", "csvPath"])
+        dfsToConcat.append(row)
     
-    #         dfsToConcat.append(runDf)
-    # if len(dfsToConcat) == 0:
-    #     return
-    # df = pd.concat(dfsToConcat, axis = 0, ignore_index=True)
-    # df.drop(columns = ["Unnamed: 0"], inplace = True)
+    managerDf = pd.concat(dfsToConcat, axis=0, ignore_index=True)
+
+    uniqueDataTags = managerDf["dataTag"].unique().tolist()
+    for dataTag in uniqueDataTags:
+        groupedDf = managerDf[managerDf["dataTag"] == dataTag]
+
+        plot_distance_hist(groupedDf, dataTag, sysAnalDir)
 
 
-def plot_distance_hist(df, outDir, idTag, resTag):
+
+#########################################################################################################
+def plot_distance_hist(groupedDf, dataTag, sysAnalDir):
+    print(dataTag)
+    ## load csv files and extract columnNames
+    csvFiles = groupedDf["csvPath"].to_list()
+    dfs = []
+    columnNames = []
+    for csvFile in csvFiles:
+        df = pd.read_csv(csvFile, index_col="Unnamed: 0")
+        dfs.append(df)
+        columnNames += df.columns.to_list()
+    columnNames = list(set(columnNames))
 
     # Generate a list of unique colors
-    colors = plt.cm.viridis(np.linspace(0, 1, len(df.columns)))
+    colors = plt.cm.viridis(np.linspace(0, 1, len(columnNames)))
 
     # Calculate the number of rows needed for the subplots
-    num_rows = math.ceil(len(df.columns) / 4)
+    num_rows = math.ceil(len(columnNames) / 4)
 
     # Create a subplot for each column in a 4xN grid
     fig, axs = plt.subplots(num_rows, 4, figsize=(20, 5*num_rows))
+    axs = axs.flatten()
 
     # Increase the font size of the suptitle and adjust its y position
-    plt.suptitle(f"Interaction distances between {idTag} and nearby residues (in Ang)", fontsize=32, y=1.02)
+    i = 0
+    for colName in columnNames:
+        for df in dfs:
+            if not colName in df.columns:
+                continue
+            # Convert distances from nm to Angstrom
+            distances_in_angstrom = df[colName] * 10
+            print(distances_in_angstrom)
+            plotColor = colors[i]
+            axs[i].hist(distances_in_angstrom, bins=30, alpha=0.5, label=colName, color=plotColor)
+            axs[i].legend()
+            # Set x-axis limits
+            axs[i].set_xlim([2, 10])
+            axs[i].set_ylim([0,100])
+        axs[i].set_title(colName)
 
-    for i, column in enumerate(df.columns):
-        row = i // 4
-        col = i % 4
-        # Convert distances from nm to Angstrom
-        distances_in_angstrom = df[column] * 10
-        axs[row, col].hist(distances_in_angstrom, bins=30, alpha=0.5, label=column, color=colors[i])
-        axs[row, col].legend()
-        # Set x-axis limits
-        axs[row, col].set_xlim([2, 10])
-        axs[row, col].set_ylim([0,100])
+        i += 1
+        # plt.suptitle(f"{colName}", fontsize=32, y=1.02)
 
     # Remove empty subplots
     [fig.delaxes(ax) for ax in axs.flatten() if not ax.has_data()]
 
     plt.tight_layout()
-    plt.savefig(p.join(sysAnalDir, f"distances_{resTag}.png"), bbox_inches="tight")
+    plt.savefig(p.join(sysAnalDir, f"{dataTag}.png"), bbox_inches="tight")
     plt.close()
 #############################################################################################
 def plot_RMSF(sysAnalDir):
-    print(sysAnalDir)
     ## load contact dfs from sysAnalDir | concat into one big df
     dfsToConcat = []
     for file in os.listdir(sysAnalDir):

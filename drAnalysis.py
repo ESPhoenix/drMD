@@ -40,7 +40,8 @@ def main():
         for inputDirName in repeats[sysTag]:
             simDir = p.join(mdDir,inputDirName,stepName)
             analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName)
-    # plotting_protocol(analMenu, analDir, keyResidues)
+    print("#### PLOTTING PROTOCOL ####")
+    plotting_protocol(analMenu, analDir, keyResidues)
 
 #############################################################################################
 def plotting_protocol(analMenu, analDir, keyResidues):
@@ -51,7 +52,8 @@ def plotting_protocol(analMenu, analDir, keyResidues):
     referenceSystem = analMenu["referenceSystem"]
     ## for interesting residues
     ## plot histograms
-    drPlot.histogram_plotting_manager(sysAnalDir)
+    for sysAnalDir in sysAnalDirs:
+        drPlot.histogram_plotting_manager(sysAnalDir)
 
     # if keyResiAnal["contactDistances"]:
     #     for sysAnalDir in sysAnalDirs:
