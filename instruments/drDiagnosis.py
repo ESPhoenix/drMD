@@ -40,7 +40,7 @@ def compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, input
         rdfYaml = p.join(sysAnalDir, f"RDF_interactions_{resTag}_{inputDirName}.yaml")
         with open(rdfYaml,"w") as file:
             yaml.dump(rdfInteractions,file, default_flow_style=False)
-
+        return rdfDf
 #############################################################################################
 def compute_delta_RMSF(analDir, referenceSystem = False):
     print("---->\tCalculating delta RMSF!")
@@ -125,6 +125,7 @@ def check_RMSF(traj, pdbDf, outDir,inputDirName):
 #############################################################################################
 def compute_atomic_distances(traj, atomPairs, sysAnalDir, inputDirName, tag):
     print("---->\tCalculating atomic distances!")
+    distanceDfs = {}
     for atomTag in atomPairs:
         print(f"-------->{tag} : {atomTag}")
         # get contacts and labels from residuePairs dict
@@ -132,13 +133,15 @@ def compute_atomic_distances(traj, atomPairs, sysAnalDir, inputDirName, tag):
         plotLabels = atomPairs[atomTag]["labels"]
         ## calculate contact distances
         contactDistances  = md.compute_distances(traj, pairwiseContacts)
-        contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
+        distanceDf = pd.DataFrame(contactDistances, columns = plotLabels)
         outCsv = p.join(sysAnalDir, f"{tag}_{atomTag}_{inputDirName}.csv")
-        contactDf.to_csv(outCsv)
-    return contactDf
+        distanceDf.to_csv(outCsv)
+        distanceDfs.update({atomTag: distanceDfs})
+    return distanceDfs
 #############################################################################################
 def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
     print("---->\tCalculating contact distances!")
+    contactDfs = {}
     for resTag in residuePairs:
         print(f"-------->{resTag}")
         # get contacts and labels from residuePairs dict
@@ -151,7 +154,8 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
         contactDf = pd.DataFrame(contactDistances, columns = plotLabels)
         outCsv = p.join(sysAnalDir, f"contacts_{resTag}_{inputDirName}.csv")
         contactDf.to_csv(outCsv)
-        return contactDf
+        contactDfs.update({resTag:contactDf})
+    return contactDfs
 #############################################################################################
 def find_pairwise_contacts(traj, pdbDf, keyResidues):
     print("---->\t Finding pairwise contacts!")
@@ -188,7 +192,7 @@ def find_pairwise_contacts(traj, pdbDf, keyResidues):
 #############################################################################################
 def find_hydrogen_bonds(traj, pdbDf, keyResidues):
     print("---->\t Finding hydrogen bonds!")
-    interestingAtoms, hydrogenBondDonors, hydrogenBondAcceptors = init_atoms_of_interest()
+    _, hydrogenBondDonors, hydrogenBondAcceptors = init_atoms_of_interest()
     for resTag in keyResidues:
         print(f"--------> {resTag}")
         ## get dataframes with residue of interest's hydrogen bond donors and acceptors
@@ -222,7 +226,7 @@ def find_hydrogen_bonds(traj, pdbDf, keyResidues):
                 acceptorDf = neighborDf.drop(index=idxToDrop)
 
                 ## make plot labels
-                targetAtomTag = ":".join([donorRow["CHAIN_ID"], donorRow["RES_NAME"], str(donorRow["RES_ID"]), donorRow["ATOM_NAME"]])
+                targetAtomTag = "_".join([resTag, donorRow["ATOM_NAME"]])
                 acceptorDf["plotLabels"] =  acceptorDf["CHAIN_ID"] +":"+ acceptorDf["RES_NAME"] +":"+ acceptorDf["RES_ID"].astype(str) +":"+ acceptorDf["ATOM_NAME"]
                 acceptorDf["plotLabels"] = targetAtomTag + " -- H -- " + acceptorDf["plotLabels"]
                 plotLabels = acceptorDf["plotLabels"].unique().tolist()
@@ -248,7 +252,7 @@ def find_hydrogen_bonds(traj, pdbDf, keyResidues):
                         idxToDrop.append(idx)
                 donorDf = neighborDf.drop(index=idxToDrop)
                 ## make plot labels
-                targetAtomTag = ":".join([acceptorRow["CHAIN_ID"], acceptorRow["RES_NAME"], str(acceptorRow["RES_ID"]), acceptorRow["ATOM_NAME"]])
+                targetAtomTag = "_".join([resTag, acceptorRow["ATOM_NAME"]])
                 donorDf["plotLabels"] =  donorDf["CHAIN_ID"] +":"+ donorDf["RES_NAME"] +":"+ donorDf["RES_ID"].astype(str) +":"+ donorDf["ATOM_NAME"]
                 donorDf["plotLabels"] = targetAtomTag + " -- H -- " + donorDf["plotLabels"]
 

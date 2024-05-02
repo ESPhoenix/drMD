@@ -259,6 +259,7 @@ def make_amber_params(outDir, pdbFile, outName,prepLog,ligandFileDict=False):
 
     inputCoords = p.join(outDir, f"{outName}.inpcrd")
     ## reset chain and residue IDs in amber PDB
+    solvatedPdb = p.join(outDir,solvatedPdb)
     drFixer.reset_chains_residues(pdbFile, solvatedPdb)
     return inputCoords, amberParams
 #####################################################################################

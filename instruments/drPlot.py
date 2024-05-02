@@ -41,22 +41,36 @@ def plot_delta_RMSF(analDir, referenceSystem):
     plt.savefig(rmsfPng,bbox_inches="tight")
 
 #########################################################################################################
-def plot_distance_hist(sysAnalDir, idTag,  dataTag):
-    print(sysAnalDir)
-    print(idTag)
-    ## load contact dfs from sysAnalDir | concat into one big df
-    dfsToConcat = []
+def histogram_plotting_manager(sysAnalDir):
     for file in os.listdir(sysAnalDir):
-        if not p.splitext(file)[1] == ".csv":
+        fileData = p.splitext(file)
+        if not fileData[1] == ".csv":
             continue
-        if  file.startswith(dataTag) and file.split("_")[1] == idTag:
-            runDf = pd.read_csv(p.join(sysAnalDir,file))
+        fileData = fileData[0].split("_")
+        dataTag = fileData[0]                   ## get type of data
+        resAtomTag = "_".join(fileData[1:-1])   ## identifier of residue or atom of interest
+        protName = fileData[-1]                 ## protein name (contains repeats information)
+
+
+
+
+    # ## load contact dfs from sysAnalDir | concat into one big df
+    # dfsToConcat = []
+    # for file in os.listdir(sysAnalDir):
+    #     if not p.splitext(file)[1] == ".csv":
+    #         continue
+    #     if  file.startswith(dataTag) and file.split("_")[1] == idTag:
+    #         runDf = pd.read_csv(p.join(sysAnalDir,file))
     
-            dfsToConcat.append(runDf)
-    if len(dfsToConcat) == 0:
-        return
-    df = pd.concat(dfsToConcat, axis = 0, ignore_index=True)
-    df.drop(columns = ["Unnamed: 0"], inplace = True)
+    #         dfsToConcat.append(runDf)
+    # if len(dfsToConcat) == 0:
+    #     return
+    # df = pd.concat(dfsToConcat, axis = 0, ignore_index=True)
+    # df.drop(columns = ["Unnamed: 0"], inplace = True)
+
+
+def plot_distance_hist(df, outDir, idTag, resTag):
+
     # Generate a list of unique colors
     colors = plt.cm.viridis(np.linspace(0, 1, len(df.columns)))
 
@@ -67,7 +81,7 @@ def plot_distance_hist(sysAnalDir, idTag,  dataTag):
     fig, axs = plt.subplots(num_rows, 4, figsize=(20, 5*num_rows))
 
     # Increase the font size of the suptitle and adjust its y position
-    plt.suptitle(f"Interaction distances between {resTag} and nearby residues (in Ang)", fontsize=32, y=1.02)
+    plt.suptitle(f"Interaction distances between {idTag} and nearby residues (in Ang)", fontsize=32, y=1.02)
 
     for i, column in enumerate(df.columns):
         row = i // 4

@@ -74,8 +74,9 @@ def validate_config(config):
         if 'maxIterations' in step:
             assert isinstance(step['maxIterations'], int), "maxIterations must be an integer"
             assert step['maxIterations']>=0, "maxIterations must be positive integer or 0 (for complete EM step)"
-        assert isinstance(step["timestep"], str), "timestep must be a string, eg \"2 fs\""
-        assert isinstance(step["duration"], str), "duration must be a string, eg \"10 ns\""
+        
+        # assert isinstance(step["timestep"], str), "timestep must be a string, eg \"2 fs\""
+        # assert isinstance(step["duration"], str), "duration must be a string, eg \"10 ns\""
 
 
 

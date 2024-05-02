@@ -6,7 +6,7 @@ keyResidues:
 
 analysisMenu:
   keyResidueAnalysis:
-    contactDistances: False
+    contactDistances: True
     radialDistribution: False
     findHydrogenBonds: True
   wholeProteinAnalysis:

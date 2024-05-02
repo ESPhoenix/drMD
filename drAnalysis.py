@@ -50,18 +50,24 @@ def plotting_protocol(analMenu, analDir, keyResidues):
     sysAnalDirs = [p.join(analDir,dir) for dir in os.listdir(analDir) if p.isdir(p.join(analDir,dir))]
     referenceSystem = analMenu["referenceSystem"]
     ## for interesting residues
-    if keyResiAnal["contactDistances"]:
-        for sysAnalDir in sysAnalDirs:
-            for resTag in keyResidues: 
-                drPlot.plot_distance_hist(sysAnalDir, idTag = resTag, dataTag = "contacts")
-    if keyResiAnal["findHydrogenBonds"]:
-        continue
+    ## plot histograms
+    drPlot.histogram_plotting_manager(sysAnalDir)
+
+    # if keyResiAnal["contactDistances"]:
+    #     for sysAnalDir in sysAnalDirs:
+    #         for resTag in keyResidues: 
+    #             drPlot.histogram_plotting_manager(sysAnalDir, idTag = resTag, dataTag = "contacts")
+    # if keyResiAnal["findHydrogenBonds"]:
+    #     for sysAnalDir in sysAnalDirs:
+    #      for resTag in keyResidues:
+    #         drPlot.histogram_plotting_manager(sysAnalDir, idTag = resTag, dataTag = "acceptor")
+    #         drPlot.histogram_plotting_manager(sysAnalDir, idTag = resTag, dataTag = "donor")
+
             
     ## for whole protein properties
     ## FOR WHOLE PROTEIN PROPERTIES
     if wholeAnal["RMSD"]:
         for sysAnalDir in sysAnalDirs:
-
             drPlot.plot_RMSD(sysAnalDir)
     if wholeAnal["RMSF"]:
         for sysAnalDir in sysAnalDirs:
@@ -102,23 +108,35 @@ def analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName):
     keyResiAnal = analMenu["keyResidueAnalysis"]
     wholeAnal = analMenu["wholeProteinAnalysis"]
 
+    analysisData = {}
+
     ## FOR INTERESTING RESIDUES
     if any(job for job in keyResiAnal.values() if job):
         residuePairs = drDiagnosis.find_pairwise_contacts(traj, pdbDf, keyResidues)
         if keyResiAnal["contactDistances"]:
-            contactDf = drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
+            contactDfs = drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
+            analysisData.update({"contacts": contactDfs})
             if keyResiAnal["radialDistribution"]:
-                drDiagnosis.compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName)
+                rdfDf = drDiagnosis.compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName)
+                analysisData.update({"rdf": rdfDf})
         if keyResiAnal["findHydrogenBonds"]:
             donorAcceptorPairs, acceptorDonorPairs = drDiagnosis.find_hydrogen_bonds(traj, pdbDf, keyResidues)
-            donorAcceptorDistancesDf = drDiagnosis.compute_atomic_distances(traj, donorAcceptorPairs, sysAnalDir, inputDirName, "donor")
-            acceptorDonorDistancesDf = drDiagnosis.compute_atomic_distances(traj, acceptorDonorPairs, sysAnalDir, inputDirName, "acceptor")
+            donorAcceptorDistancesDfs = drDiagnosis.compute_atomic_distances(traj, donorAcceptorPairs, sysAnalDir, inputDirName, "donor")
+            acceptorDonorDistancesDfs = drDiagnosis.compute_atomic_distances(traj, acceptorDonorPairs, sysAnalDir, inputDirName, "acceptor")
+            analysisData.update({"donorAcceptor": donorAcceptorDistancesDfs,
+                                 "acceptorDonor": acceptorDonorDistancesDfs})
+
 
     ## FOR WHOLE PROTEIN PROPERTIES
     if wholeAnal["RMSD"]:
-        drDiagnosis.check_RMSD(traj,sysAnalDir, inputDirName)
+        rmsdDf = drDiagnosis.check_RMSD(traj,sysAnalDir, inputDirName)
+        analysisData.update({"rmsd": rmsdDf})
+
     if wholeAnal["RMSF"]:
-        drDiagnosis.check_RMSF(traj,pdbDf, sysAnalDir, inputDirName)
+        rmsfDf = drDiagnosis.check_RMSF(traj,pdbDf, sysAnalDir, inputDirName)
+        analysisData.update({"rmsf": rmsfDf})
+
+    return analysisData
 #############################################################################################
 if  __name__ == "__main__":
     main()

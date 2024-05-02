@@ -1,6 +1,9 @@
 from os import path as p
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
+
 from matplotlib.colors import to_rgba
 from PIL import Image
 import numpy as np
@@ -132,7 +135,7 @@ def check_convergance(df, columns, simDir, tag, windowSize = 5,):
     # Save the plot as a PNG file
     savePng = p.join(simDir, f"{tag}.png")
     plt.savefig(savePng, bbox_inches='tight')
-
+    plt.close()
     return savePng
 
 ######################################################################
@@ -189,7 +192,7 @@ def extract_basic_data(vitalsDf, progressDf, outDir):
     # save the plot as a png image
     savePng = p.join(outDir,"basic_info.png")
     plt.savefig(savePng,bbox_inches="tight")
-
+    plt.close()
     return savePng
 
 
