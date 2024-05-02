@@ -5,9 +5,9 @@ pathInfo:
   
 ########################################################################
 generalInfo:
-  parallelCPU: 1
+  parallelCPU: 4
   platform: "CUDA"
-  subprocessCpus: 10
+  subprocessCpus: 1
 
 ########################################################################
 # ligandInfo:
@@ -71,12 +71,12 @@ simulationInfo:
     timestep: "2 fs"
     temp: 300
 
-  - stepName: "05_NpT_production_MD"
-    type: "NpT"
-    duration: "10 ns"
-    timestep: "2 fs"
-    freezeHeavy: False
-    temp: 300
+  # - stepName: "05_NpT_production_MD"
+  #   type: "NpT"
+  #   duration: "10 ns"
+  #   timestep: "2 fs"
+  #   freezeHeavy: False
+  #   temp: 300
 
 ########################################################################
 cleanUpInfo:
