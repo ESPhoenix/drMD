@@ -6,7 +6,31 @@ from scipy.signal import find_peaks
 import yaml
 import numpy as np
 
+#############################################################################################
+def get_residue_id_mapping(traj, pdbDf):
+    trajRes = [residue.index for residue in traj.topology.residues]
 
+
+    uniqueChains = pdbDf["CHAIN_ID"].unique().tolist()
+    pdbRes = []
+    chainIds = []
+    for uniqueChain in uniqueChains:
+        chainDf = pdbDf[pdbDf["CHAIN_ID"] == uniqueChain]
+        chainRes = chainDf["RES_ID"].unique().tolist()
+        pdbRes += chainRes
+        chainIds += [uniqueChain for _ in chainRes]
+
+    resMapping = {trajResi : {"RES_ID":pdbResi,
+                              "CHAIN_ID":chainId}  
+                              for trajResi, pdbResi, chainId  in zip(trajRes, pdbRes, chainIds) }
+
+    for i in resMapping:
+        print(f"{i} : {resMapping[i]}")
+
+    return resMapping
+#############################################################################################
+def pdbResToTrajRes(resMap,  resId, chainId):
+    return next((key for key, value in resMap.items() if value['RES_ID'] == resId and value['CHAIN_ID'] == chainId), None)
 
 
 #############################################################################################
@@ -125,11 +149,14 @@ def check_RMSF(traj, pdbDf, outDir,inputDirName):
 #############################################################################################
 def compute_atomic_distances(traj, atomPairs, sysAnalDir, inputDirName, tag):
     print("---->\tCalculating atomic distances!")
+    print(atomPairs)
     distanceDfs = {}
     for atomTag in atomPairs:
         print(f"-------->{tag} : {atomTag}")
         # get contacts and labels from residuePairs dict
         pairwiseContacts = atomPairs[atomTag]["contacts"]
+        if len(pairwiseContacts) == 0:
+            continue
         plotLabels = atomPairs[atomTag]["labels"]
         ## calculate contact distances
         contactDistances  = md.compute_distances(traj, pairwiseContacts)
@@ -146,7 +173,11 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
         print(f"-------->{resTag}")
         # get contacts and labels from residuePairs dict
         pairwiseContacts = residuePairs[resTag]["contacts"]
+        if len(pairwiseContacts) == 0:
+            continue
         plotLabels = residuePairs[resTag]["labels"]
+
+        print(pairwiseContacts)
         ## calculate contact distances
         contactDistances, residueIds = md.compute_contacts(traj, pairwiseContacts)
         # contactIds = residueIds[:, 1].tolist()
@@ -157,15 +188,20 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
         contactDfs.update({resTag:contactDf})
     return contactDfs
 #############################################################################################
-def find_pairwise_contacts(traj, pdbDf, keyResidues):
+def find_pairwise_residue_contacts(traj, pdbDf, keyResidues):
     print("---->\t Finding pairwise contacts!")
-    interestingAtoms, hydrogenBondDonors, hydrogenBondAcceptors = init_atoms_of_interest()
+
+    residueMapping = get_residue_id_mapping(traj, pdbDf)
+
+    interestingAtoms, _, _ = init_atoms_of_interest()
     residuePairs = {}
     for resTag in keyResidues:
         print(f"--------> {resTag}")
         ## find nearby residues 
         targetResId = int(keyResidues[resTag]["RES_ID"])
         targetResName = keyResidues[resTag]["RES_NAME"]
+        targetResChain = keyResidues[resTag]["CHAIN_ID"]
+
         resName = keyResidues[resTag]["RES_NAME"]
         resDf = pdbDf[(pdbDf["RES_ID"] == targetResId) &
                        (pdbDf["ATOM_NAME"].isin(interestingAtoms[resName])) &
@@ -179,15 +215,31 @@ def find_pairwise_contacts(traj, pdbDf, keyResidues):
         # exclue query residue and 2 residues adjacent
         exclueResidues = range(targetResId -2, targetResId +3)#[resId - 2, resId, resId + 2]
         neighborDf = pdbDf[(pdbDf["ATOM_ID"].isin(uniqueNeighborAtoms)) & (~pdbDf["RES_ID"].isin(exclueResidues))]
-        nearbyResidues = neighborDf["RES_ID"].unique()
-        # drop query residue from neighbors
+
+        neighborResAndChains= neighborDf[["RES_ID", "CHAIN_ID"]].drop_duplicates()
+        neighborResidues = neighborResAndChains["RES_ID"].tolist()
+        neighborChains = neighborResAndChains["CHAIN_ID"].tolist()
+
+        ## compute contacts, returns a list of [(X, Y), (X, Z)] contacts
+        ## translate pdb residue IDs to mdTraj residue Ids
+
+        targetResId_traj = pdbResToTrajRes(residueMapping, targetResId, targetResChain)
+        nearbyResIds_traj = [pdbResToTrajRes(residueMapping, neighborResId, neighborChain)
+                              for neighborResId, neighborChain in zip(neighborResidues, neighborChains)]
+
+
+        pairwiseContacts = [(targetResId_traj, nearbyIndex) for nearbyIndex in nearbyResIds_traj] 
+ 
+        
+        # make plot labels
         neighborDf = neighborDf.copy()
         neighborDf.loc[:,"plotLabels"] = neighborDf["RES_NAME"] + "_" + neighborDf["RES_ID"].astype(str)
         plotLabels = neighborDf["plotLabels"].unique().tolist()
-        ## compute contacts, returns a list of [(X, Y), (X, Z)] contacts
-        pairwiseContacts = [(targetResId -1, targetIndex - 1) for targetIndex in nearbyResidues] ## zero-index!
+
         residuePairs.update({resTag:{"contacts": pairwiseContacts,
                                              "labels": plotLabels}})
+        
+
     return residuePairs
 #############################################################################################
 def find_hydrogen_bonds(traj, pdbDf, keyResidues):
