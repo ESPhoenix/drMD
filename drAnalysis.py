@@ -112,10 +112,9 @@ def analysis_protocol(simDir, analMenu, keyResidues, sysAnalDir, inputDirName):
 
     ## FOR INTERESTING RESIDUES
     if any(job for job in keyResiAnal.values() if job):
-        residuePairs = drDiagnosis.find_pairwise_contacts(traj, pdbDf, keyResidues)
+        residuePairs = drDiagnosis.find_pairwise_residue_contacts(traj, pdbDf, keyResidues)
         if keyResiAnal["contactDistances"]:
-            contactDfs = drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
-            analysisData.update({"contacts": contactDfs})
+            contactDf = drDiagnosis.compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName)
             if keyResiAnal["radialDistribution"]:
                 rdfDf = drDiagnosis.compute_radial_distribution(traj, residuePairs, contactDf, sysAnalDir, inputDirName)
                 analysisData.update({"rdf": rdfDf})

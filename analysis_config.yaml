@@ -1,8 +1,12 @@
 keyResidues:
-  Ser249:
+  Glu3A:
     CHAIN_ID: "A"
-    RES_ID: "249"
-    RES_NAME: "SER"
+    RES_ID: "3"
+    RES_NAME: "GLU"
+  Arg7B:
+    CHAIN_ID: "B"
+    RES_ID: "7"
+    RES_NAME: "ARG" 
 
 analysisMenu:
   keyResidueAnalysis:
@@ -20,7 +24,11 @@ analysisMenu:
 pathInfo:
   mdDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   analDir: "/home/esp/scriptDevelopment/drMD/Analysis"
-  stepName: "05_NpT_production_MD"
+  stepName: "05_NpT_equilibriation"
   repeats:
-    solo_383187:
-    - "383187_A"
+    5pth:
+    - "5pth_A"
+    - "5pth_B"
+    Round2:
+    - "5pth_A"
+    - "5pth_B"
