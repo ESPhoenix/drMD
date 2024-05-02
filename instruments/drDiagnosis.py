@@ -24,8 +24,6 @@ def get_residue_id_mapping(traj, pdbDf):
                               "CHAIN_ID":chainId}  
                               for trajResi, pdbResi, chainId  in zip(trajRes, pdbRes, chainIds) }
 
-    for i in resMapping:
-        print(f"{i} : {resMapping[i]}")
 
     return resMapping
 #############################################################################################
@@ -149,7 +147,6 @@ def check_RMSF(traj, pdbDf, outDir,inputDirName):
 #############################################################################################
 def compute_atomic_distances(traj, atomPairs, sysAnalDir, inputDirName, tag):
     print("---->\tCalculating atomic distances!")
-    print(atomPairs)
     distanceDfs = {}
     for atomTag in atomPairs:
         print(f"-------->{tag} : {atomTag}")
@@ -177,7 +174,6 @@ def compute_contact_distances(traj, residuePairs, sysAnalDir, inputDirName):
             continue
         plotLabels = residuePairs[resTag]["labels"]
 
-        print(pairwiseContacts)
         ## calculate contact distances
         contactDistances, residueIds = md.compute_contacts(traj, pairwiseContacts)
         # contactIds = residueIds[:, 1].tolist()
@@ -233,7 +229,7 @@ def find_pairwise_residue_contacts(traj, pdbDf, keyResidues):
         
         # make plot labels
         neighborDf = neighborDf.copy()
-        neighborDf.loc[:,"plotLabels"] = neighborDf["RES_NAME"] + "_" + neighborDf["RES_ID"].astype(str)
+        neighborDf.loc[:,"plotLabels"] = resTag + "--" + neighborDf["RES_NAME"] + ":" + neighborDf["RES_ID"].astype(str)
         plotLabels = neighborDf["plotLabels"].unique().tolist()
 
         residuePairs.update({resTag:{"contacts": pairwiseContacts,
@@ -278,7 +274,7 @@ def find_hydrogen_bonds(traj, pdbDf, keyResidues):
                 acceptorDf = neighborDf.drop(index=idxToDrop)
 
                 ## make plot labels
-                targetAtomTag = "_".join([resTag, donorRow["ATOM_NAME"]])
+                targetAtomTag = "-".join([resTag, donorRow["ATOM_NAME"]])
                 acceptorDf["plotLabels"] =  acceptorDf["CHAIN_ID"] +":"+ acceptorDf["RES_NAME"] +":"+ acceptorDf["RES_ID"].astype(str) +":"+ acceptorDf["ATOM_NAME"]
                 acceptorDf["plotLabels"] = targetAtomTag + " -- H -- " + acceptorDf["plotLabels"]
                 plotLabels = acceptorDf["plotLabels"].unique().tolist()
