@@ -12,12 +12,12 @@ import instruments.drConstraints as drConstraints
 import instruments.drCheckup as drCheckup
 from pdbUtils import pdbUtils
 ########################################################################################################
-def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
+def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     print("Running MetaDynamics!")
     ## initilaise new system
     system = drSim.init_system(prmtop)
     ## deal with restraints (clear all lurking restraints and constants)
-    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveXml)
+    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile)
     # Add a Monte Carlo Barostat to maintain constant pressure
     barostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
@@ -44,8 +44,8 @@ def run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile):
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
     ## create new simulation
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
-    # load state from previous simulation
-    simulation.loadState(saveXml)    
+    # load state from previous simulation (or continue from checkpoint)
+    simulation = drSim.load_simulation_state(simulation, saveFile)
     ## set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
     reporters = drSim.init_reporters(simDir = simDir,

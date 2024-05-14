@@ -2,9 +2,10 @@
 import simtk.openmm as openmm
 import simtk.unit as unit
 import xml.etree.ElementTree as ET
-
+from os import path as p
 ###########################################################################################
-def constraints_handler(system, prmtop,inpcrd, sim, saveXml):
+def constraints_handler(system, prmtop,inpcrd, sim, saveFile):
+
     constraintOptions = ["relaxWaters"]
     clearRestraints = True
     if "relaxWaters" in sim:
@@ -16,7 +17,9 @@ def constraints_handler(system, prmtop,inpcrd, sim, saveXml):
     
     if clearRestraints:
         print("Running with no restraints...")
-        clear_all_restraints(saveXml)
+        if p.splitext(saveFile)[1] == ".chk":
+            return system, clearRestraints
+        clear_all_restraints(saveFile)
         return system, clearRestraints
 
 ###########################################################################################

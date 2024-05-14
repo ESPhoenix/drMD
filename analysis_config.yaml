@@ -1,12 +1,9 @@
 keyResidues:
-  Glu3A:
+  Thr2A:
     CHAIN_ID: "A"
-    RES_ID: "3"
-    RES_NAME: "GLU"
-  Arg7B:
-    CHAIN_ID: "B"
-    RES_ID: "7"
-    RES_NAME: "ARG" 
+    RES_ID: "2"
+    RES_NAME: "THR"
+
 
 analysisMenu:
   keyResidueAnalysis:
