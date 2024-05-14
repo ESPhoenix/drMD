@@ -1,6 +1,7 @@
 ## BASIC LIBS
 import os
 from os import path as p
+from shutil import rmtree
 ## OPEN MM LIBS
 import simtk.openmm.app as app
 import simtk.openmm as openmm
@@ -33,38 +34,74 @@ def run_simulation(config, outDir, inputCoords, amberParams, pdbFile):
     prmtop = app.AmberPrmtopFile(amberParams)
     inpcrd = app.AmberInpcrdFile(inputCoords)  
     simulations = config["simulationInfo"]
-    for sim in simulations:
+    for i in range(len(simulations)):
+        sim = simulations[i]
         # sort out directories
         simDir = p.join(outDir,sim["stepName"])
         ###############################
-        ## skip if complete:
-        skipToNextSim = False
-        if p.isdir(simDir):
-            for file in os.listdir(simDir):
-                if p.splitext(file)[1] == ".xml":
-                    saveXml = p.join(simDir,file)
-                    skipToNextSim = True
-        if skipToNextSim:
+        ## this bit deals with whether we continue from a saveXml or saveChk file
+        skipResumeSim, saveFile = skip_resume_or_simulate(simDir=simDir,
+                                                           simulations = simulations,
+                                                             i =i, 
+                                                             outDir=outDir)
+
+        if skipResumeSim == "skip":
             stepName = sim["stepName"]
             print(f"skipping {stepName}")
             continue
+        if skipResumeSim == "resume":
+            print(f"resuming {stepName} from checkpoint file")
+
         ################################
         # sort out directories
         os.makedirs(simDir,exist_ok=True)
         os.chdir(simDir)
         # Check for simulation type, run as needed:
         if sim["type"].upper() == "EM":
-            saveXml = run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform, pdbFile)
+            saveFile = run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform, pdbFile)
         elif sim["type"].upper() == "NVT":
             sim = process_sim_data(sim,timescale)
-            saveXml = run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
+            saveFile = run_nvt(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
         elif sim["type"].upper() == "NPT":
             sim = process_sim_data(sim,timescale)
-            saveXml = run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
+            saveFile = run_npt(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
         elif sim["type"].upper() == "META":
             sim = process_sim_data(sim, timescale)
-            saveXml = drMeta.run_metadynamics(prmtop, inpcrd, sim, saveXml, simDir, platform, pdbFile)
-
+            saveFile = drMeta.run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
+###########################################################################################
+def skip_resume_or_simulate(simDir, simulations, i, outDir):
+    # run simulation if simDir doesn't exist
+    if not p.isdir(simDir):
+        if i == 0:
+            return "simulate", "foo"
+        ## find previous saveXml file
+        previousSim = simulations[i-1]
+        previousSimDir = p.join(outDir, previousSim["stepName"])
+        for file in os.listdir(previousSimDir):
+            if p.splitext(file)[1] == ".xml":
+                saveXml = p.join(previousSimDir,file)
+                return "simulate", saveXml
+    ## look for save.xml file that is written once a sim finishes
+    ## skip over sim if this exists
+    for file in os.listdir(simDir):
+        if p.splitext(file)[1] == ".xml":
+            saveXml = p.join(simDir,file)
+            return "skip", saveXml
+    ## look for checkpoint.chk file that is written during simulation
+    ## resume simulation from this checkpoint file
+    for file in os.listdir(simDir):
+        if p.splitext(file)[1] == ".chk":
+            saveChk = p.join(simDir,file)
+            return "resume", saveChk
+    ## if it's got here, we have an empty simDir
+    ## remove and simulate
+    rmtree(simDir)
+    previousSim = simulations[i-1]
+    previousSimDir = p.join(outDir, previousSim["stepName"])
+    for file in os.listdir(previousSimDir):
+        if p.splitext(file)[1] == ".xml":
+            saveXml = p.join(previousSimDir,file)
+            return "simulate", saveXml
 
 ###########################################################################################
 def init_system(prmtop):
@@ -113,19 +150,27 @@ def process_sim_data(sim,timescale):
                 "temp":temp})
     return sim
 ###########################################################################################
-def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform, refPdb):
+def load_simulation_state(simulation, saveFile):
+    saveFileExt = p.splitext(saveFile)[1]
+    if saveFileExt == ".chk":
+        simulation.loadCheckpoint(saveFile)
+    elif saveFileExt == ".xml":
+        simulation.loadState(saveFile)
+    return simulation
+###########################################################################################
+def run_npt(prmtop, inpcrd, sim, saveFile, simDir, platform, refPdb):
     print("Running NpT Step!")
     ## initialise a new system from parameters
     system = init_system(prmtop)
     ## deal with any constraints
-    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveXml)
+    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile)
     # add constant pressure force to system (makes this an NpT simulation)
     system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # set up intergrator and system
-    # load state from previous simulation
-    simulation.loadState(saveXml)
+    # load state from previous simulation (or continue from checkpoint)
+    simulation = load_simulation_state(simulation, saveFile)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
     reporters = init_reporters(simDir = simDir,
@@ -152,19 +197,19 @@ def run_npt(prmtop, inpcrd, sim, saveXml, simDir, platform, refPdb):
     simulation.saveState(saveXml)
     return saveXml
 ###########################################################################################
-def run_nvt(prmtop, inpcrd, sim, saveXml, simDir, platform, refPdb):
+def run_nvt(prmtop, inpcrd, sim, saveFile, simDir, platform, refPdb):
     print("Running NVT Step!")
     ## initialise a new system from parameters
     system = init_system(prmtop)
 
     ## deal with any constraints
-    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveXml)
+    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile)
       
     # set up intergrator and system
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
-    # load state from previous simulation
-    simulation.loadState(saveXml)
+    # load state from previous simulation (or continue from checkpoint)
+    simulation = load_simulation_state(simulation, saveFile)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
     reporters = init_reporters(simDir = simDir,

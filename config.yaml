@@ -5,7 +5,7 @@ pathInfo:
   
 ########################################################################
 generalInfo:
-  parallelCPU: 4
+  parallelCPU: 1
   platform: "CUDA"
   subprocessCpus: 1
 
@@ -46,11 +46,11 @@ simulationInfo:
     relaxWaters: True
     temp: 300
 
-  - stepName: "04_NpT_slowIntergrator"
-    type: "NpT"
-    duration: "10 ps"
-    timestep: "0.5 fs"
-    temp: 300
+  # - stepName: "04_NpT_slowIntergrator"
+  #   type: "NpT"
+  #   duration: "10 ps"
+  #   timestep: "0.5 fs"
+  #   temp: 300
 
   # - stepName: "05_Dihedral_Metadynamics"
   #   type: "Meta"
@@ -65,11 +65,11 @@ simulationInfo:
   #     - ["B","GLN","6","CA"]
   #     - ["B","GLN","6","CB"]
 
-  - stepName: "05_NpT_equilibriation"
-    type: "NpT"
-    duration: "1 ns"
-    timestep: "2 fs"
-    temp: 300
+  # - stepName: "05_NpT_equilibriation"
+  #   type: "NpT"
+  #   duration: "1 ns"
+  #   timestep: "2 fs"
+  #   temp: 300
 
   # - stepName: "05_NpT_production_MD"
   #   type: "NpT"
