@@ -10,19 +10,19 @@ generalInfo:
   subprocessCpus: 1
 
 ########################################################################
-# ligandInfo:
-#   nLigands: 2
-#   ligands:
-#     - ligandName: "PLM"
-#       protons: True
-#       charge: -1
-#       toppar: False
-#       mol2: False
-#     - ligandName: "FAD"
-#       protons: True
-#       charge: -2
-#       toppar: False
-#       mol2: False
+ligandInfo:
+  nLigands: 2
+  ligands:
+    - ligandName: "TPA"
+      protons: False
+      charge: -2
+      toppar: False
+      mol2: False
+    - ligandName: "FFF"
+      protons: True
+      charge: -1
+      toppar: False
+      mol2: False
   
 
 ########################################################################
@@ -52,18 +52,22 @@ simulationInfo:
   #   timestep: "0.5 fs"
   #   temp: 300
 
-  # - stepName: "05_Dihedral_Metadynamics"
-  #   type: "Meta"
-  #   duration: "1 ns"
-  #   timestep: "2 fs"
-  #   temp: 300 
-  #   # biasVar: "RMSF"
-  #   biasVar: "Dihedral"
-  #   biasAtoms: 
-  #     - ["B","GLN","6","O"]
-  #     - ["B","GLN","6","C"]
-  #     - ["B","GLN","6","CA"]
-  #     - ["B","GLN","6","CB"]
+  - stepName: "05_RMSD_Metadynamics"
+    type: "Meta"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 300 
+    biasVar: "RMSD"
+    # biasKeywords:
+    #   - "backbone" 
+    # biasAtoms: 
+    #   - ["B","GLN","6","O"]
+    #   - ["B","GLN","6","C"]
+    #   - ["B","GLN","6","CA"]
+    #   - ["B","GLN","6","CB"]
+    biasResidues:
+      - ["A","TPA", "547"]
+      - ["A","FFF", "548"]
 
   # - stepName: "05_NpT_equilibriation"
   #   type: "NpT"
