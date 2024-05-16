@@ -10,14 +10,16 @@ def reset_chains_residues(goodPdb, badPdb):
     goodDf = pdbUtils.pdb2df(goodPdb)
     badDf = pdbUtils.pdb2df(badPdb)
 
-
+    ## drop waters and ions from both good and bad dataframes - we don't need to re-do these!
     hetAtomNames = ["HOH", "WAT", "TIP3",
                     "Na+", "Cl-", "Mg2+", "Ca2+"]
     
-    goodDf = goodDf[goodDf["ATOM"] == "ATOM"]
-    badHetAtoms = badDf[(badDf["ATOM"] == "HETATM") | (badDf["RES_NAME"].isin(hetAtomNames))]
+    goodWaterAndIons = goodDf[goodDf["RES_NAME"].isin(hetAtomNames)]
+    goodDf = goodDf.drop(goodWaterAndIons.index, errors='ignore')
 
-    badDf = badDf.drop(badHetAtoms.index, errors='ignore')
+    badWaterAndIons = badDf[badDf["RES_NAME"].isin(hetAtomNames)]
+
+    badDf = badDf.drop(badWaterAndIons.index, errors='ignore')
 
     chainIds = goodDf["CHAIN_ID"].unique().tolist()
     ## create a list of lists containing residue numbers and associated chains
@@ -38,7 +40,6 @@ def reset_chains_residues(goodPdb, badPdb):
     previousBadResidue = badResidues[0]
     residueCount = 0
     chainCount = 0
-
 
     for badResidue in badResidues:
         if residueCount == len(goodResidues[chainCount]):
@@ -67,7 +68,7 @@ def reset_chains_residues(goodPdb, badPdb):
 
     outputDf["RES_ID"] = outputDf["RES_ID"].map(residueMapping)
 
-    outputDf = pd.concat([outputDf, badHetAtoms], axis = 0)
+    outputDf = pd.concat([outputDf, badWaterAndIons], axis = 0)
 
     pdbUtils.df2pdb(outputDf, badPdb)
     return badPdb

@@ -24,7 +24,7 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
 
     ## create bias variable
     biasVariables = []
-    if sim["biasVar"].upper() == "RMSF":
+    if sim["biasVar"].upper() == "RMSD":
         biasVariable = gen_rmsd_bias_variable(prmtop, inpcrd, sim)
         biasVariables.append(biasVariable)
     elif sim["biasVar"].upper() == "DIHEDRAL":
@@ -108,15 +108,57 @@ def gen_rmsd_bias_variable(prmtop, inpcrd, sim):
     topology = prmtop.topology
     positions = inpcrd.positions
 
-    ## generate a backbone bias force:
-    backboneAtomNames = ["N","CA","C","O"]
-    atomIndecies = []
+    ## we need to pass a list of atom indecies to create our RMSDForce object
+    ##  we need to also pass a list of all original atom coords
+    ## depending on our user inputs stored in sim, we will select different atoms
+
+    ## get all atom coords
     atomCoords = []
     for i, atom in enumerate(topology.atoms()):
-        if atom.name in backboneAtomNames:
-            atomIndecies.append(i)
         atomCoords.append(positions[i])
 
+    atomIndecies = []
+    if "biasAtoms" in sim:
+        biasAtoms = sim["biasAtoms"]
+        for biasAtom in biasAtoms:
+            for chain in topology.chains():
+                if not chain == biasAtom[0]:
+                    continue
+                for residue in chain.residues():
+                    if not residue.name == biasAtom[1]:
+                        continue
+                    if not residue.index == biasAtom[2]:
+                        continue
+                    for atom in residue.atoms():
+                        if not atom.name == biasAtom[3]:
+                            continue
+                        atomIndecies.append(atom.index)
+
+    if "biasResidues" in sim:
+        biasResidues = sim["biasResidues"]
+        for biasResidue in biasResidues:
+            for chain in topology.chains():
+                if not chain == biasResidue[0]:
+                    continue
+                for residue in chain.residues():
+                    if not residue.name == biasResidue[1]:
+                        continue
+                    if not residue.index == biasResidue[2]:
+                        continue
+                    for atom in residue.atoms():
+                        atomIndecies.append(atom.index)
+    if "biasKeywords" in sim:
+        biasKeywords = sim["biasKeywords"]
+        for biasKeyword in biasKeywords:
+            if biasKeyword == "backbone":
+                backboneAtomNames = ["N","CA","C","O"]
+                for atom in topology.atoms():
+                    if atom.name in backboneAtomNames:
+                        atomIndecies.append(i)
+    ## deal with repeated indecies from selection
+    atomIndecies = list(set(atomIndecies))
+
+    
     rmsdForce = openmm.RMSDForce(atomCoords, atomIndecies)
     rmsdBiasVariable = metadynamics.BiasVariable(force = rmsdForce,
                                                  minValue = 10 * unit.angstrom,

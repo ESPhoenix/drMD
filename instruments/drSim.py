@@ -42,7 +42,7 @@ def run_simulation(config, outDir, inputCoords, amberParams, pdbFile):
         ## this bit deals with whether we continue from a saveXml or saveChk file
         skipResumeSim, saveFile = skip_resume_or_simulate(simDir=simDir,
                                                            simulations = simulations,
-                                                             i =i, 
+                                                             i = i, 
                                                              outDir=outDir)
 
         if skipResumeSim == "skip":

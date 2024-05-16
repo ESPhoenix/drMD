@@ -26,9 +26,12 @@ def drMD_protocol(configYaml):
                 amberParams = p.join(wholeDir,file)
             elif p.splitext(file)[1] == ".inpcrd":
                 inputCoords = p.join(wholeDir,file)
+            if p.splitext(file)[1] == ".pdb" and not file == "MERGED.pdb":
+                pdbFile = p.join(wholeDir, file)
 
     if amberParams and inputCoords:
         drSim.run_simulation(config = config,
+                pdbFile=pdbFile, 
                 outDir = outDir,
                 inputCoords=inputCoords,
                 amberParams=amberParams)
