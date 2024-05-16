@@ -66,8 +66,8 @@ simulationInfo:
     #   - ["B","GLN","6","CA"]
     #   - ["B","GLN","6","CB"]
     biasResidues:
-      - ["A","TPA", "547"]
-      - ["A","FFF", "548"]
+      - ["L","TPA", "547"]
+      - ["F","FFF", "548"]
 
   # - stepName: "05_NpT_equilibriation"
   #   type: "NpT"
