@@ -10,6 +10,71 @@ import time
 from pdbUtils import pdbUtils
 from instruments import drFixer 
 #####################################################################################
+
+def prep_protocol(config):
+    outDir = config["pathInfo"]["outputDir"]
+    prepDir = p.join(outDir,"00_prep")
+    prepLog = p.join(prepDir,"prep.log")
+
+    os.makedirs(prepDir,exist_ok=True)
+
+    ###### skip prep if complete ######
+    amberParams = False
+    inputCoords = False
+    wholeDir = p.join(prepDir,"WHOLE")
+    if p.isdir(p.join(wholeDir)):
+        for file in os.listdir(wholeDir):
+            if p.splitext(file)[1] == ".prmtop":
+                amberParams = p.join(wholeDir,file)
+            elif p.splitext(file)[1] == ".inpcrd":
+                inputCoords = p.join(wholeDir,file)
+            if p.splitext(file)[1] == ".pdb" and not file == "MERGED.pdb":
+                pdbFile = p.join(wholeDir, file)
+            
+    if amberParams and inputCoords:
+        return pdbFile, inputCoords, amberParams
+    
+    ### MAIN PREP PROTOCOL ###
+    if "ligandInfo" in config:
+        ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
+        inputPdb = config["pathInfo"]["inputPdb"]
+        split_input_pdb(inputPdb =inputPdb,
+                        config = config,
+                        outDir=prepDir)
+        ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
+        ligandPdbs,ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
+        ## PREPARE PROTEIN STRUCTURE
+        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
+        ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
+        wholePrepDir = p.join(prepDir,"WHOLE")
+        os.makedirs(wholePrepDir,exist_ok=True)
+        allPdbs = proteinPdbs + ligandPdbs
+        outName = config["pathInfo"]["outputName"]
+        mergedPdb = p.join(wholePrepDir,"MERGED.pdb")
+        pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
+        ## MAKE AMBER PARAMETER FILES WITH TLEAP
+        inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
+                            ligandFileDict=ligandFileDict,
+                            pdbFile= mergedPdb,
+                            outName= outName,
+                            prepLog= prepLog)
+        return mergedPdb, inputCoords, amberParams
+    
+    else:
+        ## PREPARE PROTEIN STRUCTURE
+        proteinPdbs = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
+        ## MERGE PROTEIN PDBS
+        outName = config["pathInfo"]["outputName"]
+        mergedPdb = p.join(p.join(prepDir,"PROT","MERGED.pdb"))
+        pdbUtils.mergePdbs(pdbList=proteinPdbs, outFile = mergedPdb)
+        ## MAKE AMBER PARAMETER FILES WITH TLEAP
+        inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
+                                                        pdbFile= mergedPdb,
+                                                        outName= outName,
+                                                        prepLog = prepLog)
+        return mergedPdb, inputCoords, amberParams
+
+#####################################################################################
 def find_ligand_charge(ligDf,ligName,outDir,pH):
     ## uses propka to identify charges on a ligand
     #make a temportaty pdb file from the ligand dataframe
