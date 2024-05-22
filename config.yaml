@@ -18,11 +18,7 @@ ligandInfo:
       charge: -2
       toppar: False
       mol2: False
-    - ligandName: "FFF"
-      protons: True
-      charge: -1
-      toppar: False
-      mol2: False
+
   
 
 ########################################################################
@@ -36,40 +32,61 @@ simulationInfo:
     type: "NVT"
     duration: "100 ps"
     timestep: "2 fs"
-    relaxWaters: True
     temp: 300
+    restraints:
+      - type: "position"
+        selection: "protein"
+      - type: "position"
+        selection: "ligands"
 
   - stepName: "03_NpT_pre-equilibriation"
     type: "NpT"
     duration: "300 ps"
     timestep: "2 fs"
-    relaxWaters: True
+    temp: 300
+    restraints:
+      - type: "position"
+        selection: "protein"
+      - type: "position"
+        selection: "ligands"
+
+  - stepName: "04_NpT_slowIntergrator"
+    type: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
     temp: 300
 
-  # - stepName: "04_NpT_slowIntergrator"
-  #   type: "NpT"
-  #   duration: "10 ps"
-  #   timestep: "0.5 fs"
-  #   temp: 300
-
-  - stepName: "05_RMSD_Metadynamics"
-    type: "Meta"
-    duration: "1 ns"
+  - stepName: "05_NpT_design_restraints"
+    type: "NpT"
+    duration: "500 ps"
     timestep: "2 fs"
-    temp: 300 
-    biasVar: "RMSD"
-    # biasKeywords:
-    #   - "backbone" 
-    # biasAtoms: 
-    #   - ["B","GLN","6","O"]
-    #   - ["B","GLN","6","C"]
-    #   - ["B","GLN","6","CA"]
-    #   - ["B","GLN","6","CB"]
-    biasResidues:
-      - ["L","TPA", "547"]
-      - ["F","FFF", "548"]
+    temp: 400
+    restraints:
+      - type: "distance"
+        selection:
+          - ["B","TPA","1","C8"]
+          - ["A","PRO","490","CB"]
+        parameters:
+          r0: 3
 
-  # - stepName: "05_NpT_equilibriation"
+  # - stepName: "05_RMSD_Metadynamics"
+  #   type: "Meta"
+  #   duration: "1 ns"
+  #   timestep: "2 fs"
+  #   temp: 300 
+  #   biasVar: "RMSD"
+  #   # biasKeywords:
+  #   #   - "backbone" 
+  #   # biasAtoms: 
+  #   #   - ["B","GLN","6","O"]
+  #   #   - ["B","GLN","6","C"]
+  #   #   - ["B","GLN","6","CA"]
+  #   #   - ["B","GLN","6","CB"]
+  #   biasResidues:
+  #     - ["L","TPA", "547"]
+  #     - ["F","FFF", "548"]
+
+  # # - stepName: "05_NpT_equilibriation"
   #   type: "NpT"
   #   duration: "1 ns"
   #   timestep: "2 fs"

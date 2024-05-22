@@ -1,0 +1,6 @@
+INFO:root:DE-STRESS will run on 1 PDB files in 1 batches.
+INFO:root:Processing batch 1/1...
+WARNING:root:4 non ATOM records removed from the PDB file /input_path/A0A0D2XFD3_TPA_1.pdb.
+DEBUG:root:Error encountered when calculating the DE-STRESS metrics for PDB file /input_path/A0A0D2XFD3_TPA_1.pdb. Therefore, this file will have None values for all the metrics. :
+ [Errno 2] No such file or directory: '/dependencies_for_de-stress/rosetta/source/bin/score_jd2.linuxgccrelease'
+INFO:root:Completed in 0.02 minutes.
