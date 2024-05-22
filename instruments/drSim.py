@@ -163,7 +163,7 @@ def run_npt(prmtop, inpcrd, sim, saveFile, simDir, platform, refPdb):
     ## initialise a new system from parameters
     system = init_system(prmtop)
     ## deal with any constraints
-    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile)
+    system = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # add constant pressure force to system (makes this an NpT simulation)
     system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
@@ -203,8 +203,21 @@ def run_nvt(prmtop, inpcrd, sim, saveFile, simDir, platform, refPdb):
     system = init_system(prmtop)
 
     ## deal with any constraints
-    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile)
-      
+    system = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
+
+    ## check forces
+    for i in range(system.getNumForces()):
+        force = system.getForce(i)
+        print("Force", i, "type:", type(force).__name__)
+        # If you want to explore properties of specific forces, you can add more detailed checks
+        if isinstance(force, openmm.CustomExternalForce):
+            print("  - Energy expression:", force.getEnergyFunction())
+            print("  - Number of global parameters:", force.getNumGlobalParameters())
+            for j in range(force.getNumGlobalParameters()):
+                parameterName = force.getGlobalParameterName(j)
+                print("    - Global parameter:", parameterName)
+
+
     # set up intergrator and system
     integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)

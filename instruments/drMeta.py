@@ -17,7 +17,7 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     ## initilaise new system
     system = drSim.init_system(prmtop)
     ## deal with restraints (clear all lurking restraints and constants)
-    system, clearRestraints = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile)
+    system = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile)
     # Add a Monte Carlo Barostat to maintain constant pressure
     barostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
