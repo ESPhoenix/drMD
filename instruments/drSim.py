@@ -111,25 +111,36 @@ def init_system(prmtop):
     return system
 ###########################################################################################
 def init_reporters(simDir, nSteps, nLogSteps):
+    ## vitalsCsv gives you information on potential, kinetic and total energy 
+    ## as well as temperature, volume and density
     vitalsCsv = p.join(simDir, "vitals_report.csv")
     vitalsStateReporter = app.StateDataReporter(file = vitalsCsv, reportInterval = nLogSteps, step = True,
                                             time = True, potentialEnergy = True, kineticEnergy = True,
                                             totalEnergy = True, temperature = True, volume = True,
                                             density = True)
+    ## progresCsv gives you information on how long the simulation has been running and
+    ## how long is left
     progressCsv = p.join(simDir, "progress_report.csv")
     progressStateReporter = app.StateDataReporter(file = progressCsv, progress = True, remainingTime = True,
                                             speed = True, elapsedTime = True, totalSteps = nSteps,
                                             reportInterval = nLogSteps)
-
+    ## dcdFile is the trajectory of the simulation
     dcdFile = p.join(simDir, "trajectory.dcd")
     dcdTrajectoryReporter = app.DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
-
+    ## chkFile works as a checkpoint so that the simulation can be resumed if something goes wrong
     chkFile = p.join(simDir, "checkpoint.chk")
-    chkReporter = app.CheckpointReporter(file = chkFile, reportInterval = nLogSteps, writeState = False) 
+    chkReporter = app.CheckpointReporter(file = chkFile, reportInterval = nLogSteps, writeState = False)
+    ## restraintsCsv contains all custom forces
+
+
+
+
     reporters = {"vitals":[vitalsStateReporter,vitalsCsv],
                 "progress": [progressStateReporter,progressCsv],
                  "trajectory": [dcdTrajectoryReporter, dcdFile],
                  "checkpoint": [chkReporter, chkFile]}
+
+
 
     return  reporters
 ###########################################################################################

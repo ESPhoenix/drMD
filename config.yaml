@@ -64,10 +64,29 @@ simulationInfo:
     restraints:
       - type: "distance"
         selection:
-          - ["B","TPA","1","C8"]
-          - ["A","PRO","490","CB"]
+          - ["B","TPA","1","O2"]
+          - ["A","ARG","217","NH2"]
         parameters:
-          r0: 3
+          r0: 1
+          k: 1000
+      - type: "angle"
+        selection:
+          - ["B","TPA","1","O2"]
+          - ["A","ARG","217","NH2"]
+          - ["A","ARG","217","CZ"]
+        parameters:
+          theta0: 180
+          k: 300
+      # - type: "torsion"
+      #   selection:
+      #     - ["B","TPA","1","C8"]
+      #     - ["B","TPA","1","O2"]
+      #     - ["A","ARG","217","NH2"]
+      #     - ["A","ARG","217","CZ"]
+      #   parameters:
+      #     theta0: 90
+      #     k: 1000
+
 
   # - stepName: "05_RMSD_Metadynamics"
   #   type: "Meta"

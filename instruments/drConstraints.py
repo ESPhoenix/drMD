@@ -4,6 +4,7 @@ import simtk.unit as unit
 import xml.etree.ElementTree as ET
 from os import path as p
 from pdbUtils import pdbUtils
+import math
 ###########################################################################################
 def constraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile):
 
@@ -21,6 +22,9 @@ def constraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile):
             elif restraint["type"] == "angle":
                 parameters = restraint["parameters"]
                 system = create_angle_restraint(system, prmtop, selection, parameters, kNumber, pdbFile)
+            elif restraint["type"] == "torsion":
+                parameters = restraint["parameters"]
+                system = create_torsion_restraint(system, prmtop, selection, parameters, kNumber, pdbFile)
             kNumber += 1
     
     else:
@@ -49,9 +53,10 @@ def create_distance_restraint(system, prmtop, selection, parameters, kNumber, pd
     ## Create a distance restraint
     k_force_constant = 1000.0 * unit.kilojoules_per_mole / unit.nanometer**2
     distanceRestraint = openmm.CustomBondForce(f"0.5 * k{str(kNumber)} * (r - r0)^2")
-    distanceRestraint.addGlobalParameter(f"k{str(kNumber)}", k_force_constant)
+    ## add per bond parameters, k for force constant, r0 for desired distance
+    distanceRestraint.addPerBondParameter(f"k{str(kNumber)}")
     distanceRestraint.addPerBondParameter("r0")
-
+    ## add force to system
     system.addForce(distanceRestraint)
 
     # Get the indices of the two atoms to be restrained
@@ -60,20 +65,23 @@ def create_distance_restraint(system, prmtop, selection, parameters, kNumber, pd
         raise ValueError("Expected exactly two atom indices for a distance restraint.")
 
     # Get target distance from the parameters dictionary, and convert from angstroms to nanometers
+    kForceConstant = parameters["k"]
     targetDistance_nm = parameters["r0"] * unit.angstroms * 0.1
 
     # Add the atom pair and the calculated target distance in nanometers to the bond restraint
-    distanceRestraint.addBond(restraintAtomIndexes[0], restraintAtomIndexes[1], [targetDistance_nm])
+    distanceRestraint.addBond(restraintAtomIndexes[0], restraintAtomIndexes[1], [kForceConstant, targetDistance_nm])
 
     return system
 ###########################################################################################
 def create_angle_restraint(system, prmtop, selection, parameters, kNumber, pdbFile):
     ## Create an angle restraint
-    k_force_constant = 1000.0 * unit.kilojoules_per_mole / unit.radians**2
     angleRestraint = openmm.CustomAngleForce(f"0.5 * k{str(kNumber)} * (theta - theta0)^2")
-    angleRestraint.addGlobalParameter(f"k{str(kNumber)}", k_force_constant)
+
+    ## add per angle parameters, k for force constant, theta0 for desired angle
+    angleRestraint.addPerAngleParameter(f"k{str(kNumber)}")
     angleRestraint.addPerAngleParameter("theta0")
-    
+
+    ## add force to system
     system.addForce(angleRestraint)
 
     # Get the indices of the three atoms to be restrained
@@ -82,11 +90,43 @@ def create_angle_restraint(system, prmtop, selection, parameters, kNumber, pdbFi
         raise ValueError("Expected exactly three atom indices for an angle restraint.")
 
     # Get target angle from the parameters dictionary and convert from degrees to radians
-    targetAngle_rad = parameters["theta0"] * unit.degrees * (unit.pi / 180.0)
+    kForceConstant = parameters["k"] * unit.kilojoules_per_mole / unit.radians**2
+    targetAngle_rad = parameters["theta0"] * unit.degrees * (math.pi / 180.0)
 
     # Add the atom triplet and the calculated target angle in radians to the angle restraint
-    angleRestraint.addAngle(restraintAngleAtoms[0], restraintAngleAtoms[1], restraintAngleAtoms[2], [targetAngle_rad])
+    angleRestraint.addAngle(restraintAngleAtoms[0],
+                             restraintAngleAtoms[1],
+                               restraintAngleAtoms[2],
+                                 [kForceConstant, targetAngle_rad])
 
+    return system
+###########################################################################################
+def create_torsion_restraint(system, prmtop, selection, parameters, kNumber, pdbFile):
+    ## Create a torsion restraint
+    # Note: Ensure 'phi' is the variable used for torsion calculation in OpenMM
+    torsionRestraint = openmm.CustomTorsionForce(f"0.5*k{str(kNumber)}*(1-cos(theta-theta0))")
+    
+    ## Add parameters: k for force constant, phi0 for desired torsion angle
+    torsionRestraint.addPerTorsionParameter(f"k{str(kNumber)}")
+    torsionRestraint.addPerTorsionParameter("theta0")
+    
+    ## Add force to system
+    system.addForce(torsionRestraint)
+    
+    ## Get indices of the four atoms to be restrained
+    restraintTorsionAtoms = get_restraint_atom_selection(selection, prmtop, pdbFile)
+    if len(restraintTorsionAtoms) != 4:
+        raise ValueError("Expected exactly four atom indices for a torsion restraint.")
+    
+    ## Get target torsion angle from parameters (in radians)
+    kForceConstant = parameters.get("k", 1000) * unit.kilojoules_per_mole / unit.radians**2  # Default k value if not specified
+    targetTorsion_rad = parameters["phi0"] * math.pi / 180.0
+    
+    ## Add the atom quartet and settings to the torsion restraint
+    torsionRestraint.addTorsion(restraintTorsionAtoms[0], restraintTorsionAtoms[1],
+                                restraintTorsionAtoms[2], restraintTorsionAtoms[3],
+                                [kForceConstant, targetTorsion_rad])
+    
     return system
 ###########################################################################################
 def get_restraint_atom_selection(selection, prmtop, pdbFile):
@@ -139,37 +179,6 @@ def get_restraint_atom_selection(selection, prmtop, pdbFile):
             restraintAtomsIndexes.append(atomIndex)
 
     return restraintAtomsIndexes
-
-# ###########################################################################################
-# def restrain_non_water(system, prmtop, inpcrd):
-#     restraint = openmm.CustomExternalForce("k*periodicdistance(x, y, z, x0, y0, z0)^2")
-#     system.addForce(restraint)
-#     restraint.addGlobalParameter("k", 1000.0 * unit.kilojoules_per_mole / unit.nanometer)
-#     restraint.addPerParticleParameter("x0")
-#     restraint.addPerParticleParameter("y0")
-#     restraint.addPerParticleParameter("z0")
-#     solvent_residues = ['HOH', 'WAT']  
-#     for atom in prmtop.topology.atoms():
-#         # Check if the residue of the atom is not part of the solvent
-#         if atom.residue.name not in solvent_residues:
-#             restraint.addParticle(atom.index, inpcrd.getPositions()[atom.index])
-#     return system
-
-
-# ###########################################################################################
-# def restrain_all_atom_names_except_list(system, prmtop, inpcrd, unrestrictedAtomSymbolList):
-#     # assert all names in unrestrictedAtomNamesList are in an allowed list.
-#     restraint = openmm.CustomExternalForce("k*periodicdistance(x, y, z, x0, y0, z0)^2")
-#     system.addForce(restraint)
-#     restraint.addGlobalParameter("k", 1000.0 * unit.kilojoules_per_mole / unit.nanometer)
-#     restraint.addPerParticleParameter("x0")
-#     restraint.addPerParticleParameter("y0")
-#     restraint.addPerParticleParameter("z0")
-
-#     for atom in prmtop.topology.atoms():
-#         if atom.element.symbol not in unrestrictedAtomSymbolList:
-#             restraint.addParticle(atom.index, inpcrd.getPositions()[atom.index])
-#     return system
 
 ###########################################################################################
 def clear_all_restraints(saveXml):
