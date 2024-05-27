@@ -13,13 +13,17 @@ generalInfo:
 ligandInfo:
   nLigands: 2
   ligands:
-    - ligandName: "TPA"
+    - ligandName: "LIG"
       protons: False
-      charge: -2
+      charge: 0
+      toppar: False
+      mol2: False
+    - ligandName: "WPC"
+      protons: True
+      charge: 0 
       toppar: False
       mol2: False
 
-  
 
 ########################################################################
 simulationInfo:
@@ -37,7 +41,10 @@ simulationInfo:
       - type: "position"
         selection: "protein"
       - type: "position"
-        selection: "ligands"
+        selection: "ligands"  
+    logInterval: "10 ps"
+
+
 
   - stepName: "03_NpT_pre-equilibriation"
     type: "NpT"
@@ -49,34 +56,38 @@ simulationInfo:
         selection: "protein"
       - type: "position"
         selection: "ligands"
+    logInterval: "10 ps"
 
-  - stepName: "04_NpT_slowIntergrator"
-    type: "NpT"
-    duration: "10 ps"
-    timestep: "0.5 fs"
-    temp: 300
+  # - stepName: "04_NpT_slowIntergrator"
+  #   type: "NpT"
+  #   duration: "10 ps"
+  #   timestep: "0.5 fs"
+  #   temp: 300
+  #   logInterval: None
 
-  - stepName: "05_NpT_design_restraints"
-    type: "NpT"
-    duration: "500 ps"
-    timestep: "2 fs"
-    temp: 400
-    restraints:
-      - type: "distance"
-        selection:
-          - ["B","TPA","1","O2"]
-          - ["A","ARG","217","NH2"]
-        parameters:
-          r0: 1
-          k: 1000
-      - type: "angle"
-        selection:
-          - ["B","TPA","1","O2"]
-          - ["A","ARG","217","NH2"]
-          - ["A","ARG","217","CZ"]
-        parameters:
-          theta0: 180
-          k: 300
+
+  # - stepName: "05_NpT_design_restraints"
+  #   type: "NpT"
+  #   duration: "500 ps"
+  #   timestep: "2 fs"
+  #   temp: 400
+  #   logInterval: "1 ps"
+  #   restraints:
+  #     - type: "distance"
+  #       selection:
+  #         - ["F","FE2","1","FE2"]
+  #         - ["L","LIG","1","C71"]
+  #       parameters:
+  #         r0: 3
+  #         k: 1000
+  #     - type: "angle"
+  #       selection:
+  #         - ["C","WPC","1","ND"]
+  #         - ["F","FE2","1","FE2"]
+  #         - ["L","LIG","1","C71"]
+  #       parameters:
+  #         theta0: 90
+  #         k: 300
       # - type: "torsion"
       #   selection:
       #     - ["B","TPA","1","C8"]

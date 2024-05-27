@@ -46,11 +46,12 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # load state from previous simulation (or continue from checkpoint)
     simulation = drSim.load_simulation_state(simulation, saveFile)
-    ## set up reporters
+    # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
+    reportInterval = sim["logInterval"]
     reporters = drSim.init_reporters(simDir = simDir,
                                 nSteps =  totalSteps,
-                                nLogSteps = sim["nLogSteps"])
+                                reportInterval= reportInterval)
     for rep in reporters:
         simulation.reporters.append(reporters[rep][0])
     ## run metadynamics simulation

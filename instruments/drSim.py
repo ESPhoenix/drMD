@@ -110,11 +110,11 @@ def init_system(prmtop):
                                     constraints = app.HBonds)
     return system
 ###########################################################################################
-def init_reporters(simDir, nSteps, nLogSteps):
+def init_reporters(simDir, nSteps, reportInterval):
     ## vitalsCsv gives you information on potential, kinetic and total energy 
     ## as well as temperature, volume and density
     vitalsCsv = p.join(simDir, "vitals_report.csv")
-    vitalsStateReporter = app.StateDataReporter(file = vitalsCsv, reportInterval = nLogSteps, step = True,
+    vitalsStateReporter = app.StateDataReporter(file = vitalsCsv, reportInterval = reportInterval, step = True,
                                             time = True, potentialEnergy = True, kineticEnergy = True,
                                             totalEnergy = True, temperature = True, volume = True,
                                             density = True)
@@ -123,16 +123,14 @@ def init_reporters(simDir, nSteps, nLogSteps):
     progressCsv = p.join(simDir, "progress_report.csv")
     progressStateReporter = app.StateDataReporter(file = progressCsv, progress = True, remainingTime = True,
                                             speed = True, elapsedTime = True, totalSteps = nSteps,
-                                            reportInterval = nLogSteps)
+                                            reportInterval = reportInterval)
     ## dcdFile is the trajectory of the simulation
     dcdFile = p.join(simDir, "trajectory.dcd")
-    dcdTrajectoryReporter = app.DCDReporter(file = dcdFile, reportInterval = nLogSteps, append = False)
+    dcdTrajectoryReporter = app.DCDReporter(file = dcdFile, reportInterval = reportInterval, append = False)
     ## chkFile works as a checkpoint so that the simulation can be resumed if something goes wrong
     chkFile = p.join(simDir, "checkpoint.chk")
-    chkReporter = app.CheckpointReporter(file = chkFile, reportInterval = nLogSteps, writeState = False)
+    chkReporter = app.CheckpointReporter(file = chkFile, reportInterval = reportInterval, writeState = False)
     ## restraintsCsv contains all custom forces
-
-
 
 
     reporters = {"vitals":[vitalsStateReporter,vitalsCsv],
@@ -150,6 +148,10 @@ def process_sim_data(sim,timescale):
     timestep = float(timestepData[0]) * timescale[timestepData[1]]
     durationData = sim["duration"].split()
     duration = int(durationData[0]) * timescale[durationData[1]]
+    logIntervalData = sim["logInterval"].split()
+    logInterval = float(logIntervalData[0]) * timescale[logIntervalData[1]]
+    logIntervalInSteps = int(round(logInterval / timestep))
+    print(logIntervalInSteps)
     nSteps = int(duration / timestep)
     nLogSteps = round(nSteps / 500)
     temp = sim["temp"] *unit.kelvin
@@ -158,7 +160,8 @@ def process_sim_data(sim,timescale):
                 "duration": duration,
                 "nSteps":nSteps,
                 "nLogSteps":nLogSteps,
-                "temp":temp})
+                "temp":temp,
+                "logInterval": logIntervalInSteps})
     return sim
 ###########################################################################################
 def load_simulation_state(simulation, saveFile):
@@ -184,9 +187,10 @@ def run_npt(prmtop, inpcrd, sim, saveFile, simDir, platform, refPdb):
     simulation = load_simulation_state(simulation, saveFile)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
+    reportInterval = sim["logInterval"]
     reporters = init_reporters(simDir = simDir,
                                 nSteps =  totalSteps,
-                                nLogSteps = sim["nLogSteps"])
+                                reportInterval= reportInterval)
     for rep in reporters:
         simulation.reporters.append(reporters[rep][0])
     # run NVT simulation
@@ -236,9 +240,10 @@ def run_nvt(prmtop, inpcrd, sim, saveFile, simDir, platform, refPdb):
     simulation = load_simulation_state(simulation, saveFile)
     # set up reporters
     totalSteps = simulation.currentStep + sim["nSteps"]
+    reportInterval = sim["logInterval"]
     reporters = init_reporters(simDir = simDir,
                                 nSteps =  totalSteps,
-                                nLogSteps = sim["nLogSteps"])
+                                reportInterval= reportInterval)
     for rep in reporters:
         simulation.reporters.append(reporters[rep][0])
 

@@ -41,6 +41,8 @@ def reset_chains_residues(goodPdb, badPdb):
     residueCount = 0
     chainCount = 0
 
+
+
     for badResidue in badResidues:
         if residueCount == len(goodResidues[chainCount]):
             if chainCount  + 1 < len(goodResidues):
