@@ -1,0 +1,13 @@
+pyyaml
+argpass
+pandas
+mdtraj
+numpy
+matplotlib
+pillow
+fpdf
+lxml
+scipy
+adjustText
+tqdm
+pdbutils
