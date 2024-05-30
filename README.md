@@ -21,6 +21,11 @@ conda install -c conda-forge ambertools=23
 ```bash
 conda install -c omnia openmm
 ``` 
+## Install OpenBabel
+```bash
+conda install -c conda-forge openbabel
+```
+
 ## Install other python libraries
 ```bash
 pip install -r requirements.txt
