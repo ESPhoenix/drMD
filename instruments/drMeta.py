@@ -11,6 +11,9 @@ import instruments.drSim as drSim
 import instruments.drConstraints as drConstraints
 import instruments.drCheckup as drCheckup
 from pdbUtils import pdbUtils
+
+
+
 ########################################################################################################
 def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     print("Running MetaDynamics!")
@@ -22,14 +25,22 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     barostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
 
-    ## create bias variable
+    ## read biases from sim config and create bias variables
+    biases = sim["biases"]
     biasVariables = []
-    if sim["biasVar"].upper() == "RMSD":
-        biasVariable = gen_rmsd_bias_variable(prmtop, inpcrd, sim)
-        biasVariables.append(biasVariable)
-    elif sim["biasVar"].upper() == "DIHEDRAL":
-        biasVariable = gen_dihedral_bias_variable(prmtop, inpcrd, sim, pdbFile)
-        biasVariables.append(biasVariable)
+    for bias in biases:
+        print(bias)
+        print(bias["selection"])
+        atomIndexes = get_atom_index_for_metadynamics(bias["selection"], pdbFile)
+        atomCoords = get_atom_coords_for_metadynamics(prmtop, inpcrd)
+        ## create bias variable
+        if bias["biasVar"].upper() == "RMSD":
+            biasVariable = gen_rmsd_bias_variable(bias, atomCoords, atomIndexes)
+            biasVariables.append(biasVariable)
+
+        if bias["biasVar"].upper() == "DIHEDRAL":
+            biasVariable = gen_dihedral_bias_variable(bias, atomCoords, atomIndexes)
+            biasVariables.append(biasVariable)
 
     ## create metadynamics object -- adds bias variable as a force to the system
     meta = metadynamics.Metadynamics(system = system,
@@ -70,29 +81,64 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     ## return checkpoint file for continuing simulation
     return saveXml
 ########################################################################################################
-def gen_dihedral_bias_variable(prmtop, inpcrd, sim, pdbFile):
+def get_atom_coords_for_metadynamics(prmtop, inpcrd):
     topology = prmtop.topology
     positions = inpcrd.positions
-    ## get atom indecies
-    dihedralAtomsInput = sim["biasAtoms"]
-    atomIndecies = []
+    ## get all atom coords
+    atomCoords = []
+    for i, atom in enumerate(topology.atoms()):
+        atomCoords.append(positions[i])
 
+    return atomCoords
+########################################################################################################
+def get_atom_index_for_metadynamics(selection,  pdbFile):
     pdbDf = pdbUtils.pdb2df(pdbFile)
-    for atomInfo in dihedralAtomsInput:
-        atomDf = pdbDf[(pdbDf["CHAIN_ID"].astype(str) == atomInfo[0]) &
-                        (pdbDf["RES_NAME"].astype(str) == atomInfo[1]) &
-                        (pdbDf["RES_ID"].astype(str) == atomInfo[2]) &
-                       (pdbDf["ATOM_NAME"].astype(str) == atomInfo[3]) ]
-        atomIndex  = atomDf.index.values[0]
-        atomIndecies.append(atomIndex)
+    ## reads input selection - finds required atom indexes
+    atomIndecies = []
+    ## look for keywords
+    if selection["type"] == "backbone":
+        backboneAtomNames = ["N","CA","C","O"]
+        backboneDf = pdbDf[pdbDf["ATOM_NAME"].isisn(backboneAtomNames)]
+        atomIndecies = backboneDf.index.tolist()
+        return atomIndecies
+    elif selection["type"] == "protein":
+        aminoAcidNames = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
+                'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
+                    'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR',
+                    'VAL']
+        proteinDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidNames)]
+        atomIndecies = proteinDf.index.tolist()
+        return atomIndecies
+    ## if residue or atom style selections, get indexes for required atoms
+    elif  selection["type"] == "residue":
+        selectionInput = selection["input"]
+        for residue in selectionInput:
+            residueDf = pdbDf[(pdbDf["CHAIN_ID"] == residue[0])
+                              & (pdbDf["RES_NAME"] == residue[1])
+                              & (pdbDf["RES_ID"] == int(residue[2])) ]
+            atomIndecies += residueDf.index.tolist()
+        return atomIndecies
+    elif  selection["type"] == "atom":
+        selectionInput = selection["input"]
+        for atom in selectionInput:
+            atomDf = pdbDf[(pdbDf["CHAIN_ID"] == atom[0])
+                              & (pdbDf["RES_NAME"] == atom[1])
+                              & (pdbDf["RES_ID"] == int(atom[2])) 
+                              & (pdbDf["ATOM_NAME"] == atom[3]) ]
+            atomIndecies += atomDf.index.tolist()
+    return atomIndecies
+
+########################################################################################################
+def gen_dihedral_bias_variable(bias, atomCoords, atomIndexes):
+
 
     ## generate a dihedral bias force:
     dihedralForce = openmm.CustomTorsionForce("theta")
 
-    dihedralForce.addTorsion(atomIndecies[0],
-                              atomIndecies[1],
-                                atomIndecies[2],
-                                  atomIndecies[3])
+    dihedralForce.addTorsion(atomIndexes[0],
+                              atomIndexes[1],
+                                atomIndexes[2],
+                                  atomIndexes[3])
 
     dihedralBiasVariable = metadynamics.BiasVariable(force = dihedralForce,
                                                      minValue = -180 * unit.degrees,
@@ -105,62 +151,9 @@ def gen_dihedral_bias_variable(prmtop, inpcrd, sim, pdbFile):
 
 
 ########################################################################################################
-def gen_rmsd_bias_variable(prmtop, inpcrd, sim):
-    topology = prmtop.topology
-    positions = inpcrd.positions
-
-    ## we need to pass a list of atom indecies to create our RMSDForce object
-    ##  we need to also pass a list of all original atom coords
-    ## depending on our user inputs stored in sim, we will select different atoms
-
-    ## get all atom coords
-    atomCoords = []
-    for i, atom in enumerate(topology.atoms()):
-        atomCoords.append(positions[i])
-
-    atomIndecies = []
-    if "biasAtoms" in sim:
-        biasAtoms = sim["biasAtoms"]
-        for biasAtom in biasAtoms:
-            for chain in topology.chains():
-                if not chain == biasAtom[0]:
-                    continue
-                for residue in chain.residues():
-                    if not residue.name == biasAtom[1]:
-                        continue
-                    if not residue.index == biasAtom[2]:
-                        continue
-                    for atom in residue.atoms():
-                        if not atom.name == biasAtom[3]:
-                            continue
-                        atomIndecies.append(atom.index)
-
-    if "biasResidues" in sim:
-        biasResidues = sim["biasResidues"]
-        for biasResidue in biasResidues:
-            for chain in topology.chains():
-                if not chain == biasResidue[0]:
-                    continue
-                for residue in chain.residues():
-                    if not residue.name == biasResidue[1]:
-                        continue
-                    if not residue.index == biasResidue[2]:
-                        continue
-                    for atom in residue.atoms():
-                        atomIndecies.append(atom.index)
-    if "biasKeywords" in sim:
-        biasKeywords = sim["biasKeywords"]
-        for biasKeyword in biasKeywords:
-            if biasKeyword == "backbone":
-                backboneAtomNames = ["N","CA","C","O"]
-                for atom in topology.atoms():
-                    if atom.name in backboneAtomNames:
-                        atomIndecies.append(i)
-    ## deal with repeated indecies from selection
-    atomIndecies = list(set(atomIndecies))
-
-    
-    rmsdForce = openmm.RMSDForce(atomCoords, atomIndecies)
+def gen_rmsd_bias_variable(bias, atomCoords, atomIndexes):
+  
+    rmsdForce = openmm.RMSDForce(atomCoords, atomIndexes)
     rmsdBiasVariable = metadynamics.BiasVariable(force = rmsdForce,
                                                  minValue = 10 * unit.angstrom,
                                                  maxValue = 100 * unit.angstrom,
