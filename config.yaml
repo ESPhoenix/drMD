@@ -11,18 +11,14 @@ generalInfo:
 
 ########################################################################
 ligandInfo:
-  nLigands: 2
+  nLigands: 1
   ligands:
-    - ligandName: "LIG"
-      protons: False
-      charge: 0
-      toppar: False
-      mol2: False
-    - ligandName: "WPC"
+    - ligandName: "FMN"
       protons: True
-      charge: 0 
+      charge: -1
       toppar: False
       mol2: False
+
 
 
 ########################################################################
@@ -44,8 +40,6 @@ simulationInfo:
         selection: "ligands"  
     logInterval: "10 ps"
 
-
-
   - stepName: "03_NpT_pre-equilibriation"
     type: "NpT"
     duration: "300 ps"
@@ -58,12 +52,12 @@ simulationInfo:
         selection: "ligands"
     logInterval: "10 ps"
 
-  # - stepName: "04_NpT_slowIntergrator"
-  #   type: "NpT"
-  #   duration: "10 ps"
-  #   timestep: "0.5 fs"
-  #   temp: 300
-  #   logInterval: None
+  - stepName: "04_NpT_slowIntergrator"
+    type: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temp: 300
+    logInterval: "1 ps"
 
 
   # - stepName: "05_NpT_design_restraints"
@@ -88,33 +82,41 @@ simulationInfo:
   #       parameters:
   #         theta0: 90
   #         k: 300
-      # - type: "torsion"
-      #   selection:
-      #     - ["B","TPA","1","C8"]
-      #     - ["B","TPA","1","O2"]
-      #     - ["A","ARG","217","NH2"]
-      #     - ["A","ARG","217","CZ"]
-      #   parameters:
-      #     theta0: 90
-      #     k: 1000
+  #     - type: "torsion"
+  #       selection:
+  #         - ["B","TPA","1","C8"]
+  #         - ["B","TPA","1","O2"]
+  #         - ["A","ARG","217","NH2"]
+  #         - ["A","ARG","217","CZ"]
+  #       parameters:
+  #         theta0: 90
+  #         k: 1000
 
 
-  # - stepName: "05_RMSD_Metadynamics"
-  #   type: "Meta"
-  #   duration: "1 ns"
-  #   timestep: "2 fs"
-  #   temp: 300 
-  #   biasVar: "RMSD"
-  #   # biasKeywords:
-  #   #   - "backbone" 
-  #   # biasAtoms: 
-  #   #   - ["B","GLN","6","O"]
-  #   #   - ["B","GLN","6","C"]
-  #   #   - ["B","GLN","6","CA"]
-  #   #   - ["B","GLN","6","CB"]
-  #   biasResidues:
-  #     - ["L","TPA", "547"]
-  #     - ["F","FFF", "548"]
+  - stepName: "05_RMSD_Metadynamics"
+    type: "Meta"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 400
+    logInterval: "10 ps"
+    metaDynamicsParams:
+      height: 2
+      biasFactor: 5
+    biases: 
+      - biasVar: "RMSD"
+        selection: 
+          type: "residue"
+          input: 
+          - ["A","FMN","248"]
+        # type: "atom"
+        # - ["B","GLN","6","O"]
+        # - ["B","GLN","6","C"]
+        # - ["B","GLN","6","CA"]
+        # - ["B","GLN","6","CB"]
+          # type: "backbone"
+          # type: "protein"
+          
+
 
   # # - stepName: "05_NpT_equilibriation"
   #   type: "NpT"
