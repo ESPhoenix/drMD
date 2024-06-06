@@ -10,6 +10,7 @@ import  simtk.unit  as unit
 import instruments.drSim as drSim
 import instruments.drConstraints as drConstraints
 import instruments.drCheckup as drCheckup
+import instruments.drMetaClusterizer as drClusters
 from pdbUtils import pdbUtils
 
 
@@ -77,7 +78,14 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     ## run drCheckup to assess simulation health (will this work for METADYNAMICS???)
     drCheckup.check_vitals(simDir,reporters["vitals"][1], reporters["progress"][1])
 
-    
+    ## run trajectory clustering 
+    if "clusterTrajectory" in sim:
+        if sim["clusterTrajectory"]["clusterBool"]:
+            drClusters.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
+
+
+
+
     ## return checkpoint file for continuing simulation
     return saveXml
 ########################################################################################################
@@ -113,6 +121,7 @@ def get_atom_index_for_metadynamics(selection,  pdbFile):
     elif  selection["type"] == "residue":
         selectionInput = selection["input"]
         for residue in selectionInput:
+            print(residue)
             residueDf = pdbDf[(pdbDf["CHAIN_ID"] == residue[0])
                               & (pdbDf["RES_NAME"] == residue[1])
                               & (pdbDf["RES_ID"] == int(residue[2])) ]
@@ -153,6 +162,7 @@ def gen_dihedral_bias_variable(bias, atomCoords, atomIndexes):
 ########################################################################################################
 def gen_rmsd_bias_variable(bias, atomCoords, atomIndexes):
   
+    ## generate a rmsd bias variable
     rmsdForce = openmm.RMSDForce(atomCoords, atomIndexes)
     rmsdBiasVariable = metadynamics.BiasVariable(force = rmsdForce,
                                                  minValue = 10 * unit.angstrom,

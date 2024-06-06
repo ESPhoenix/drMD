@@ -93,12 +93,12 @@ simulationInfo:
   #         k: 1000
 
 
-  - stepName: "05_RMSD_Metadynamics"
+  - stepName: "05_RMSD_Metadynamics_Dummy"
     type: "Meta"
-    duration: "1 ns"
+    duration: "10 ps"
     timestep: "2 fs"
     temp: 400
-    logInterval: "10 ps"
+    logInterval: "1 ps"
     metaDynamicsParams:
       height: 2
       biasFactor: 5
@@ -108,6 +108,17 @@ simulationInfo:
           type: "residue"
           input: 
           - ["A","FMN","248"]
+    clusterTrajectory: 
+      clusterBool: True
+      nClusters: 10
+      selection:
+        type: "residue"
+        input: 
+        - ["A","FMN","248"]
+
+    # restraints:
+    #   - type: "position"
+    #     selection: "protein"
         # type: "atom"
         # - ["B","GLN","6","O"]
         # - ["B","GLN","6","C"]
