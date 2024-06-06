@@ -1,31 +1,31 @@
 import mdtraj as md
 from sklearn.cluster import KMeans
-
+import glob
 import numpy as np
 import os
 from os import path as p
-import instruments.drMeta as drMeta
+import instruments.drSelector as drSelector
 
 #######################################################################
 def rmsd_clustering_protocol(inDir, clusterInfo):
     print("Clustering trajectory...")
-    outDir = p.join(inDir,"cluster_pdbs")
     ## make outDir if needed
+    outDir = p.join(inDir,"cluster_pdbs")
     os.makedirs(outDir,exist_ok=True)
 
     ## unpack clusterInfo
     nClusters = clusterInfo["nClusters"]
     clusterSelection = clusterInfo["selection"]
-
+    ## find output files
     dcdFile = p.join(inDir, "trajectory.dcd")
-    pdbFile = p.join(inDir, "Meta_final_geom.pdb")
+    pdbFile = glob.glob(p.join(inDir,"*.pdb"))[0]
 
     if not p.isfile(dcdFile) or not p.isfile(pdbFile):
         print("MetaDynamics output files not found!")
         print("Better call the Doctor!")
         return
 
-    clusterSelectionAtomIndexes = drMeta.get_atom_index_for_metadynamics(clusterSelection, pdbFile)
+    clusterSelectionAtomIndexes = drSelector.get_atom_indexes(clusterSelection, pdbFile)
 
     # Load trajectory
     traj = md.load(dcdFile, top=pdbFile)
