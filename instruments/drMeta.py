@@ -6,22 +6,21 @@ import simtk.openmm.app as app
 from simtk.openmm.app import metadynamics
 import simtk.openmm as openmm
 import  simtk.unit  as unit
-## CUSTOM LIBS
-import instruments.drSim as drSim
-import instruments.drConstraints as drConstraints
-import instruments.drCheckup as drCheckup
-import instruments.drMetaClusterizer as drClusters
+## CUSTOM drMD LIBS
+from instruments import drSim
+from instruments import drRestraints
+from instruments import drCheckup 
+from instruments import drClusterizer
+from instruments import drSelector
+## generic pdb <-> df utils
 from pdbUtils import pdbUtils
-
-
-
 ########################################################################################################
 def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     print("Running MetaDynamics!")
     ## initilaise new system
     system = drSim.init_system(prmtop)
     ## deal with restraints (clear all lurking restraints and constants)
-    system = drConstraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile)
+    system = drRestraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile)
     # Add a Monte Carlo Barostat to maintain constant pressure
     barostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
@@ -32,7 +31,7 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     for bias in biases:
         print(bias)
         print(bias["selection"])
-        atomIndexes = get_atom_index_for_metadynamics(bias["selection"], pdbFile)
+        atomIndexes = drSelector.get_atom_indexes(bias["selection"], pdbFile)
         atomCoords = get_atom_coords_for_metadynamics(prmtop, inpcrd)
         ## create bias variable
         if bias["biasVar"].upper() == "RMSD":
@@ -81,10 +80,7 @@ def run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile):
     ## run trajectory clustering 
     if "clusterTrajectory" in sim:
         if sim["clusterTrajectory"]["clusterBool"]:
-            drClusters.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
-
-
-
+            drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
 
     ## return checkpoint file for continuing simulation
     return saveXml
@@ -96,46 +92,8 @@ def get_atom_coords_for_metadynamics(prmtop, inpcrd):
     atomCoords = []
     for i, atom in enumerate(topology.atoms()):
         atomCoords.append(positions[i])
-
     return atomCoords
-########################################################################################################
-def get_atom_index_for_metadynamics(selection,  pdbFile):
-    pdbDf = pdbUtils.pdb2df(pdbFile)
-    ## reads input selection - finds required atom indexes
-    atomIndecies = []
-    ## look for keywords
-    if selection["type"] == "backbone":
-        backboneAtomNames = ["N","CA","C","O"]
-        backboneDf = pdbDf[pdbDf["ATOM_NAME"].isisn(backboneAtomNames)]
-        atomIndecies = backboneDf.index.tolist()
-        return atomIndecies
-    elif selection["type"] == "protein":
-        aminoAcidNames = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
-                'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
-                    'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR',
-                    'VAL']
-        proteinDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidNames)]
-        atomIndecies = proteinDf.index.tolist()
-        return atomIndecies
-    ## if residue or atom style selections, get indexes for required atoms
-    elif  selection["type"] == "residue":
-        selectionInput = selection["input"]
-        for residue in selectionInput:
-            print(residue)
-            residueDf = pdbDf[(pdbDf["CHAIN_ID"] == residue[0])
-                              & (pdbDf["RES_NAME"] == residue[1])
-                              & (pdbDf["RES_ID"] == int(residue[2])) ]
-            atomIndecies += residueDf.index.tolist()
-        return atomIndecies
-    elif  selection["type"] == "atom":
-        selectionInput = selection["input"]
-        for atom in selectionInput:
-            atomDf = pdbDf[(pdbDf["CHAIN_ID"] == atom[0])
-                              & (pdbDf["RES_NAME"] == atom[1])
-                              & (pdbDf["RES_ID"] == int(atom[2])) 
-                              & (pdbDf["ATOM_NAME"] == atom[3]) ]
-            atomIndecies += atomDf.index.tolist()
-    return atomIndecies
+
 
 ########################################################################################################
 def gen_dihedral_bias_variable(bias, atomCoords, atomIndexes):
