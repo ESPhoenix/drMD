@@ -38,15 +38,15 @@ def constraints_handler(
         kNumber: int = 0
         for restraint in restraintInfo:
             selection: list = restraint["selection"]
-            if restraint["type"] == "position":
+            if restraint["restraintType"] == "position":
                 system: openmm.System = create_position_restraint(system, inpcrd, selection, kNumber, pdbFile)
-            elif restraint["type"] == "distance":
+            elif restraint["restraintType"] == "distance":
                 parameters: dict = restraint["parameters"]
                 system: openmm.System = create_distance_restraint(system, selection, parameters, kNumber, pdbFile)
-            elif restraint["type"] == "angle":
+            elif restraint["restraintType"] == "angle":
                 parameters: dict = restraint["parameters"]
                 system: openmm.System = create_angle_restraint(system, selection, parameters, kNumber, pdbFile)
-            elif restraint["type"] == "torsion":
+            elif restraint["restraintType"] == "torsion":
                 parameters: dict = restraint["parameters"]
                 system: openmm.System = create_torsion_restraint(system, selection, parameters, kNumber, pdbFile)
             kNumber += 1

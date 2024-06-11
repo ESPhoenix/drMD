@@ -25,37 +25,37 @@ def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
     atomIndexes: List[int] = []
     print(selection)
     # Check selection type and find required atom indexes
-    if selection["type"] == "backbone":
+    if selection["keyword"] == "backbone":
         # Find indexes for all backbone atoms
         backboneDf: pd.DataFrame = pdbDf[pdbDf["ATOM_NAME"].isin(backboneAtomNames)]
         atomIndexes = backboneDf.index.tolist()
-    elif selection["type"] == "protein":
+    elif selection["keyword"] == "protein":
         # Find indexes for all protein atoms
         proteinDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidResNames)]
         atomIndexes = proteinDf.index.tolist()
-    elif selection["type"] == "water":
+    elif selection["keyword"] == "water":
         # Find indexes for water molecules
         waterDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(solventResNames)]
         atomIndexes = waterDf.index.tolist()
-    elif selection["type"] == "ions":
+    elif selection["keyword"] == "ions":
         # Find indexes for ions
         ionDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(ionResNames)]
         atomIndexes = ionDf.index.tolist()
-    elif selection["type"] == "ligands":
+    elif selection["keyword"] == "ligands":
         # Find indexes for all ligands / organics / oddball molecules
         ligandDf: pd.DataFrame = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidResNames+solventResNames+ionResNames)]
         atomIndexes = ligandDf.index.tolist()
-    elif selection["type"] == "residue":
+    elif selection["keyword"] == "residue":
         # Find indexes for whole residue selections
-        selectionInput = selection["input"]
+        selectionInput = selection["selectionSyntax"]
         for residue in selectionInput:
             residueDf: pd.DataFrame = pdbDf[(pdbDf["CHAIN_ID"] == residue[0])
                               & (pdbDf["RES_NAME"] == residue[1])
                               & (pdbDf["RES_ID"] == int(residue[2])) ]
             atomIndexes += residueDf.index.tolist()
-    elif selection["type"] == "atom":
+    elif selection["keyword"] == "atom":
         # Find indexes for atom-by-atom selections
-        selectionInput = selection["input"]
+        selectionInput = selection["selectionSyntax"]
         for atom in selectionInput:
             atomDf: pd.DataFrame = pdbDf[(pdbDf["CHAIN_ID"] == atom[0])
                               & (pdbDf["RES_NAME"] == atom[1])
