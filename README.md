@@ -49,11 +49,14 @@ Inputs are grouped by theme and are stored as nested dictionaries and lists acco
 ### pathInfo
 The pathInfo entry in the config file is a dictionary containing two parameters:
 - inputDir:     This is the absoloute path towards a directory containing PDB files that will be used as starting points for your simulations.
+
                 *Note that if you whish to perform multiple repeats of your simulation protocols upon one PDB file, simply duplicate it within 
                 this directory with suitable changes to the filenames*
 
-- outputDir:    This is the absoloute path towards a directory that you want your drMD outputs to be written to
+- outputDir:    This is the absoloute path towards a directory that you want your drMD outputs to be written to.
+
                 *Note that this file does not need to exist at the point of running drMD, the script will create outputDir if it does not already exist*
+                
                 *Note that within outputDir, a directory will be created for each PDB file contained in inputDir, 
                  in this document, these subdirectories will be refered to as runDirs*
 
@@ -143,11 +146,36 @@ For Energy Minimisation steps, the following additional parameters are required:
 - maxIterations:    This is the maximum number (int) of iterations that will be run in the Energy Minimisation step
                     If this parameter is set to -1, the step will run until the energy converges
 
+Example Energy Minimisation syntax:
+```yaml
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    type: "EM"
+    temp: 300
+    maxIterations: -1
+```
+This will run a energy minimisation until the energy converges
+
 #### Generic Simulation Parameters
 For "normal" simulations using NVT or NPT ensembles, as well as for Metadynamics simulations, the following additional parameters are required:
 - duration:         This is the duration of the simulation step, as a string "int unit" eg. "1000 ps"
+
 - timestep:         This is the timestep of the simulation, as a string "int unit" eg. "2 fs"
+
 - logInterval:      This is the frequency that the simulation will write to file using built-in OpemMM reporters. As a string "int unit" eg. "100 ps"
+
+
+Example NVT simulation syntax:
+```yaml
+simulationInfo:
+  - stepName: "02_NVT_pre-equilibraition"
+    type: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temp: 300
+    logInterval: "10 ps"
+```
+This will run a 100 ps NVT molecular dynamics simulation with a timestep of 2 fs, a temp of 300 and a logInterval of 10 ps
 
 #### Adding Restraints with drMD
 If you whish to perform simulations (not Energy Minimisations) with restraints, the following additional parameters are required:
