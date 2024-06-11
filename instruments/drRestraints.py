@@ -62,7 +62,7 @@ def constraints_handler(
 ###########################################################################################
 def create_position_restraint(
     system: openmm.System,
-    inpcrd: openmm.app.Inpcrd,
+    inpcrd: any,
     selection: str,
     kNumber: int,
     pdbFile: str

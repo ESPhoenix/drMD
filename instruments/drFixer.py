@@ -5,49 +5,62 @@ from pdbUtils import pdbUtils
 import pandas as pd
 
 ##################################################################################################
-def reset_chains_residues(goodPdb, badPdb):
+def reset_chains_residues(goodPdb: str, badPdb: str) -> str:
+    """
+    Resets the chains and residues in a PDB file to match another PDB file.
+
+    Parameters:
+        goodPdb (str): Path to the PDB file with the correct chains and residues.
+        badPdb (str): Path to the PDB file with incorrect chains and residues.
+
+    Returns:
+        str: Path to the modified PDB file.
+    """
     ## load pdb files as dataframes - separate out waters and ions
-    goodDf = pdbUtils.pdb2df(goodPdb)
-    badDf = pdbUtils.pdb2df(badPdb)
+    # Load the good and bad PDB files as dataframes
+    goodDf: pd.DataFrame = pdbUtils.pdb2df(goodPdb)
+    badDf: pd.DataFrame = pdbUtils.pdb2df(badPdb)
 
     ## drop waters and ions from both good and bad dataframes - we don't need to re-do these!
-    hetAtomNames = ["HOH", "WAT", "TIP3",
+    # Drop waters and ions from the good and bad dataframes
+    hetAtomNames: List[str] = ["HOH", "WAT", "TIP3",
                     "Na+", "Cl-", "Mg2+", "Ca2+"]
     
-    goodWaterAndIons = goodDf[goodDf["RES_NAME"].isin(hetAtomNames)]
-    goodDf = goodDf.drop(goodWaterAndIons.index, errors='ignore')
+    goodWaterAndIons: pd.DataFrame = goodDf[goodDf["RES_NAME"].isin(hetAtomNames)]
+    goodDf: pd.DataFrame = goodDf.drop(goodWaterAndIons.index, errors='ignore')
 
-    badWaterAndIons = badDf[badDf["RES_NAME"].isin(hetAtomNames)]
+    badWaterAndIons: pd.DataFrame = badDf[badDf["RES_NAME"].isin(hetAtomNames)]
 
-    badDf = badDf.drop(badWaterAndIons.index, errors='ignore')
+    badDf: pd.DataFrame = badDf.drop(badWaterAndIons.index, errors='ignore')
 
-    chainIds = goodDf["CHAIN_ID"].unique().tolist()
+    chainIds: list = goodDf["CHAIN_ID"].unique().tolist()
     ## create a list of lists containing residue numbers and associated chains
-    goodResidues = []       ## stores unique residue ids for each chain
-    goodChains = []     ## stores chain ids associated with the above
+    # Create a list of lists containing unique residue IDs and associated chain IDs for each chain
+    goodResidues: list = []       ## stores unique residue ids for each chain
+    goodChains: list = []     ## stores chain ids associated with the above
     for chainId in chainIds:
-        goodChainDf = goodDf[goodDf["CHAIN_ID"] == chainId]
-        goodChainResidues = list(set(goodChainDf["RES_ID"].to_list()))
+        goodChainDf: pd.DataFrame = goodDf[goodDf["CHAIN_ID"] == chainId]
+        goodChainResidues: list = list(set(goodChainDf["RES_ID"].to_list()))
         goodResidues.append(goodChainResidues)
-        goodChainChains = [chainId for _ in range(len(goodChainResidues))]
+        goodChainChains: list = [chainId for _ in range(len(goodChainResidues))]
         goodChains.append(goodChainChains)
 
     ## get list of residues in bad pdb
-    badResidues = badDf["RES_ID"].to_list()
+    # Get the list of residue IDs in the bad PDB file
+    badResidues: list = badDf["RES_ID"].to_list()
     ## create mappings that translate bad pdb to good pdb chains and residues
-    residueMapping = {}
-    chainMapping = {}
-    previousBadResidue = badResidues[0]
-    residueCount = 0
-    chainCount = 0
-
-
+    # Create mappings to translate residue IDs and chain IDs from the bad PDB file to the good PDB file
+    residueMapping: dict = {}
+    chainMapping: dict = {}
+    previousBadResidue: int = badResidues[0]
+    residueCount: int = 0
+    chainCount: int = 0
 
     for badResidue in badResidues:
         if residueCount == len(goodResidues[chainCount]):
             if chainCount  + 1 < len(goodResidues):
                 chainCount += 1
-                residueCount = 0
+                residueCount: int = 0
                 residueMapping.update({previousBadResidue:goodResidues[chainCount][residueCount]})
                 chainMapping.update({previousBadResidue:goodChains[chainCount][residueCount]})
             else:
@@ -65,13 +78,14 @@ def reset_chains_residues(goodPdb, badPdb):
     residueMapping.update({badResidue:goodResidues[chainCount][residueCount]})
     chainMapping.update({badResidue:goodChains[chainCount][residueCount]})
 
-    outputDf = badDf.copy()
+    # Modify the chain and residue IDs in the bad PDB file to match the good PDB file and save the modified PDB file
+    outputDf: pd.DataFrame = badDf.copy()
     outputDf["CHAIN_ID"] = outputDf["RES_ID"].map(chainMapping)
 
     outputDf["RES_ID"] = outputDf["RES_ID"].map(residueMapping)
 
-    outputDf = pd.concat([outputDf, badWaterAndIons], axis = 0)
-
+    outputDf: pd.DataFrame = pd.concat([outputDf, badWaterAndIons], axis = 0)
+    ## write output pdb
     pdbUtils.df2pdb(outputDf, badPdb)
     return badPdb
 
