@@ -33,28 +33,30 @@ simulationInfo:
     duration: "100 ps"
     timestep: "2 fs"
     temp: 300
-    restraints:
-    - type: "position"
-      selection:
-        type: "protein"
-    - type: "position"
-      selection: 
-        type: "ligands"  
     logInterval: "10 ps"
+
+    restraints:
+    - restraintType: "position"
+      selection:
+        keyword: "protein"
+    - restraintType: "position"
+      selection: 
+        keyword: "ligands"  
 
   - stepName: "03_NpT_pre-equilibriation"
     type: "NpT"
-    duration: "300 ps"
+    duration: "100 ps"
     timestep: "2 fs"
     temp: 300
-    restraints:
-    - type: "position"
-      selection:
-        type: "protein"
-    - type: "position"
-      selection: 
-        type: "ligands"  
     logInterval: "10 ps"
+
+    restraints:
+    - restraintType: "position"
+      selection:
+        keyword: "protein"
+    - restraintType: "position"
+      selection: 
+        keyword: "ligands"  
 
   - stepName: "04_NpT_slowIntergrator"
     type: "NpT"
@@ -69,35 +71,37 @@ simulationInfo:
     timestep: "2 fs"
     temp: 400
     logInterval: "5 ps"
+
     metaDynamicsParams:
       height: 2
       biasFactor: 5
     biases: 
       - biasVar: "RMSD"
         selection: 
-          type: "residue"
-          input: 
+          keyword: "residue"
+          selectionSyntax: 
           - ["A","FMN","248"]
     clusterTrajectory: 
       clusterBool: True
       nClusters: 10
       selection:
-        type: "residue"
-        input: 
+        keyword: "residue"
+        selectionSyntax: 
         - ["A","FMN","248"]
+
     restraints:
-    - type: "distance"
+    - restraintType: "distance"
       selection:
-        type: "atom"
-        input:
+        keyword: "atom"
+        selectionSyntax:
         - ["A","FMN","248","P"]
         - ["A","FMN","248","C8M"]
       parameters:
         r0: 3
         k: 1000
-    - type: "position"
+    - restraintType: "position"
       selection:
-        type: "protein"
+        keyword: "protein"
       parameters:
         k: 1000
 

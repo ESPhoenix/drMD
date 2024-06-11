@@ -192,7 +192,7 @@ If you whish to perform simulations (not Energy Minimisations) with restraints, 
                     You can add as many restraints as you wish, with one dictionary per restraints
                     Each restraints dictionary contains the following parameters:
 
-    - type:         This is the type of restraints that will be added. Accepted arguments are: "distance", "angle", "dihedral", "position"
+    - restraintType: This is the type of restraints that will be added. Accepted arguments are: "distance", "angle", "dihedral", "position"
 
     - parameters:   This is a dictionary containing the parameters for the restraints.
 
@@ -210,36 +210,38 @@ If you whish to perform simulations (not Energy Minimisations) with restraints, 
 
     - selection:    This is a dictionary containing information on the selection of atoms that the restraints will be applied to.
 *Note  Each selection contains the following parameters:
-        - type:     This can be set the following presets: "backbone", "protein", "ligand", "water", or "ions".
+        - keyword:     This can be set the following presets: "backbone", "protein", "ligand", "water", or "ions".
 *Note If a preset is used, atoms will be selected automatically for you and no other parameters need to be set.
 *Note Other options for more granular selections are "residue" or "atom".
 
 *Note   If "residue" has been selected and additional parameter must be used:
-        - input:    This is a list of lists containing the information needed to select resiudes. This must use the following format:
+        - selectionSyntax:    This is a list of lists containing the information needed to select resiudes. This must use the following format:
             [[chainId, residueName, residueNumber], [chainId, residueName, residueNumber], ...]      
 
 *Note    If "atom" has been selected and additional parameter must be used:
-        - input:    This is a list of lists containing the information needed to select atoms. This must use the following format:
+        - selectionSyntax:    This is a list of lists containing the information needed to select atoms. This must use the following format:
             [[chainId, residueName, residueNumber, atomName], [chainId, residueName, residueNumber, atomName], ...]      
 ```
 Example restraints syntax:
 ```yaml
     restraints:
-    - type: "position"
+    - restraintType: "position"
       selection:
-        type: "protein"
+        keyword: "protein"
         parameters:
           k: 1000
     - type: "distance"
       selection: 
-        type: "atoms"  
-        parameters:
-          k: 1000
-          r0: 3
-        input:
+        keyword: "atoms"  
+        selectionSyntax:
           - ["A", "ALA", 1, "CA"]
           - ["A", "ALA", 2, "CA"]
+      parameters:
+        k: 1000
+        r0: 3
+
 ```
+
 This example will add a position restraints to the protein atoms and 
 a 3 Angstrom distance restraint between the CA atoms of residues 1 and 2 of the protein
 
@@ -275,11 +277,11 @@ Example MetaDynamics syntax:
     biases: 
       - biasVar: "RMSD"
         selection: 
-          type: "backbone"
+          keyword: "backbone"
     - biasVar: "torsion"
         selection: 
-          type: "atom"
-          input:
+          keyword: "atom"
+          selectionSyntax:
             - ["A", "ALA", 1, "CA"]
             - ["A", "ALA", 2, "CA"]
             - ["A", "ALA", 3, "CA"]
