@@ -50,15 +50,15 @@ Inputs are grouped by theme and are stored as nested dictionaries and lists acco
 The pathInfo entry in the config file is a dictionary containing two parameters:
 - inputDir:     This is the absoloute path towards a directory containing PDB files that will be used as starting points for your simulations.
 
-                *Note that if you whish to perform multiple repeats of your simulation protocols upon one PDB file, simply duplicate it within 
-                this directory with suitable changes to the filenames*
+                >Note that if you whish to perform multiple repeats of your simulation protocols upon one PDB file, simply duplicate it within 
+                >this directory with suitable changes to the filenames
 
 - outputDir:    This is the absoloute path towards a directory that you want your drMD outputs to be written to.
 
-                *Note that this file does not need to exist at the point of running drMD, the script will create outputDir if it does not already exist*
-                
-                *Note that within outputDir, a directory will be created for each PDB file contained in inputDir, 
-                 in this document, these subdirectories will be refered to as runDirs*
+                >Note that this file does not need to exist at the point of running drMD, the script will create outputDir if it does not already exist
+
+                >Note that within outputDir, a directory will be created for each PDB file contained in inputDir, 
+                >in this document, these subdirectories will be refered to as runDirs*
 
 Example pathInfo:
 ```yaml
