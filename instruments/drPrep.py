@@ -88,7 +88,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         mergedPdb: str = p.join(wholePrepDir,"MERGED.pdb")
         pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords: str, amberParams: str = make_amber_params(outDir = wholePrepDir,
+        inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
                             ligandFileDict=ligandFileDict,
                             pdbFile= mergedPdb,
                             outName= outName,
@@ -103,7 +103,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         mergedPdb: str = p.join(p.join(prepDir,"PROT","MERGED.pdb"))
         pdbUtils.mergePdbs(pdbList=proteinPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords: str, amberParams: str = make_amber_params(outDir = p.join(prepDir,"PROT"),
+        inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                         pdbFile= mergedPdb,
                                                         outName= outName,
                                                         prepLog = prepLog)
@@ -249,14 +249,14 @@ def ligand_protonation(
         obabelCommand: str = f"obabel {ligPdb} -O {ligPdb_H} -h"
         run_with_log(obabelCommand, prepLog, ligPdb_H)
 
-        ligPdb_newH = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
+        ligPdb_newH: str = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
 
         # Rename the hydrogens in the ligand pdb file
         rename_hydrogens(ligPdb_H, ligPdb_newH)
 
         # Run pdb4amber to get compatible types and fix atom numbering
-        ligPdb_amber = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
-        pdb4amberCommand = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
+        ligPdb_amber: str = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
+        pdb4amberCommand: str = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
         run_with_log(pdb4amberCommand, prepLog, ligPdb_amber)
 
         ligPdb = ligPdb_amber

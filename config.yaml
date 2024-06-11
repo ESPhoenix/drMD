@@ -34,10 +34,12 @@ simulationInfo:
     timestep: "2 fs"
     temp: 300
     restraints:
-      - type: "position"
-        selection: "protein"
-      - type: "position"
-        selection: "ligands"  
+    - type: "position"
+      selection:
+        type: "protein"
+    - type: "position"
+      selection: 
+        type: "ligands"  
     logInterval: "10 ps"
 
   - stepName: "03_NpT_pre-equilibriation"
@@ -46,10 +48,12 @@ simulationInfo:
     timestep: "2 fs"
     temp: 300
     restraints:
-      - type: "position"
-        selection: "protein"
-      - type: "position"
-        selection: "ligands"
+    - type: "position"
+      selection:
+        type: "protein"
+    - type: "position"
+      selection: 
+        type: "ligands"  
     logInterval: "10 ps"
 
   - stepName: "04_NpT_slowIntergrator"
@@ -59,47 +63,21 @@ simulationInfo:
     temp: 300
     logInterval: "1 ps"
 
-  # - stepName: "05_RMSD_Metadynamics_Dummy"
-  #   type: "Meta"
-  #   duration: "100 ps"
-  #   timestep: "2 fs"
-  #   temp: 400
-  #   logInterval: "5 ps"
-  #   metaDynamicsParams:
-  #     height: 2
-  #     biasFactor: 5
-  #   biases: 
-  #     - biasVar: "RMSD"
-  #       selection: 
-  #         type: "residue"
-  #         input: 
-  #         - ["A","FMN","248"]
-  #   clusterTrajectory: 
-  #     clusterBool: True
-  #     nClusters: 10
-  #     selection:
-  #       type: "residue"
-  #       input: 
-  #       - ["A","FMN","248"]
-  #   restraints:
-  #   - type: "distance"
-  #     selection:
-  #       type: "atom"
-  #       input:
-  #       - ["A","FMN","248","P"]
-  #       - ["A","FMN","248","C8M"]
-  #     parameters:
-  #       r0: 3
-  #       k: 1000
-
-
-
-
-  - stepName: "05_NpT_equilibriation"
-    type: "NpT"
-    duration: "1 ns"
+  - stepName: "05_RMSD_Metadynamics_Dummy"
+    type: "Meta"
+    duration: "100 ps"
     timestep: "2 fs"
-    temp: 300
+    temp: 400
+    logInterval: "5 ps"
+    metaDynamicsParams:
+      height: 2
+      biasFactor: 5
+    biases: 
+      - biasVar: "RMSD"
+        selection: 
+          type: "residue"
+          input: 
+          - ["A","FMN","248"]
     clusterTrajectory: 
       clusterBool: True
       nClusters: 10
@@ -107,7 +85,39 @@ simulationInfo:
         type: "residue"
         input: 
         - ["A","FMN","248"]
-    logInterval: "10 ps"
+    restraints:
+    - type: "distance"
+      selection:
+        type: "atom"
+        input:
+        - ["A","FMN","248","P"]
+        - ["A","FMN","248","C8M"]
+      parameters:
+        r0: 3
+        k: 1000
+    - type: "position"
+      selection:
+        type: "protein"
+      parameters:
+        k: 1000
+
+
+
+
+
+  # - stepName: "05_NpT_equilibriation"
+  #   type: "NpT"
+  #   duration: "1 ns"
+  #   timestep: "2 fs"
+  #   temp: 300
+  #   clusterTrajectory: 
+  #     clusterBool: True
+  #     nClusters: 10
+  #     selection:
+  #       type: "residue"
+  #       input: 
+  #       - ["A","FMN","248"]
+  #   logInterval: "10 ps"
   # - stepName: "05_NpT_production_MD"
   #   type: "NpT"
   #   duration: "10 ns"

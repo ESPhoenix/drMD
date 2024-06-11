@@ -11,7 +11,31 @@ from fpdf import FPDF
 
 ######################################################################
 def create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesConvTable, propertiesPlot):
-    # Create instance of FPDF class
+    """
+    Creates a PDF document containing simulation vitals using the given images and plots.
+    
+    Args:
+        simDir (str): The directory where the PDF will be saved.
+        basicPng (str): The path to the basic information image file.
+        energyConvTable (str): The path to the energy convergence table image file.
+        energyPlot (str): The path to the energy plot image file.
+        propertiesConvTable (str): The path to the properties convergence table image file.
+        propertiesPlot (str): The path to the properties plot image file.
+        
+    Returns:
+        None
+        
+    This function creates a PDF document using the FPDF library with the given images and plots. The PDF document contains the following sections:
+    
+    - Title: "Simulation Vitals"
+    - Basic Information: The basic information image file is added to the PDF with a specified width and height.
+    - Energy Convergence Table: The energy convergence table image file is added to the PDF with a specified width and height.
+    - Properties Convergence Table: The properties convergence table image file is added to the PDF with a specified width and height.
+    - Energy Plot: The energy plot image file is added to the PDF with a specified width and height.
+    - Properties Plot: The properties plot image file is added to the PDF with a specified width and height.
+    
+    The PDF document is saved in the specified simulation directory with the filename "Simulation_Vitals.pdf".
+    """
     pdf = FPDF()
     # Add a page
     pdf.add_page()
