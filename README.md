@@ -96,14 +96,14 @@ ligandInfo contains two parameters:
 
 - ligands:          This is a list of dictionaries containing information about each ligand. 
                     You can add as many ligands as you wish, with one dictionary per ligand
-                    Each ligand dictionary contains the following parameters:
+                    *Note that each ligand dictionary contains the following parameters:
 
     - ligandName:   This is the three letter name of the ligand, this will be used to match the residue names in your PDB files
 
     - protons:      This is a boolean (TRUE/FALSE) to tell drMD whether you have protons on your ligand. 
                     If set to FALSE, drMD will run an automated protonation protocol to add protons to your ligand
                     *Note that the automatic protonation protocol only works reliably for simple organic ligands.
-                    If your ligand is complex it is recommended to manually add protons in your input PDB file prior to running drMD*
+                    *Note If your ligand is complex it is recommended to manually add protons in your input PDB file prior to running drMD*
 
     - charge:       This is the charge of the ligand (int)
 
@@ -133,10 +133,9 @@ Each simulation detailed in simulationInfo will be run in sequence, with the out
 #### Manditory parameters
 Each simulation dictionary contains the following parameters:
 ```yaml
-- stepName:         This is the name of the step that will be used to create a subdirectory in the runDir, we reccomend prefixing these names with
-                    numbers to make them order nicely
+- stepName:         This is the name of the step that will be used to create a subdirectory in the runDir, we reccomend prefixing these names with numbers to make them order nicely
 
-- type:             This is the type of simulation that will be run. Accepted arguments are:
+- type:             This is the type of simulation that will be run. Accepted arguments are
 
     - "EM":         This will run a steepest-decent Energy Minimisation step. 
                     *Note that it is reccomended to run one of these steps before any other simulation steps*
@@ -147,6 +146,7 @@ Each simulation dictionary contains the following parameters:
 - temp:             This is the temperature (int) of the simulation in Kelvin 
 ```
 Depending on the type of simulation specified, additional parameters will be required.
+
 #### Energy Minimisation Pararameters
 For Energy Minimisation steps, the following additional parameters are required:
 ```yaml
@@ -196,29 +196,29 @@ If you whish to perform simulations (not Energy Minimisations) with restraints, 
 
     - parameters:   This is a dictionary containing the parameters for the restraints.
 
- ##   All restraints need to have the following parameter:
+ *Note All restraints need to have the following parameter:
         -k :        This is the force constant of the restraint (int)
 
- ##   Distance restraints require the following parameter:
+*Note   Distance restraints require the following parameter:
         -r0:        This is the distance in Angstroms that the restraint should be applied at (int/float)
 
- ##   Angle restrainst require the following parameter:
+*Note   Angle restrainst require the following parameter:
         -theta0:    This is the angle in degrees that the angle should be constrained at (int/float)
 
- ##   Dihedral restraints require the following parameter:
+*Note   Dihedral restraints require the following parameter:
         -phi0:      This is the angle in degrees that the dihedral should be constrained at (int/float)
 
     - selection:    This is a dictionary containing information on the selection of atoms that the restraints will be applied to.
-##    Each selection contains the following parameters:
+*Note  Each selection contains the following parameters:
         - type:     This can be set the following presets: "backbone", "protein", "ligand", "water", or "ions".
-    # If a preset is used, atoms will be selected automatically for you and no other parameters need to be set.
-    # Other options for more granular selections are "residue" or "atom".
+*Note If a preset is used, atoms will be selected automatically for you and no other parameters need to be set.
+*Note Other options for more granular selections are "residue" or "atom".
 
-##    If "residue" has been selected and additional parameter must be used:
+*Note   If "residue" has been selected and additional parameter must be used:
         - input:    This is a list of lists containing the information needed to select resiudes. This must use the following format:
             [[chainId, residueName, residueNumber], [chainId, residueName, residueNumber], ...]      
 
-##    If "atom" has been selected and additional parameter must be used:
+*Note    If "atom" has been selected and additional parameter must be used:
         - input:    This is a list of lists containing the information needed to select atoms. This must use the following format:
             [[chainId, residueName, residueNumber, atomName], [chainId, residueName, residueNumber, atomName], ...]      
 ```
@@ -248,13 +248,13 @@ To run a metadynamics simulation, first set the simulation type to "META".
 To do this, you will need to specify the following parameters:
 ```yaml
 - metaDynamicsParameters:   This is a dictionary containing the parameters for the Metadynamics simulation,
-    ## The requried parameters within this dictionary are:
+    *Note The requried parameters within this dictionary are:
     - height:               This is the height (int) parameter used in the Metadynamics simulation
 
     - biasFactor:           This is the bias factor (int) parameter used in the Metadynamics simulation
 
-## You will also need to specify at least one biasVariable for the simulation to sample.
-## You can specify as many biasVariables as you wish, with one dictionary per biasVariable
+*Note You will also need to specify at least one biasVariable for the simulation to sample.
+*Note You can specify as many biasVariables as you wish, with one dictionary per biasVariable
 This is within the following biases list:
 - biases:    This is a list of dictionaries containing information about each biasVariable.
 
