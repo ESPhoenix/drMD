@@ -51,7 +51,7 @@ def main():
     '''
     ## SORT OUT DIRECTORIES
     topDir = os.getcwd()
-    batchConfig = read_inputs()
+    batchConfig = drConfigInspector.read_and_validate_config()
     drConfigInspector.validate_config(batchConfig)
     outDir = batchConfig["pathInfo"]["outputDir"]
     yamlDir = p.join(outDir,"00_configs")
