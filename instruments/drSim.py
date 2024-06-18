@@ -356,7 +356,7 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, simDir: str, pl
     system: openmm.System = init_system(prmtop)
 
     # Set up integrator and simulation
-    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(300*unit.kelvin,
+    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"]*unit.kelvin,
                                                                   1/unit.picosecond,
                                                                   0.004*unit.picoseconds)
     simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology,
