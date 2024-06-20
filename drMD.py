@@ -19,23 +19,7 @@ from subprocess import run
 
 ## CLEAN CODE
 from typing import Optional
-#####################################################################################################
-def read_inputs():
-    '''
-    reads config.yaml from command line input
-    returns batchConfig as a dictionary
-    this contains information generic to all MD runs specified in the config 
-    '''
-    ## create an argpass parser, read config file, snip off ".py" if on the end of file
-    parser = argpass.ArgumentParser()
-    parser.add_argument("--config")
-    args = parser.parse_args()
 
-    batchConfig=args.config
-    ## Read config.yaml into a dictionary
-    with open(batchConfig,"r") as yamlFile:
-        batchConfig = yaml.safe_load(yamlFile) 
-    return batchConfig
 ######################################################################################################
 def main():
     '''
@@ -49,10 +33,11 @@ def main():
     Returns:
         Nothing
     '''
-    ## SORT OUT DIRECTORIES
-    topDir = os.getcwd()
+    
+    ## Read config.yaml into a dictionary and run checks on it
     batchConfig = drConfigInspector.read_and_validate_config()
-    drConfigInspector.validate_config(batchConfig)
+
+    ## unpack batchConfig into variables for this function
     outDir = batchConfig["pathInfo"]["outputDir"]
     yamlDir = p.join(outDir,"00_configs")
     pdbDir = batchConfig["pathInfo"]["inputDir"]
@@ -60,15 +45,18 @@ def main():
     parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
     subprocessCpus = batchConfig["generalInfo"]["subprocessCpus"]
     
+    ## set envorment variables for OpenMP and OpenMM
     manage_cpu_usage_for_subprocesses("ON",subprocessCpus)
 
+    ## create yamlDir if it doesn't exist, this will be used to store per-run yaml files
     os.makedirs(yamlDir,exist_ok=True)
+    ## run simulations in serial or paralell
     if parallelCPU == 1:
         run_serial(batchConfig, pdbDir, outDir, yamlDir, simInfo)
     elif parallelCPU > 1:
         run_parallel(parallelCPU, batchConfig, pdbDir, outDir, yamlDir, simInfo)
 
-
+    ## unset envorment variables for OpenMP and OpenMM
     manage_cpu_usage_for_subprocesses("OFF")
 
 ######################################################################################################

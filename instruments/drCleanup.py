@@ -65,7 +65,7 @@ def get_endpoint_pdbs(
     # Iterate over each simulation and collate the pdbs
     for sim in simulationInfo:
         stepName: str = sim["stepName"]
-        tag: str = sim["type"]
+        tag: str = sim["simulationType"]
         collateSubDir: str = p.join(collatedPdbDir,stepName)
         os.makedirs(collateSubDir,exist_ok=True)
         excudeDirNames.append(stepName)

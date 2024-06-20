@@ -24,17 +24,16 @@ ligandInfo:
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
-    type: "EM"
+    simulationType: "EM"
     temp: 300
     maxIterations: 1000
 
   - stepName: "02_NVT_pre-equilibraition"
-    type: "NVT"
+    simulationType: "NVT"
     duration: "100 ps"
     timestep: "2 fs"
     temp: 300
     logInterval: "10 ps"
-
     restraints:
     - restraintType: "position"
       selection:
@@ -44,7 +43,7 @@ simulationInfo:
         keyword: "ligands"  
 
   - stepName: "03_NpT_pre-equilibriation"
-    type: "NpT"
+    simulationType: "NpT"
     duration: "100 ps"
     timestep: "2 fs"
     temp: 300
@@ -59,14 +58,14 @@ simulationInfo:
         keyword: "ligands"  
 
   - stepName: "04_NpT_slowIntergrator"
-    type: "NpT"
+    simulationType: "NpT"
     duration: "10 ps"
     timestep: "0.5 fs"
     temp: 300
     logInterval: "1 ps"
 
   - stepName: "05_RMSD_Metadynamics_Dummy"
-    type: "Meta"
+    simulationType: "Meta"
     duration: "100 ps"
     timestep: "2 fs"
     temp: 400
@@ -110,7 +109,7 @@ simulationInfo:
 
 
   # - stepName: "05_NpT_equilibriation"
-  #   type: "NpT"
+  #   simulationType: "NpT"
   #   duration: "1 ns"
   #   timestep: "2 fs"
   #   temp: 300

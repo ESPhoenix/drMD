@@ -96,16 +96,16 @@ def check_simulationInfo(config: dict) -> None:
         elif simulationType.upper() == "META":
             check_meta_options(simulation, stepName)
 
-        restraintsInfo, = check_info_for_args(simulation, stepName, ["restraints"], optional=True)
-        if restraintsInfo:
-            check_restraints_options(restraintsInfo, stepName)
+        restraintInfo, = check_info_for_args(simulation, stepName, ["restraintInfo"], optional=True)
+        if restraintInfo:
+            check_restraints_options(restraintInfo, stepName)
 #########################################################################
-def check_restraints_options(restraintsInfo: dict, stepName: str) -> None:
-    if not isinstance(restraintsInfo, list):
+def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
+    if not isinstance(restraintInfo, list):
         raise TypeError(f"restraintsInfo in {stepName} must be a list of restraints")
-    if len(restraintsInfo) == 0:
+    if len(restraintInfo) == 0:
         raise ValueError(f"restraintsInfo is must contain some restraints")
-    for restraint in restraintsInfo:
+    for restraint in restraintInfo:
         restraintType, selection, parameters = check_info_for_args(restraint, "restraint", ["restraintType", "selection", "parameters"], optional=False)
         if not restraintType.upper() in ["RMSD", "TORSION", "DISTANCE", "ANGLE"]:
             raise ValueError("restraintType must be one of the following:\n RMSD, DISTANCE, ANGLE, TORSION")
@@ -163,7 +163,7 @@ def check_time_input(timeInputValue: str, timeInputName: str, stepName: str) -> 
 #########################################################################
 def check_shared_simulation_options(simulation) -> str:
     ## check for shared required args in simulation
-    stepName, simulationType, temp = check_info_for_args(simulation, "simulation", ["stepName", "simulationType"], optional=False)
+    stepName, simulationType, temp = check_info_for_args(simulation, "simulation", ["stepName", "simulationType", "temp"], optional=False)
     ## make sure stepName is correct
     if not isinstance(stepName, str):
         raise TypeError(f"stepName {str(stepName)} must be a a string")
@@ -214,7 +214,7 @@ def validate_path(argName: str, argPath: Union[PathLike, str]) -> None:
     Check to see if a path variable is indeed the correct type
     Check to see if the path exists
     """
-    if  not isinstance(argPath, (os.PathLike, str)) :
+    if  not isinstance(argPath, (PathLike, str)) :
         raise TypeError(f"The config argument {argName} = {argPath} is not a PathLike.")
     # Check if the path exists
     if not p.exists(argPath):
@@ -295,76 +295,3 @@ def validate_config(config: dict) -> None:
         print("Input PDB does not exist")
         exit()
 
-
-#####################################################################################
-def validate_config(config: dict) -> None:
-    """
-    Validates the configuration dictionary.
-
-    Args:
-        config (dict): The configuration dictionary.
-
-    Raises:
-        AssertionError: If any of the required sections, keys, or values are missing or invalid.
-
-    Returns:
-        None
-    """
-
-    # Assert the presence of main sections
-    required_sections = ['pathInfo', 'generalInfo','simulationInfo','cleanUpInfo']
-    for section in required_sections:
-        assert section in config, f"Missing required section: {section}"
-
-    # Validate pathInfo
-    assert isinstance(config['pathInfo']['inputDir'], str), "inputDir must be a string"
-    assert isinstance(config['pathInfo']['outputDir'], str), "outputDir must be a string"
-    assert p.exists(config['pathInfo']['inputDir']), f"Input directory does not exist: {config['pathInfo']['inputDir']}"
-    assert p.exists(p.dirname(config['pathInfo']['outputDir'])), f"At least parent directory of outputDir should exist: {config['pathInfo']['outputDir']}"
-
-    # Validate generalInfo
-    assert isinstance(config['generalInfo']['parallelCPU'], int), "parallelCPU must be an integer"
-    assert isinstance(config['generalInfo']['platform'], str), "platform must be a string"
-    assert config['generalInfo']['platform'] in ["CPU", "CUDA", "OpenCL"], "Platform must be either 'CPU', 'OpenCL' or 'CUDA'"
-    assert isinstance(config['generalInfo']['subprocessCpus'], int), "subprocessCpus must be an integer"
-
-    # Validate ligandInfo
-    if 'ligandInfo' in config:
-        assert isinstance(config['ligandInfo']['nLigands'], int), "nLigands must be an integer"
-        assert isinstance(config['ligandInfo']['ligands'], list), "ligands must be a list"
-        for ligand in config['ligandInfo']['ligands']:
-            assert isinstance(ligand['ligandName'], str), "ligandName must be a string"
-            assert isinstance(ligand['protons'], bool), "protons must be a boolean"
-            assert isinstance(ligand['charge'], int), "charge must be an integer"
-
-    # Validate simulationInfo
-    filename_invalid_chars_pattern = re.compile(r'[^\w-]') # Allows letters, numbers, underscores, and hyphens
-    permittedSimulationTypes = ["EM","NVT","NPT","META"]
-    for step in config['simulationInfo']:
-        
-        assert isinstance(step['stepName'], str), "stepName must be a string"
-        assert not filename_invalid_chars_pattern.search(step['stepName']), f"stepName contains invalid characters for a filename: {step['stepName']}. Allows letters, numbers, underscores, and hyphens"
-
-        assert isinstance(step['type'], str), "type must be a string"
-        assert step['type'].upper() in permittedSimulationTypes, f"simulation type can only be one of {permittedSimulationTypes}. You entered: {step['type']}"
-        assert isinstance(step['temp'], int), "temp must be an integer"
-        if 'maxIterations' in step:
-            assert isinstance(step['maxIterations'], int), "maxIterations must be an integer"
-            assert step['maxIterations']>=0, "maxIterations must be positive integer or 0 (for complete EM step)"
-        
-        # assert isinstance(step["timestep"], str), "timestep must be a string, eg \"2 fs\""
-        # assert isinstance(step["duration"], str), "duration must be a string, eg \"10 ns\""
-
-
-    # Validate cleanUpInfo
-    assert isinstance(config['cleanUpInfo']['getEndpointPdbs'], bool), "getEndpointPdbs must be a boolean"
-    assert isinstance(config['cleanUpInfo']['removeWaters'], bool), "removeWaters must be a boolean"
-    assert isinstance(config['cleanUpInfo']['removeIons'], bool), "removeIons must be a boolean"
-    assert isinstance(config['cleanUpInfo']['keepFileNames'], bool), "keepFileNames must be a boolean"
-
-    print("Configuration is valid.")
-
-# Example usage
-# Load your config dictionary from the YAML file first
-# Then pass it to the validation function
-# validate_config(config)
