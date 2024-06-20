@@ -111,7 +111,36 @@ def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
         if not restraintType.upper() in ["POSITION", "TORSION", "DISTANCE", "ANGLE"]:
             raise ValueError("restraintType must be one of the following:\n POSITION, DISTANCE, ANGLE, TORSION")
         check_selection(selection, stepName)
+        check_restraint_parameters(restraintType, parameters)
+#########################################################################
+def check_restraint_parameters(restraintType: str, parameters: dict) -> None:
+    k, = check_info_for_args(parameters, "parameters", ["k"], optional=False)
+    if not isinstance(k, (int, float)):
+        raise TypeError(f"restraint parameters must be a number")
+    if k <= 0:
+        raise ValueError(f"restraint parameters must be positive")
+
+    if restraintType.upper() == "TORSION":
+        phi, = check_info_for_args(parameters, "parameters", ["phi"], optional=False)
+        if not isinstance(phi, (int, float)):
+            raise TypeError(f"restraint parameters must be a number")
+        if phi < -180 or phi > 180:
+            raise ValueError(f"restraint parameters must be between -180 and 180")
         
+    elif restraintType.upper() == "DISTANCE":
+        r0, = check_info_for_args(parameters, "parameters", ["r0"], optional=False)
+        if not isinstance(r0, (int, float)):
+            raise TypeError(f"restraint parameters must be a number")
+        if r0 < 0:
+            raise ValueError(f"restraint parameters must be positive")
+
+    elif restraintType.upper() == "ANGLE":
+        theta0, = check_info_for_args(parameters, "parameters", ["theta0"], optional=False)
+        if not isinstance(theta0, (int, float)):
+            raise TypeError(f"restraint parameters must be a number")
+        if theta0 < 0 or theta0 > 180:
+            raise ValueError(f"restraint parameters must be between 0 and 180")
+
 #########################################################################
 def check_selection(selection: dict, stepName: str) -> None:
     keyword, = check_info_for_args(selection, "selection", ["keyword"], optional=False)
@@ -119,7 +148,7 @@ def check_selection(selection: dict, stepName: str) -> None:
         raise TypeError(f"selection keywords incorrect in {stepName}, see README.md for more details")
     if not keyword in ["all", "protein", "ligands", "water", "ions", "custom"]:
         raise ValueError(f"selection keywords incorrect in {stepName}, see README.md for more details")
-    
+
     if keyword == "custom":
         customSelection, = check_info_for_args(selection, stepName, ["customSelection"], optional=False)
         if not isinstance(customSelection, list):
