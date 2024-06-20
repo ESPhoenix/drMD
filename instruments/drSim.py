@@ -32,13 +32,13 @@ def init_system(prmtop: app.Topology) -> openmm.System:
     nonbondedMethod: openmm.NonbondedForce = app.PME
     nonbondedCutoff: unit.Quantity = 1 * unit.nanometer
 
-    # Define the constraints.
-    constraints: openmm.Force = app.HBonds
+    # Define the restraints.
+    hBondconstraints: openmm.Force = app.HBonds
 
     # Create the system.
     system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
                                                 nonbondedCutoff=nonbondedCutoff,
-                                                constraints=constraints)
+                                                constraints=hBondconstraints)
 
     return system
 
@@ -191,7 +191,7 @@ def run_npt(prmtop: str, inpcrd: str, sim: dict, saveFile: str, simDir: str, pla
         str: The path to the XML file containing the final state of the simulation.
 
     This function runs a simulation at constant pressure (NpT) step. The function
-    initializes the system, handles any constraints, adds a constant pressure force,
+    initializes the system, handles any restraints, adds a constant pressure force,
     sets up the integrator and system, loads the state from a checkpoint or XML file,
     sets up reporters, runs the simulation, saves the final geometry as a PDB file,
     resets the chain and residue Ids, runs drCheckup, performs trajectory clustering
@@ -201,8 +201,8 @@ def run_npt(prmtop: str, inpcrd: str, sim: dict, saveFile: str, simDir: str, pla
     print("Running NpT Step!")
     ## initialise a new system from parameters
     system: openmm.System = init_system(prmtop)
-    ## deal with any constraints
-    system: openmm.System = drRestraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
+    ## deal with any restraints
+    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # add constant pressure force to system (makes this an NpT simulation)
     system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
     integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
@@ -265,7 +265,7 @@ def run_nvt(
         str: The path to the XML file containing the final state of the simulation.
 
     This function runs a simulation at constant volume (NVT) step. The function
-    initializes the system, handles any constraints, checks the forces applied to the
+    initializes the system, handles any restraints, checks the forces applied to the
     system, sets up the integrator and system, loads the state from a checkpoint or XML
     file, sets up reporters, runs the simulation, saves the final geometry as a PDB file,
     resets the chain and residue Ids, runs drCheckup, performs trajectory clustering if
@@ -276,8 +276,8 @@ def run_nvt(
     # Initialize a new system from parameters
     system: openmm.System = init_system(prmtop)
 
-    # Deal with any constraints
-    system: openmm.System = drRestraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
+    # Deal with any restraints
+    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
 
     # Check forces
     for i in range(system.getNumForces()):

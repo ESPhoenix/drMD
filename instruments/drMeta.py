@@ -47,13 +47,15 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
     # Initialize a new system from parameters
     system: openmm.System = drSim.init_system(prmtop)
     # Deal with restraints (clear all lurking restraints and constants)
-    system: openmm.System = drRestraints.constraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile)
+    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile)
     # Add a Monte Carlo Barostat to maintain constant pressure
     barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
+    # Read metaDynamicsInfo from sim config
+    metaDynamicsInfo: dict = sim["metaDynamicsInfo"]
 
     # Read biases from sim config and create bias variables
-    biases: list = sim["biases"]
+    biases: list = metaDynamicsInfo["biases"]
     biasVariables: list = []
     for bias in biases:
         # Get atom indexes and coordinates for the biases
@@ -71,8 +73,8 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
     meta: metadynamics.Metadynamics = metadynamics.Metadynamics(system=system,
                                      variables=biasVariables,
                                      temperature=sim["temp"],
-                                     biasFactor=5,
-                                     height=1,
+                                     biasFactor=metaDynamicsInfo["biasFactor"],
+                                     height=metaDynamicsInfo["height"],
                                      frequency=50,
                                      saveFrequency=50,
                                      biasDir=simDir)

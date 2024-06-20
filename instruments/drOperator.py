@@ -96,15 +96,15 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         os.chdir(simDir)
 
         # Run the simulation
-        if sim["type"].upper() == "EM":
+        if sim["simulationType"].upper() == "EM":
             saveFile = drSim.run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform, pdbFile)
-        elif sim["type"].upper() == "NVT":
+        elif sim["simulationType"].upper() == "NVT":
             sim = drSim.process_sim_data(sim, timescale)
             saveFile = drSim.run_nvt(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
-        elif sim["type"].upper() == "NPT":
+        elif sim["simulationType"].upper() == "NPT":
             sim = drSim.process_sim_data(sim, timescale)
             saveFile = drSim.run_npt(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
-        elif sim["type"].upper() == "META":
+        elif sim["simulationType"].upper() == "META":
             sim = drSim.process_sim_data(sim, timescale)
             saveFile = drMeta.run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
 ###########################################################################################
