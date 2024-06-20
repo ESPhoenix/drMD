@@ -1,6 +1,7 @@
 from pdbUtils import pdbUtils
 import pandas as pd
 from typing import List
+import numpy as np
 #######################################################################
 def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
     """
@@ -25,7 +26,10 @@ def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
     atomIndexes: List[int] = []
     print(selection)
     # Check selection type and find required atom indexes
-    if selection["keyword"] == "backbone":
+    if selection["keyword"] == "all":
+        # Find indexes for all atoms
+        atomIndexes = pdbDf.index.tolist()
+    elif selection["keyword"] == "backbone":
         # Find indexes for all backbone atoms
         backboneDf: pd.DataFrame = pdbDf[pdbDf["ATOM_NAME"].isin(backboneAtomNames)]
         atomIndexes = backboneDf.index.tolist()
@@ -45,23 +49,27 @@ def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
         # Find indexes for all ligands / organics / oddball molecules
         ligandDf: pd.DataFrame = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidResNames+solventResNames+ionResNames)]
         atomIndexes = ligandDf.index.tolist()
-    elif selection["keyword"] == "residue":
+    elif selection["keyword"] == "custom":
         # Find indexes for whole residue selections
-        selectionInput = selection["selectionSyntax"]
-        for residue in selectionInput:
-            residueDf: pd.DataFrame = pdbDf[(pdbDf["CHAIN_ID"] == residue[0])
-                              & (pdbDf["RES_NAME"] == residue[1])
-                              & (pdbDf["RES_ID"] == int(residue[2])) ]
-            atomIndexes += residueDf.index.tolist()
-    elif selection["keyword"] == "atom":
-        # Find indexes for atom-by-atom selections
-        selectionInput = selection["selectionSyntax"]
-        for atom in selectionInput:
-            atomDf: pd.DataFrame = pdbDf[(pdbDf["CHAIN_ID"] == atom[0])
-                              & (pdbDf["RES_NAME"] == atom[1])
-                              & (pdbDf["RES_ID"] == int(atom[2]))
-                              & (pdbDf["ATOM_NAME"] == atom[3]) ]
-            atomIndexes += atomDf.index.tolist()
+        customSelection = selection["customSelection"]
+        ## check for "all" selections in selectionSytax
+        for selection in customSelection:
+            ## create selection conditions
+            ## init empty list to store conditions
+            selectionConditions: list  = []
+            ## for each selection key...
+            for selctionKey in ["CHAIN_ID", "RES_NAME", "RES_ID", "ATOM_NAME"]:
+                ## use list inputs to create a .isin() condition
+                if isinstance(selection[selctionKey], list):
+                    selectionConditions.append(pdbDf[selctionKey].isin(range(selection[selctionKey])))
+                ## use single input to create a == condition
+                elif selection[selctionKey] != "all":
+                    selectionConditions.append(pdbDf[selctionKey] == selection[selctionKey])
+                ## "all" inputs create no condition
+            selectionConditionsCombined = np.logical_and.reduce(selectionConditions)
+            selectionDf = pdbDf[selectionConditionsCombined]
+            ## add to atomIndexes list
+            atomIndexes += selectionDf.index.tolist()
 
     return atomIndexes
 

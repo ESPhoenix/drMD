@@ -9,7 +9,7 @@ import simtk.unit as unit
 ## CUSTOM drMD LIBS
 import instruments.drSelector as drSelector
 ###########################################################################################
-def constraints_handler(
+def restraints_handler(
         system: openmm.System,
         prmtop: str,
         inpcrd: str,
@@ -32,8 +32,10 @@ def constraints_handler(
         openmm.System: The system with restraints applied.
     """
 
-    if "restraints" in sim:
-        restraintInfo: list = sim["restraints"]
+    if "restraintInfo" in sim:
+        restraintInfo: list = sim["restraintInfo"]
+    
+
 
         kNumber: int = 0
         for restraint in restraintInfo:

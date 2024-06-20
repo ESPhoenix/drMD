@@ -106,32 +106,34 @@ def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
     if len(restraintInfo) == 0:
         raise ValueError(f"restraintsInfo is must contain some restraints")
     for restraint in restraintInfo:
+        print(restraint)
         restraintType, selection, parameters = check_info_for_args(restraint, "restraint", ["restraintType", "selection", "parameters"], optional=False)
-        if not restraintType.upper() in ["RMSD", "TORSION", "DISTANCE", "ANGLE"]:
-            raise ValueError("restraintType must be one of the following:\n RMSD, DISTANCE, ANGLE, TORSION")
+        if not restraintType.upper() in ["POSITION", "TORSION", "DISTANCE", "ANGLE"]:
+            raise ValueError("restraintType must be one of the following:\n POSITION, DISTANCE, ANGLE, TORSION")
         check_selection(selection, stepName)
         
 #########################################################################
 def check_selection(selection: dict, stepName: str) -> None:
-    ##TODO: are we happy with this selection method or should we implement something a bit more snazzy (wildcards etc)
-    ##TODO: decide whether we go with selection dicts instead of lists
-    keyword, = check_info_for_args(selection)
+    keyword, = check_info_for_args(selection, "selection", ["keyword"], optional=False)
     if not isinstance(keyword, str):
         raise TypeError(f"selection keywords incorrect in {stepName}, see README.md for more details")
-    if not keyword in ["all", "protein", "ligands", "water", "ions", "residue", "atom"]:
+    if not keyword in ["all", "protein", "ligands", "water", "ions", "custom"]:
         raise ValueError(f"selection keywords incorrect in {stepName}, see README.md for more details")
     
-    if keyword in ["atom", "residue"]:
-        selectionSyntax = check_info_for_args(selection, stepName, ["selectionSyntax"], optional=False)
-        if not isinstance(selectionSyntax, list):
-            raise TypeError(f"selectionSyntax in {stepName} must be a list of lists")
-        for selection in selectionSyntax:
-            if keyword == "atom":
-                if not len(selection) == 4:
-                    raise ValueError("each selection in selectionSyntax must contain four elements with the atom keyword")
-            elif keyword == "residue":
-                if not len(selection) == 3:
-                    raise ValueError("each selection in selectionSyntax must contain four elements with the residue keyword")
+    if keyword == "custom":
+        customSelection, = check_info_for_args(selection, stepName, ["customSelection"], optional=False)
+        if not isinstance(customSelection, list):
+            raise TypeError(f"selectionSyntax in {stepName} must be a list of dcits")
+        for selection in customSelection:
+            chainId, residueName, residueNumber, atomName = check_info_for_args(selection, stepName, ["CHAIN_ID", "RES_NAME", "RES_ID", "ATOM_NAME"], optional=False)
+            if not isinstance(chainId, (str,list)):
+                raise TypeError("CHAIN_ID must be a string or list of strings")
+            if not isinstance(residueName, (str,list)):
+                raise TypeError("RES_NAME must be a string or list of strings")
+            if not isinstance(residueNumber, (int,list)):
+                raise TypeError("RES_ID must be an int or list of ints")
+            if not isinstance(atomName, (str,list)):
+                raise TypeError("ATOM_NAME must be a string or list of strings")
 #########################################################################
 def check_meta_options(simulation: dict, stepName: str) -> None:
     ### TODO: rework how metaDynamicsInfo works

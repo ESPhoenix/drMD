@@ -188,7 +188,7 @@ This will run a 100 ps NVT molecular dynamics simulation with a timestep of 2 fs
 #### Adding Restraints with drMD
 If you whish to perform simulations (not Energy Minimisations) with restraints, the following additional parameters are required:
 ```yaml
-- restraints:       This is a list of dictionaries containing information about each restraints. 
+- restraintInfo:       This is a list of dictionaries containing information about each restraints. 
                     You can add as many restraints as you wish, with one dictionary per restraints
                     Each restraints dictionary contains the following parameters:
 
@@ -212,15 +212,12 @@ If you whish to perform simulations (not Energy Minimisations) with restraints, 
 *Note  Each selection contains the following parameters:
         - keyword:     This can be set the following presets: "backbone", "protein", "ligand", "water", or "ions".
 *Note If a preset is used, atoms will be selected automatically for you and no other parameters need to be set.
-*Note Other options for more granular selections are "residue" or "atom".
+*Note For a more granular selection method, use the keyword "custom".
 
-*Note   If "residue" has been selected and additional parameter must be used:
-        - selectionSyntax:    This is a list of lists containing the information needed to select resiudes. This must use the following format:
-            [[chainId, residueName, residueNumber], [chainId, residueName, residueNumber], ...]      
-
-*Note    If "atom" has been selected and additional parameter must be used:
-        - selectionSyntax:    This is a list of lists containing the information needed to select atoms. This must use the following format:
-            [[chainId, residueName, residueNumber, atomName], [chainId, residueName, residueNumber, atomName], ...]      
+*Note   If "custom" has been selected and additional parameter must be used:
+        - customSelection:    This is a list of lists containing the information needed to select resiudes. This must use the following format:
+            [{CHAIN_ID: chainId, RES_NAME: residueName, RES_ID: residueNumber, ATOM_NAME: atomName}, ...]      
+ 
 ```
 Example restraints syntax:
 ```yaml
@@ -232,10 +229,10 @@ Example restraints syntax:
           k: 1000
     - type: "distance"
       selection: 
-        keyword: "atoms"  
+        keyword: "custom"  
         selectionSyntax:
-          - ["A", "ALA", 1, "CA"]
-          - ["A", "ALA", 2, "CA"]
+          - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 1, ATOM_NAME: "CA"}
+          - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 2, ATOM_NAME: "CA"}
       parameters:
         k: 1000
         r0: 3
@@ -249,21 +246,21 @@ a 3 Angstrom distance restraint between the CA atoms of residues 1 and 2 of the 
 To run a metadynamics simulation, first set the simulation type to "META".
 To do this, you will need to specify the following parameters:
 ```yaml
-- metaDynamicsParameters:   This is a dictionary containing the parameters for the Metadynamics simulation,
+- metaDynamicsInfo:   This is a dictionary containing the parameters for the Metadynamics simulation,
     *Note The requried parameters within this dictionary are:
     - height:               This is the height (int) parameter used in the Metadynamics simulation
 
     - biasFactor:           This is the bias factor (int) parameter used in the Metadynamics simulation
 
+    - biases:               This is a list of dictionaries containing information about each biasVariable.
+
 *Note You will also need to specify at least one biasVariable for the simulation to sample.
 *Note You can specify as many biasVariables as you wish, with one dictionary per biasVariable
-This is within the following biases list:
-- biases:    This is a list of dictionaries containing information about each biasVariable.
+*Note Each dictionary in biases must contain the following parameters:
 
-Within each biasVariable dictionary, you need to specify the following parameters:  
-    - biasVar:      This is the type of biasVariable that will be added. Accepted arguments are: "RMSD", "torsion"
+      - biasVar:      This is the type of biasVariable that will be added. Accepted arguments are "RMSD", "torsion"
                     TODO: add "distance" and "angle" options
-    - selection:    This is a dictionary containing information on the selection of atoms that the biasVariable will be applied to.
+      - selection:    This is a dictionary containing information on the selection of atoms that the biasVariable will be applied to.
                     The selection syntax is identical to that used for the restraints.
                     *Note that for distance bias variables, the selection type must be "atoms" with two atoms selected
                     *Note that for distance bias variables, the selection type must be "atoms" with three atoms selected
@@ -271,21 +268,22 @@ Within each biasVariable dictionary, you need to specify the following parameter
 ```
 Example MetaDynamics syntax:
 ```yaml
-    metaDynamicsParams:
+    metaDynamicsInfo:
       height: 2
       biasFactor: 5
-    biases: 
-      - biasVar: "RMSD"
-        selection: 
-          keyword: "backbone"
-    - biasVar: "torsion"
-        selection: 
-          keyword: "atom"
+      biases: 
+        - biasVar: "RMSD"
+          selection: 
+            keyword: "backbone"
+        - biasVar: "torsion"
+          selection: 
+            keyword: "custom"
           selectionSyntax:
-            - ["A", "ALA", 1, "CA"]
-            - ["A", "ALA", 2, "CA"]
-            - ["A", "ALA", 3, "CA"]
-            - ["A", "ALA", 4, "CA"]
+            - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 1, ATOM_NAME: "CA"}
+            - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 2, ATOM_NAME: "CA"}
+            - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 3, ATOM_NAME: "CA"}
+            - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 4, ATOM_NAME: "CA"}
+
 ```
 This example will add a RMSD bias to the backbone of the protein
 and a torsion bias between the CA atoms of residues 1, 2, 3, and 4 of the protein
