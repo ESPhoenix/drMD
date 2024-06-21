@@ -77,7 +77,6 @@ def manage_cpu_usage_for_subprocesses(mode , subprocessCpus = None):
         os.environ['OPENMM_CPU_THREADS'] = str(subprocessCpus)
 
         omp_num_threads = os.environ.get('OMP_NUM_THREADS')
-        print("OMP_NUM_THREADS:", omp_num_threads)
     elif mode == "OFF":
         # remove cpu useage limits
         run(f"unset OMP_NUM_THREADS", shell=True)

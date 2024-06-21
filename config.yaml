@@ -83,15 +83,6 @@ simulationInfo:
             keyword: "custom"
             customSelection: 
             - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
-
-    clusterTrajectory: 
-      clusterBool: True
-      nClusters: 10
-      selection:
-        keyword: "custom"
-        customSelection: 
-        - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
-
     restraintInfo:
     - restraintType: "distance"
       selection: 
@@ -107,7 +98,13 @@ simulationInfo:
         keyword: "protein"
       parameters:
         k: 1000
-
+    clusterTrajectory: 
+      nClusters: 10
+      selection:
+        keyword: "custom"
+        customSelection: 
+        - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
+########################################################################
 
 
 
