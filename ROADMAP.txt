@@ -13,7 +13,8 @@ remove bool- just run if this if arg is there
 
 
 #### MetaDyanamics
-
+- distance MetaDyanamics    []
+- angle MetaDyanamics       []
 
 #### cleanUp
 Re-do all of this!

@@ -8,19 +8,13 @@ generalInfo:
   parallelCPU: 1
   platform: "CUDA"
   subprocessCpus: 1
-
 ########################################################################
 ligandInfo:
-  nLigands: 1
-  ligands:
-    - ligandName: "FMN"
-      protons: True
-      charge: -1
-      toppar: False
-      mol2: False
-
-
-
+  - ligandName: "FMN"
+    protons: True
+    charge: -1
+    toppar: False
+    mol2: False
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"

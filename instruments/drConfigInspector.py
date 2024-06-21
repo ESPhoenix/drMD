@@ -66,14 +66,28 @@ def check_generalInfo(config: dict) -> None:
         raise ValueError("Platform must be CUDA, OpenCL, or CPU")
 #########################################################################
 def check_ligandInfo(config: dict) -> None:
-    ## TODO: come back to this!
     """
     Checks optional ligandInfo entry in config
     """
     ligandInfo,  = check_info_for_args(config, "config", ["ligandInfo"], optional=True)
-    if not ligandInfo:
-        return
-    ##TODO: redo this ligandInfo - remove nLigands etc
+    
+    for ligand in ligandInfo:
+        if not isinstance(ligand, dict):
+            raise TypeError("ligandInfo must be a list of dicts")
+        if len(ligand) == 0:
+            raise ValueError("ligandInfo must have at least one entry")
+        ligandName, protons, charge, toppar, mol2  = check_info_for_args(ligand, "ligand", ["ligandName", "protons", "charge", "toppar", "mol2"], optional=True)
+        if not isinstance(ligandName, str):
+            raise TypeError("ligandName must be a string")
+        if not isinstance(protons, bool):
+            raise TypeError("protons must be a bool")
+        if not isinstance(charge, int):
+            raise TypeError("charge must be an int")
+        if not isinstance(toppar, bool):
+            raise TypeError("toppar must be a bool")
+        if not isinstance(mol2, bool):
+            raise TypeError("mol2 must be a bool")
+
 #########################################################################
 def check_simulationInfo(config: dict) -> None:
     """
