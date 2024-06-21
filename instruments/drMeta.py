@@ -111,8 +111,7 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
 
     # Run trajectory clustering
     if "clusterTrajectory" in sim:
-        if sim["clusterTrajectory"]["clusterBool"]:
-            drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
+        drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
 
     # Return checkpoint file for continuing simulation
     return saveXml

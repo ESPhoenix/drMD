@@ -68,25 +68,45 @@ def check_generalInfo(config: dict) -> None:
 def check_ligandInfo(config: dict) -> None:
     """
     Checks optional ligandInfo entry in config
+
+    Args:
+        config (dict): The main configuration dictionary
+
+    Raises:
+        TypeError: If ligandInfo is not a list of dictionaries, or if ligandName is not a string
+        TypeError: If protons, charge, toppar, or mol2 is not a boolean
+        ValueError: If ligandInfo is an empty list
+        ValueError: If ligandInfo does not have at least one entry
     """
+    # Check if ligandInfo in config
     ligandInfo,  = check_info_for_args(config, "config", ["ligandInfo"], optional=True)
     
+    # Check each entry in ligandInfo
     for ligand in ligandInfo:
+        # Check if ligand is a dictionary
         if not isinstance(ligand, dict):
             raise TypeError("ligandInfo must be a list of dicts")
+        # Check if ligand has at least one entry
         if len(ligand) == 0:
             raise ValueError("ligandInfo must have at least one entry")
-        ligandName, protons, charge, toppar, mol2  = check_info_for_args(ligand, "ligand", ["ligandName", "protons", "charge", "toppar", "mol2"], optional=True)
+        
+        # Check each argument in the ligand dictionary
+        ligandName, protons, charge, toppar, mol2  = check_info_for_args(
+            ligand, "ligand", ["ligandName", "protons", "charge", "toppar", "mol2"], optional=True
+        )
+        
+        # Check if ligandName is a string
         if not isinstance(ligandName, str):
             raise TypeError("ligandName must be a string")
-        if not isinstance(protons, bool):
-            raise TypeError("protons must be a bool")
+        
+        # Check if protons, charge, toppar, and mol2 are booleans
+        for arg_value, arg_name in zip([protons, toppar, mol2], ["protons", "toppar", "mol2"]):
+            if not isinstance(arg_value, bool):
+                raise TypeError(f"{arg_name} must be a boolean")
+
+        # Check if charge is an int
         if not isinstance(charge, int):
             raise TypeError("charge must be an int")
-        if not isinstance(toppar, bool):
-            raise TypeError("toppar must be a bool")
-        if not isinstance(mol2, bool):
-            raise TypeError("mol2 must be a bool")
 
 #########################################################################
 def check_simulationInfo(config: dict) -> None:
@@ -113,18 +133,79 @@ def check_simulationInfo(config: dict) -> None:
         restraintInfo, = check_info_for_args(simulation, stepName, ["restraintInfo"], optional=True)
         if restraintInfo:
             check_restraints_options(restraintInfo, stepName)
+
+        clusterTrajectory, = check_info_for_args(simulation, stepName, ["clusterTrajectory"], optional=True)
+        if clusterTrajectory:
+            check_cluster_trajectory_options(clusterTrajectory, stepName)
+
+#########################################################################
+def check_cluster_trajectory_options(clusterTrajectory: dict, stepName: str) -> None:
+    """
+    Checks for options in clusterTrajectory.
+
+    Args:
+        clusterTrajectory (dict): A dictionary containing options for clustering a trajectory.
+        stepName (str): The name of the step.
+
+    Raises:
+        TypeError: If clusterTrajectory is not a dictionary.
+        ValueError: If clusterTrajectory is empty.
+        TypeError: If nClusters is not an integer.
+    """
+    # Check if clusterTrajectory is a dictionary
+    if not isinstance(clusterTrajectory, dict):
+        raise TypeError("clusterTrajectory in {stepName} must be a dict")
+    
+    # Check if clusterTrajectory has at least one entry
+    if len(clusterTrajectory) == 0:
+        raise ValueError("clusterTrajectory in {stepName} must contain some entries")
+    
+    # Check for required args for clustering a trajectory
+    nClusters, selection = check_info_for_args(clusterTrajectory, stepName, ["nClusters", "selection"], optional=False)
+    
+    # Check if nClusters is an integer
+    if not isinstance(nClusters, int):
+        raise TypeError("nClusters in {stepName} must be an int")
+    
+    # Check selection for clustering a trajectory
+    check_selection(selection, stepName)
+
 #########################################################################
 def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
+    """
+    Checks for options in restraintInfo.
+
+    Args:
+        restraintInfo (dict): A dictionary containing options for restraints.
+        stepName (str): The name of the step.
+
+    Raises:
+        TypeError: If restraintInfo is not a list.
+        ValueError: If restraintInfo is empty.
+        TypeError: If restraintType is not one of the following: POSITION, TORSION, DISTANCE, ANGLE.
+        ValueError: If restraintInfo does not contain any restraints.
+    """
+    # Check if restraintInfo is a list
     if not isinstance(restraintInfo, list):
         raise TypeError(f"restraintsInfo in {stepName} must be a list of restraints")
+    
+    # Check if restraintInfo has at least one entry
     if len(restraintInfo) == 0:
         raise ValueError(f"restraintsInfo is must contain some restraints")
+    
+    # Loop through each restraint in restraintInfo
     for restraint in restraintInfo:
-        print(restraint)
+        # Check for required args for restraints
         restraintType, selection, parameters = check_info_for_args(restraint, "restraint", ["restraintType", "selection", "parameters"], optional=False)
+        
+        # Check if restraintType is one of the following: POSITION, TORSION, DISTANCE, ANGLE
         if not restraintType.upper() in ["POSITION", "TORSION", "DISTANCE", "ANGLE"]:
             raise ValueError("restraintType must be one of the following:\n POSITION, DISTANCE, ANGLE, TORSION")
+        
+        # Check selection for restraints
         check_selection(selection, stepName)
+        
+        # Check restraint parameters
         check_restraint_parameters(restraintType, parameters)
 #########################################################################
 def check_restraint_parameters(restraintType: str, parameters: dict) -> None:

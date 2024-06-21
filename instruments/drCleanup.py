@@ -3,6 +3,7 @@ from os import path as p
 from shutil import copy, rmtree
 from pdbUtils import pdbUtils
 from typing import List, Dict, Union, Any, Optional
+import pandas as pd
 ######################################################################################################
 def clean_up_handler(batchConfig: dict) -> None:
     """
