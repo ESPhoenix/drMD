@@ -65,10 +65,15 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
         if bias["biasVar"].upper() == "RMSD":
             biasVariable: metadynamics.BiasVariable = gen_rmsd_bias_variable(bias, atomCoords, atomIndexes)
             biasVariables.append(biasVariable)
-        if bias["biasVar"].upper() == "DIHEDRAL":
+        elif bias["biasVar"].upper() == "DIHEDRAL":
             biasVariable: metadynamics.BiasVariable = gen_dihedral_bias_variable(bias, atomCoords, atomIndexes)
             biasVariables.append(biasVariable)
-
+        elif bias["biasVar"].upper() == "DISTANCE":
+            biasVariable: metadynamics.BiasVariable = gen_distance_bias_variable(bias, atomCoords, atomIndexes)
+            biasVariables.append(biasVariable)
+        elif bias["biasVar"].upper() == "ANGLE":
+            biasVariable: metadynamics.BiasVariable = gen_angle_bias_variable(bias, atomCoords, atomIndexes)
+            biasVariables.append(biasVariable)
     # Create metadynamics object and add bias variables as forces to the system
     meta: metadynamics.Metadynamics = metadynamics.Metadynamics(system=system,
                                      variables=biasVariables,
@@ -142,7 +147,40 @@ def get_atom_coords_for_metadynamics(prmtop: app.Topology, inpcrd: any) -> list:
 
     # Return the list of atom coordinates
     return atomCoords
+########################################################################################################
+def gen_angle_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: list) -> metadynamics.BiasVariable:
+    """
+    Generate an angle bias variable.
 
+    Parameters
+    ----------
+    bias : dict
+        The bias dictionary containing the angle parameters.
+    atomCoords : np.ndarray
+        The coordinates of all atoms in the system.
+    atomIndexes : list
+        The indexes of the atoms involved in the angle calculation.
+
+    Returns
+    -------
+    angleBiasVariable : openmm.CustomTorsionForce
+        The angle bias variable.
+    """
+
+    # Create an angle bias force
+    angleForce: openmm.CustomAngleForce = openmm.CustomAngleForce("theta")
+
+    # Add the atom indexes for the angle
+    angleForce.addAngle(atomIndexes[0],
+                          atomIndexes[1],
+                          atomIndexes[2])
+    
+    angleBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(force = angleForce,
+                                                     minValue = 0 * unit.degrees,
+                                                     maxValue = 180 * unit.degrees,
+                                                     biasWidth = 1 * unit.degrees,
+                                                     periodic = False)
+    return angleBiasVariable
 
 ########################################################################################################
 def gen_dihedral_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: list) -> metadynamics.BiasVariable:
@@ -166,7 +204,7 @@ def gen_dihedral_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: 
     
     ## generate a dihedral bias force:
     # Create a custom torsion force object
-    dihedralForce: openmm.CustomTorsionForce = openmm.CustomTorsionForce("theta")
+    dihedralForce: openmm.CustomTorsionForce = openmm.CustomTorsionForce("phi")
     
     # Add the atom indexes for the dihedral angle
     dihedralForce.addTorsion(atomIndexes[0],
@@ -183,7 +221,41 @@ def gen_dihedral_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: 
     
     return dihedralBiasVariable
 
+########################################################################################################
+def gen_distance_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: list) -> metadynamics.BiasVariable:
+    """
+    Generate a distance bias variable.
 
+    Parameters
+    ----------
+    bias : dict
+        The bias dictionary containing the distance parameters.
+    atomCoords : np.ndarray
+        The coordinates of all atoms in the system.
+    atomIndexes : list
+        The indexes of the atoms involved in the distance calculation.
+
+    Returns
+    -------
+    distanceBiasVariable : openmm.CustomTorsionForce
+        The distance bias variable.
+    """
+
+    # Create a distance bias force
+    distanceForce: openmm.CustomTorsionForce = openmm.CustomBondForce("0.5*k*(r-r0)^2")
+    distanceForce.addPerBondParameter("k")
+    distanceForce.addPerBondParameter("r0") 
+    # Add the atom indexes for the distance
+    distanceForce.addBond(atomIndexes[0],
+                             atomIndexes[1])
+    
+    distanceBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(force = distanceForce,
+                                                     minValue = 0 * unit.angstrom,
+                                                     maxValue = 100 * unit.angstrom,
+                                                     biasWidth = 1 * unit.angstrom,
+                                                     periodic = False)
+    
+    return distanceBiasVariable
 
 ########################################################################################################
 def gen_rmsd_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: list) -> metadynamics.BiasVariable:
