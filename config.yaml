@@ -78,11 +78,11 @@ simulationInfo:
       height: 2
       biasFactor: 5
       biases: 
-        - biasVar: "RMSD"
-          selection: 
-            keyword: "custom"
-            customSelection: 
-            - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
+      - biasVar: "RMSD"
+        selection: 
+          keyword: "custom"
+          customSelection: 
+          - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
     restraintInfo:
     - restraintType: "distance"
       selection: 

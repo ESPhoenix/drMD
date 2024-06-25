@@ -13,9 +13,14 @@ remove bool- just run if this if arg is there
 
 
 #### MetaDyanamics
-- distance MetaDyanamics    []
-- angle MetaDyanamics       []
+- distance MetaDyanamics    [x]
+- angle MetaDyanamics       [x]
 
 #### cleanUp
 Re-do all of this!
 move clustering here?
+
+#### analysis 
+Re-do 
+what do we actually want here
+should we remove this section for now?
