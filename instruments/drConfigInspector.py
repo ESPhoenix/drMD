@@ -1,12 +1,17 @@
 ## basic libraries
 import argpass
 import yaml
+import os
 from os import path as p
 import re
 ## clean code
 from typing import Tuple, Union
 from os import PathLike
 import multiprocessing as mp
+## drMD modules
+from instruments import drSpash
+## WellsWood modules
+from pdbUtils import pdbUtils
 #####################################################################################
 def read_and_validate_config() -> dict:
     """
@@ -19,15 +24,29 @@ def read_and_validate_config() -> dict:
     Returns:
     - config (dict)
     """
-
-    print("checking config file...")
+    print("-->\tChecking config file...")
     config: dict = read_input_yaml()
-    check_pathInfo(config)
-    check_generalInfo(config)
-    check_ligandInfo(config)
-    check_simulationInfo(config)
-    print("... config file is correct")
+
+    for function, infoName in zip([check_pathInfo, check_generalInfo, check_ligandInfo, check_simulationInfo],
+                                  ["pathInfo", "generalInfo", "ligandInfo", "simulationInfo"]):
+        try:
+            function(config)
+        except FileNotFoundError as e:
+            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+        except yaml.YAMLError as e:
+            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+        except KeyError as e:
+            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+        except TypeError as e:
+            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+        except ValueError as e:
+            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+
+    print("-->\tConfig file is correct")
     return config
+#####################################################################################
+def error_in_info(infoName):
+    print(f"-->\tError in config file!\n-->\tProblem found in the {infoName} section:")
 #####################################################################################
 def check_pathInfo(config: dict) -> None:
     """
@@ -55,15 +74,15 @@ def check_generalInfo(config: dict) -> None:
     ## check that generalInfo cpu arguments are int values and are positive
     for argValue, argName in zip([parallelCPU, subprocessCpus], ["parallelCPU", "subprocessCpus"]):
         if not isinstance(argValue, int):
-            raise TypeError(f"The config argument {argName} = {argValue} is not a an int type.")
+            raise TypeError(f"-->\tThe config argument {argName} = {argValue} is not a an int type.")
         if argValue < 1:
-            raise ValueError(f"The config argument {argName} = {argValue} must be a int greater than 1")
+            raise ValueError(f"-->\tThe config argument {argName} = {argValue} must be a int greater than 1")
     ## check that your computer has enough CPUs
     if parallelCPU * subprocessCpus > mp.cpu_count():
-        raise ValueError("totalCpuUseage argument exceeds your computers number of cores")
+        raise ValueError("-->\ttotalCpuUseage argument exceeds your computers number of cores")
     ## ensure that compatable platform has been chosen 
     if not platform in ["CUDA", "OpenCL", "CPU"]:
-        raise ValueError("Platform must be CUDA, OpenCL, or CPU")
+        raise ValueError("-->\tPlatform must be CUDA, OpenCL, or CPU")
 #########################################################################
 def check_ligandInfo(config: dict) -> None:
     """
@@ -80,15 +99,16 @@ def check_ligandInfo(config: dict) -> None:
     """
     # Check if ligandInfo in config
     ligandInfo,  = check_info_for_args(config, "config", ["ligandInfo"], optional=True)
-    
+    inputDir = config["pathInfo"]["inputDir"]
+
     # Check each entry in ligandInfo
     for ligand in ligandInfo:
         # Check if ligand is a dictionary
         if not isinstance(ligand, dict):
-            raise TypeError("ligandInfo must be a list of dicts")
+            raise TypeError("-->\tligandInfo must be a list of dicts")
         # Check if ligand has at least one entry
         if len(ligand) == 0:
-            raise ValueError("ligandInfo must have at least one entry")
+            raise ValueError("-->\tligandInfo must have at least one entry")
         
         # Check each argument in the ligand dictionary
         ligandName, protons, charge, toppar, mol2  = check_info_for_args(
@@ -97,16 +117,25 @@ def check_ligandInfo(config: dict) -> None:
         
         # Check if ligandName is a string
         if not isinstance(ligandName, str):
-            raise TypeError("ligandName must be a string")
+            raise TypeError("-->\tligandName must be a string")
         
         # Check if protons, charge, toppar, and mol2 are booleans
         for arg_value, arg_name in zip([protons, toppar, mol2], ["protons", "toppar", "mol2"]):
             if not isinstance(arg_value, bool):
-                raise TypeError(f"{arg_name} must be a boolean")
+                raise TypeError(f"-->\t{arg_name} must be a boolean")
 
         # Check if charge is an int
         if not isinstance(charge, int):
-            raise TypeError("charge must be an int")
+            raise TypeError("-->\tcharge must be an int")
+        
+        # Check if ligand is in input pdb file
+        inputPdbs = [file for file in os.listdir(inputDir) if file.endswith(".pdb")]
+        for inputPdb in inputPdbs:
+            inputDf = pdbUtils.pdb2df(p.join(inputDir, inputPdb))
+            if not ligandName in inputDf["RES_NAME"].values:
+                raise ValueError(f"-->\tLigand name \"{ligandName}\" not found in input file: {inputPdb}")
+
+
 
 #########################################################################
 def check_simulationInfo(config: dict) -> None:
@@ -118,9 +147,9 @@ def check_simulationInfo(config: dict) -> None:
     simulationInfo,  = check_info_for_args(config, "config", ["simulationInfo"], optional=False)
     ## ensure that simulationInfo is a non-zero-length list
     if not isinstance(simulationInfo, list):
-        raise TypeError("simulationInfo must be a list containing dicts")
+        raise TypeError("-->\tsimulationInfo must be a list containing dicts")
     if len(simulationInfo) == 0:
-        raise ValueError("simulationInfo must have at least one entry")
+        raise ValueError("-->\tsimulationInfo must have at least one entry")
     ## look through each entry in simulationInfo
     for simulation in simulationInfo:
         simulationType, stepName = check_shared_simulation_options(simulation)
@@ -138,6 +167,12 @@ def check_simulationInfo(config: dict) -> None:
         if clusterTrajectory:
             check_cluster_trajectory_options(clusterTrajectory, stepName)
 
+        ## check for illigal args
+        alowedArgsForSimulations = ["stepName", "simulationType", "duration", "maxIterations",
+                                     "timestep", "temp", "logInterval", "restraintInfo",
+                                       "metaDynamicsInfo", "clusterTrajectory"]
+        check_info_for_illigal_args(simulation, stepName, alowedArgsForSimulations)
+
 #########################################################################
 def check_cluster_trajectory_options(clusterTrajectory: dict, stepName: str) -> None:
     """
@@ -154,18 +189,18 @@ def check_cluster_trajectory_options(clusterTrajectory: dict, stepName: str) -> 
     """
     # Check if clusterTrajectory is a dictionary
     if not isinstance(clusterTrajectory, dict):
-        raise TypeError("clusterTrajectory in {stepName} must be a dict")
+        raise TypeError("-->\tclusterTrajectory in {stepName} must be a dict")
     
     # Check if clusterTrajectory has at least one entry
     if len(clusterTrajectory) == 0:
-        raise ValueError("clusterTrajectory in {stepName} must contain some entries")
+        raise ValueError("-->\tclusterTrajectory in {stepName} must contain some entries")
     
     # Check for required args for clustering a trajectory
     nClusters, selection = check_info_for_args(clusterTrajectory, stepName, ["nClusters", "selection"], optional=False)
     
     # Check if nClusters is an integer
     if not isinstance(nClusters, int):
-        raise TypeError("nClusters in {stepName} must be an int")
+        raise TypeError(f"-->\tnClusters in {stepName} must be an int")
     
     # Check selection for clustering a trajectory
     check_selection(selection, stepName)
@@ -187,11 +222,11 @@ def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
     """
     # Check if restraintInfo is a list
     if not isinstance(restraintInfo, list):
-        raise TypeError(f"restraintsInfo in {stepName} must be a list of restraints")
+        raise TypeError(f"-->\trestraintsInfo in {stepName} must be a list of restraints")
     
     # Check if restraintInfo has at least one entry
     if len(restraintInfo) == 0:
-        raise ValueError(f"restraintsInfo is must contain some restraints")
+        raise ValueError(f"-->\trestraintsInfo is must contain some restraints")
     
     # Loop through each restraint in restraintInfo
     for restraint in restraintInfo:
@@ -200,7 +235,7 @@ def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
         
         # Check if restraintType is one of the following: POSITION, TORSION, DISTANCE, ANGLE
         if not restraintType.upper() in ["POSITION", "TORSION", "DISTANCE", "ANGLE"]:
-            raise ValueError("restraintType must be one of the following:\n POSITION, DISTANCE, ANGLE, TORSION")
+            raise ValueError("-->\trestraintType must be one of the following:\n-->\tPOSITION, DISTANCE, ANGLE, TORSION")
         
         # Check selection for restraints
         check_selection(selection, stepName)
@@ -211,53 +246,63 @@ def check_restraints_options(restraintInfo: dict, stepName: str) -> None:
 def check_restraint_parameters(restraintType: str, parameters: dict) -> None:
     k, = check_info_for_args(parameters, "parameters", ["k"], optional=False)
     if not isinstance(k, (int, float)):
-        raise TypeError(f"restraint parameters must be a number")
+        raise TypeError(f"-->\k force constants parameters must be a number for all resraints")
     if k <= 0:
-        raise ValueError(f"restraint parameters must be positive")
+        raise ValueError(f"-->\tk force constants  parameters must be positive for all restraints")
 
     if restraintType.upper() == "TORSION":
         phi, = check_info_for_args(parameters, "parameters", ["phi"], optional=False)
         if not isinstance(phi, (int, float)):
-            raise TypeError(f"restraint parameters must be a number")
+            raise TypeError(f"-->\phi0 parameters must be a number for torsion restraints")
         if phi < -180 or phi > 180:
-            raise ValueError(f"restraint parameters must be between -180 and 180")
+            raise ValueError(f"-->\tphi0 parameters must be between -180 and 180 for torsion restraints")
         
     elif restraintType.upper() == "DISTANCE":
         r0, = check_info_for_args(parameters, "parameters", ["r0"], optional=False)
         if not isinstance(r0, (int, float)):
-            raise TypeError(f"restraint parameters must be a number")
+            raise TypeError(f"-->\r0  parameters must be a number for distance restraints")
         if r0 < 0:
-            raise ValueError(f"restraint parameters must be positive")
+            raise ValueError(f"-->\r0 parameters must be positive for distance restraints")
 
     elif restraintType.upper() == "ANGLE":
         theta0, = check_info_for_args(parameters, "parameters", ["theta0"], optional=False)
         if not isinstance(theta0, (int, float)):
-            raise TypeError(f"restraint parameters must be a number")
+            raise TypeError(f"-->\theta0  parameters must be a number for angle restraints")
         if theta0 < 0 or theta0 > 180:
-            raise ValueError(f"restraint parameters must be between 0 and 180")
+            raise ValueError(f"-->\theta0 parameters must be between 0 and 180 for angle restraints")
 
 #########################################################################
 def check_selection(selection: dict, stepName: str) -> None:
     keyword, = check_info_for_args(selection, "selection", ["keyword"], optional=False)
     if not isinstance(keyword, str):
-        raise TypeError(f"selection keywords incorrect in {stepName}, see README.md for more details")
+        raise TypeError(f"-->\tselection keywords incorrect in {stepName}, see README.md for more details")
     if not keyword in ["all", "protein", "ligands", "water", "ions", "custom"]:
-        raise ValueError(f"selection keywords incorrect in {stepName}, see README.md for more details")
+        raise ValueError(f"-->\tselection keywords incorrect in {stepName}, see README.md for more details")
 
     if keyword == "custom":
         customSelection, = check_info_for_args(selection, stepName, ["customSelection"], optional=False)
         if not isinstance(customSelection, list):
-            raise TypeError(f"selectionSyntax in {stepName} must be a list of dcits")
+            raise TypeError(f"-->\tselectionSyntax in {stepName} must be a list of dcits")
         for selection in customSelection:
             chainId, residueName, residueNumber, atomName = check_info_for_args(selection, stepName, ["CHAIN_ID", "RES_NAME", "RES_ID", "ATOM_NAME"], optional=False)
             if not isinstance(chainId, (str,list)):
-                raise TypeError("CHAIN_ID must be a string or list of strings")
+                raise TypeError(f"""-->\tError in custom selection syntax in {stepName}:
+-->\tCHAIN_ID must be a string, a list of strings or the keyword 'all'
+                                """)
             if not isinstance(residueName, (str,list)):
-                raise TypeError("RES_NAME must be a string or list of strings")
+                raise TypeError(f"""-->\tError in custom selection syntax in {stepName}:
+-->\tRES_NAME must be a string, a list of strings or the keyword 'all'
+                                """)
+                
             if not isinstance(residueNumber, (int,list)):
-                raise TypeError("RES_ID must be an int or list of ints")
+                raise TypeError(f"""-->\tError in custom selection syntax in {stepName}:
+-->\tRES_ID must be an int or a list of ints or the keyword 'all'
+                                """)
             if not isinstance(atomName, (str,list)):
-                raise TypeError("ATOM_NAME must be a string or list of strings")
+                raise TypeError(f"""-->\tError in custom selection syntax in {stepName}:
+-->\tATOM_NAME must be a string, a list of strings or the keyword 'all'
+                                """)
+
 #########################################################################
 def check_meta_options(simulation: dict, stepName: str) -> None:
     ### TODO: rework how metaDynamicsInfo works
@@ -277,14 +322,14 @@ def check_nvt_npt_options(simulation: dict, stepName: str) -> None:
 #########################################################################
 def check_time_input(timeInputValue: str, timeInputName: str, stepName: str) -> None:
     if not isinstance(timeInputValue, str):
-        raise TypeError(f"{timeInputName} in {stepName} must be in the format \"10 ns\"")
+        raise TypeError(f"-->\t{timeInputName} in {stepName} must be in the format \"10 ns\"")
     timeInputData = timeInputValue.split()
     try:
         numberAsFloat = int(timeInputData[0])
     except:
-        raise ValueError(f"{timeInputName} in {stepName} must be in the format \"10 ns\"")
+        raise ValueError(f"-->\t{timeInputName} in {stepName} must be in the format \"10 ns\"")
     if not timeInputData[1] in ["fs","ps","ns","ms"]:
-        raise ValueError(f"{timeInputName} in {stepName} must be in the format \"10 ns\"")
+        raise ValueError(f"-->\t{timeInputName} in {stepName} must be in the format \"10 ns\"")
 
 #########################################################################
 def check_shared_simulation_options(simulation) -> str:
@@ -292,17 +337,17 @@ def check_shared_simulation_options(simulation) -> str:
     stepName, simulationType, temp = check_info_for_args(simulation, "simulation", ["stepName", "simulationType", "temp"], optional=False)
     ## make sure stepName is correct
     if not isinstance(stepName, str):
-        raise TypeError(f"stepName {str(stepName)} must be a a string")
+        raise TypeError(f"-->\tstepName {str(stepName)} must be a a string")
     if " " in stepName:
-        raise ValueError(f"No whitespace allowed in stepName {stepName}")
+        raise ValueError(f"-->\tNo whitespace allowed in stepName {stepName}")
     ## make sure simulationType is an allowed value
     if not simulationType.upper() in ["EM", "NVT", "NPT", "META"]:
-        raise ValueError(f"simulationType in {stepName} must be the following:\n EM, NVT, NPT, META")
+        raise ValueError(f"-->\tsimulationType in {stepName} must be the following:\n-->\tEM, NVT, NPT, META")
     ## make sure temp is an int
     if not isinstance(temp, int):
-        raise TypeError(f"Temperature in {stepName} must be an int")
+        raise TypeError(f"-->\tTemperature in {stepName} must be an int")
     if temp < 0:
-        raise ValueError(f"Temperature in {stepName} must be a positive int")
+        raise ValueError(f"-->\tTemperature in {stepName} must be a positive int")
 
     return simulationType, stepName
 
@@ -319,9 +364,21 @@ def check_info_for_args(info: dict, infoName: str,  argNames: list, optional: bo
         isArg, argValue = check_dict_for_key(info, argName)
         ## if a required arg is not in the dict, raise a KeyError
         if not isArg and not optional:
-            raise KeyError(f"Argument {argName} not found in {infoName}")
+            raise KeyError(f"-->\tArgument {argName} not found in {infoName}")
         unpackedDicts.append(argValue)
     return unpackedDicts
+
+#########################################################################
+def check_info_for_illigal_args(info: dict, infoName: str,  allowedKeys: list) -> None:
+    """
+    Simple check to see if list of keys is in a dict
+    If optional is set to "False", raises a KeyError
+    If all is as expected returns a list of values to be unpacked
+    """
+    keysInInfo = list(info.keys())
+    illegalKeys = list(set(keysInInfo) - set(allowedKeys))
+    if len(illegalKeys) > 0:
+        raise ValueError(f"-->\t{infoName} contains illegal keys: {illegalKeys}")
 #########################################################################
 def check_dict_for_key(info: dict, key: any) -> Tuple[bool, any]:
     """
@@ -341,10 +398,10 @@ def validate_path(argName: str, argPath: Union[PathLike, str]) -> None:
     Check to see if the path exists
     """
     if  not isinstance(argPath, (PathLike, str)) :
-        raise TypeError(f"The config argument {argName} = {argPath} is not a PathLike.")
+        raise TypeError(f"-->\tThe config argument {argName} = {argPath} is not a PathLike.")
     # Check if the path exists
     if not p.exists(argPath):
-        raise FileNotFoundError(f"The config argument {argName} = {argPath} does not exist.")
+        raise FileNotFoundError(f"-->\tThe config argument {argName} = {argPath} does not exist.")
 #####################################################################################
 def read_input_yaml() -> dict:
     """
@@ -366,9 +423,9 @@ def read_input_yaml() -> dict:
             config: dict = yaml.safe_load(yamlFile)
             return config
     except FileNotFoundError:
-        raise FileNotFoundError(f"config file {configFile} not found")
+        raise FileNotFoundError(f"-->\tconfig file {configFile} not found")
     except yaml.YAMLError as exc:
-        raise yaml.YAMLError("Error parsing YAML file:", exc)
+        raise yaml.YAMLError("-->\tError parsing YAML file:", exc)
 
 
 
@@ -376,6 +433,7 @@ def read_input_yaml() -> dict:
 def read_config(configYaml: str) -> dict:
     """
     Reads a config.yaml file and returns its contents as a dictionary.
+    This is performed by drOperator on automatically generated configs,
 
     Args:
         configYaml (str): The path to the config.yaml file.
@@ -390,34 +448,3 @@ def read_config(configYaml: str) -> dict:
     return config
 
 #####################################################################################
-def validate_config(config: dict) -> None:
-    """
-    Validates the configuration dictionary.
-
-    Args:
-        config (dict): The configuration dictionary.
-
-    Raises:
-        SystemExit: If the number of proteins in the config does not match nProteins,
-                    if the number of ligands in the config does not match nLigands,
-                    or if the input PDB file does not exist.
-
-    Returns:
-        None
-    """
-    # Check if the number of proteins in the config matches nProteins
-    if not config["proteinInfo"]["nProteins"] == len(config["proteinInfo"]["proteins"]):
-        print("Number of proteins in config does not match nProteins")
-        exit()
-
-    # Check if the number of ligands in the config matches nLigands
-    if "ligandInfo" in config and config["ligandInfo"] is not None:
-        if not config["ligandInfo"]["nLigands"] == len(config["ligandInfo"]["ligands"]):
-            print("Number of ligands in config does not match nLigands")
-            exit()
-
-    # Check if the input PDB file exists
-    if not p.isfile(config["pathInfo"]["inputPdb"]):
-        print("Input PDB does not exist")
-        exit()
-

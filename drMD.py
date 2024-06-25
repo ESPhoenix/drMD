@@ -7,11 +7,11 @@ import yaml
 import argpass
 ## CUSTOM DR MD MODULES
 from pdbUtils import pdbUtils
-import instruments.drPrep as drPrep
-import instruments.drCleanup as drCleanup
-import instruments.drOperator as drOperator
-import instruments.drConfigInspector as drConfigInspector
-
+from  instruments import drPrep 
+from  instruments import drCleanup 
+from  instruments import drOperator 
+from  instruments import drConfigInspector 
+from  instruments import drSpash
 ## Multiprocessing
 import concurrent.futures as cf
 from tqdm import tqdm
@@ -33,10 +33,11 @@ def main():
     Returns:
         Nothing
     '''
-    
-    ## Read config.yaml into a dictionary and run checks on it
-    batchConfig = drConfigInspector.read_and_validate_config()
+    ## print drMD logo
+    drSpash.print_drMD_logo()
 
+    ## get batchConfig
+    batchConfig = drConfigInspector.read_and_validate_config()
     ## unpack batchConfig into variables for this function
     outDir = batchConfig["pathInfo"]["outputDir"]
     yamlDir = p.join(outDir,"00_configs")

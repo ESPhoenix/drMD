@@ -3,8 +3,8 @@ import os
 from os import path as p
 from shutil import rmtree
 ## OPEN MM LIBS
-import simtk.openmm.app as app
-import simtk.openmm as openmm
+import openmm.app as app
+import openmm as openmm
 import simtk.unit  as unit
 ## drMD UTILS
 from instruments import drPrep
@@ -83,13 +83,15 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
                                                            i = i, 
                                                            outDir=outDir)
 
+
+        pdbName = p.splitext(p.basename(pdbFile))[0]
         # Skip or resume simulation
         if skipResumeSim == "skip":
             stepName: str = sim["stepName"]
-            print(f"Skipping {stepName}")
+            print(f"-->\tSkipping {stepName} for run:\t {pdbName}")
             continue
         if skipResumeSim == "resume":
-            print(f"Resuming {stepName} from checkpoint file")
+            print(f"-->\tResuming {stepName} from checkpoint file for run:\t {pdbName}")
 
         # Set up directories
         os.makedirs(simDir,exist_ok=True)

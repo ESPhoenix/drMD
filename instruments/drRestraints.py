@@ -4,7 +4,7 @@ from os import path as p
 from pdbUtils import pdbUtils
 import math
 ## OPENMM LIBS
-import simtk.openmm as openmm
+import openmm as openmm
 import simtk.unit as unit
 ## CUSTOM drMD LIBS
 import instruments.drSelector as drSelector

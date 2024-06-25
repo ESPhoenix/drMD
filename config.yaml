@@ -33,9 +33,7 @@ simulationInfo:
       parameters:
         k: 1000
       selection:
-        keyword: "custom"
-        customSelection:             
-        - {CHAIN_ID: "A", RES_NAME: "all",RES_ID: [1,20], ATOM_NAME: "all"}
+        keyword: "protein"
 
     - restraintType: "position"
       selection: 
@@ -98,6 +96,8 @@ simulationInfo:
         keyword: "protein"
       parameters:
         k: 1000
+
+
     clusterTrajectory: 
       nClusters: 10
       selection:
@@ -130,6 +130,7 @@ simulationInfo:
   #   temp: 300
 
 ########################################################################
+
 cleanUpInfo:
   getEndpointPdbs: True
   removeWaters : True

@@ -3,9 +3,9 @@ import os
 from os import path as p
 import numpy as np
 ## OPEN MM LIBS
-import simtk.openmm.app as app
-from simtk.openmm.app import metadynamics
-import simtk.openmm as openmm
+import openmm.app as app
+from openmm.app import metadynamics
+import openmm as openmm
 import  simtk.unit  as unit
 ## CUSTOM drMD LIBS
 from instruments import drSim
