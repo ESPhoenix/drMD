@@ -24,7 +24,6 @@ def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
 
     # Initialize list of atom indexes
     atomIndexes: List[int] = []
-    print(selection)
     # Check selection type and find required atom indexes
     if selection["keyword"] == "all":
         # Find indexes for all atoms

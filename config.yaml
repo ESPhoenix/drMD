@@ -58,81 +58,69 @@ simulationInfo:
         keyword: "ligands"  
       parameters:
         k: 1000
-########################################################################
-  - stepName: "04_NpT_slowIntergrator"
-    simulationType: "NpT"
-    duration: "10 ps"
-    timestep: "0.5 fs"
-    temp: 300
-    logInterval: "1 ps"
-########################################################################
-  - stepName: "05_RMSD_Metadynamics_Dummy"
-    simulationType: "Meta"
-    duration: "100 ps"
-    timestep: "2 fs"
-    temp: 400
-    logInterval: "5 ps"
-    metaDynamicsInfo:
-      height: 2
-      biasFactor: 5
-      biases: 
-      - biasVar: "RMSD"
-        selection: 
-          keyword: "custom"
-          customSelection: 
-          - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
-    restraintInfo:
-    - restraintType: "distance"
-      selection: 
-        keyword: "custom"
-        customSelection:
-        - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "P"}
-        - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C8M"}
-      parameters:
-        r0: 3
-        k: 1000
-    - restraintType: "position"
-      selection:
-        keyword: "protein"
-      parameters:
-        k: 1000
+# ########################################################################
+#   - stepName: "04_NpT_slowIntergrator"
+#     simulationType: "NpT"
+#     duration: "10 ps"
+#     timestep: "0.5 fs"
+#     temp: 300
+#     logInterval: "1 ps"
+# ########################################################################
+#   - stepName: "05_RMSD_Metadynamics_Dummy"
+#     simulationType: "Meta"
+#     duration: "100 ps"
+#     timestep: "2 fs"
+#     temp: 400
+#     logInterval: "5 ps"
+#     metaDynamicsInfo:
+#       height: 2
+#       biasFactor: 5
+#       biases: 
+#       - biasVar: "RMSD"
+#         selection: 
+#           keyword: "custom"
+#           customSelection: 
+#           - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
+#     restraintInfo:
+#     - restraintType: "distance"
+#       selection: 
+#         keyword: "custom"
+#         customSelection:
+#         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "P"}
+#         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C8M"}
+#       parameters:
+#         r0: 3
+#         k: 1000
+#     - restraintType: "position"
+#       selection:
+#         keyword: "protein"
+#       parameters:
+#         k: 1000
 
+################################################
 
-    clusterTrajectory: 
-      nClusters: 10
-      selection:
-        keyword: "custom"
-        customSelection: 
-        - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
-########################################################################
-
-
-
-
-  # - stepName: "05_NpT_equilibriation"
-  #   simulationType: "NpT"
-  #   duration: "1 ns"
-  #   timestep: "2 fs"
-  #   temp: 300
-  #   clusterTrajectory: 
-  #     clusterBool: True
-  #     nClusters: 10
+postSimulationInfo:
+  # clusterInfo:
+  #   stepNames: ["05_RMSD_Metadynamics_Dummy", "03_NpT_pre-equilibriation"] 
+  #   nClusters: 3
+  #   clusterBy:
   #     selection:
-  #       type: "residue"
-  #       input: 
-  #       - ["A","FMN","248"]
-  #   logInterval: "10 ps"
-  # - stepName: "05_NpT_production_MD"
-  #   type: "NpT"
-  #   duration: "10 ns"
-  #   timestep: "2 fs"
-  #   freezeHeavy: False
-  #   temp: 300
-
-########################################################################
-
-cleanUpInfo:
-  getEndpointPdbs: True
-  removeWaters : True
-  removeIons : True
-  keepFileNames: True
+  #       keyword: "custom"
+  #       customSelection: 
+  #       - {CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
+  #   removeAtoms:
+  #   - selection:
+  #     keyword: "water"
+  #   - selection:
+  #     keyword: "ions"
+  #   collate: True
+  endPointInfo:
+    stepNames: ["03_NpT_pre-equilibriation"]
+    removeAtoms:
+    - selection:
+      keyword: "water"
+    - selection:
+      keyword: "ions"
+    - selection:
+      keyword: "ligands"
+    collate: True

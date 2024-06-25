@@ -221,9 +221,11 @@ def run_npt(prmtop: str, inpcrd: str, sim: dict, saveFile: str, simDir: str, pla
     # run NVT simulation
     simulation.step(sim["nSteps"])
 
+    # find name to call outFiles
+    protName = p.basename(p.dirname(simDir))
     # save result as pdb - reset chain and residue Ids
     state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
-    nptPdb: str = p.join(simDir, "NpT_final_geom.pdb")
+    nptPdb: str = p.join(simDir, f"{protName}.pdb")
     with open(nptPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     drFixer.reset_chains_residues(refPdb, nptPdb)
@@ -309,10 +311,11 @@ def run_nvt(
 
     # Run NVT simulation
     simulation.step(sim["nSteps"])
-
-    # Save result as pdb - reset chain and residue Ids
+    # find name to call outFiles
+    protName = p.basename(p.dirname(simDir))
+    # save result as pdb - reset chain and residue Ids
     state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
-    nvtPdb: str = p.join(simDir, "NVT_final_geom.pdb")
+    nvtPdb: str = p.join(simDir, f"{protName}.pdb")
     with open(nvtPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     drFixer.reset_chains_residues(refPdb, nvtPdb)
@@ -372,10 +375,11 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, simDir: str, pl
     # Run energy minimisation
     simulation.minimizeEnergy(maxIterations=sim['maxIterations'])
 
-    # Save result as pdb - reset chain and residue Ids
-    state: openmm.State = simulation.context.getState(getPositions=True,
-                                                      getEnergy=True)
-    minimisedPdb: str = p.join(simDir, "minimised_geom.pdb")
+    # find name to call outFiles
+    protName = p.basename(p.dirname(simDir))
+    # save result as pdb - reset chain and residue Ids
+    state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
+    minimisedPdb: str = p.join(simDir, f"{protName}.pdb")
     with open(minimisedPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology,
                                      state.getPositions(),
