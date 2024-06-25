@@ -25,8 +25,20 @@ def read_and_validate_config() -> dict:
     - config (dict)
     """
     print("-->\tChecking config file...")
-    config: dict = read_input_yaml()
 
+    try:
+        config: dict = read_input_yaml()
+    except FileNotFoundError as e:
+        drSpash.print_config_error() ; print(e) ; exit(1)
+    except yaml.YAMLError as e:
+        drSpash.print_config_error() ; print(e) ; exit(1)
+    except KeyError as e:
+        drSpash.print_config_error() ; print(e) ; exit(1)
+    except TypeError as e:
+        drSpash.print_config_error() ; print(e) ; exit(1)
+    except ValueError as e:
+        drSpash.print_config_error() ; print(e) ; exit(1)
+        
     for function, infoName in zip([check_pathInfo, check_generalInfo, check_ligandInfo, check_simulationInfo],
                                   ["pathInfo", "generalInfo", "ligandInfo", "simulationInfo"]):
         try:

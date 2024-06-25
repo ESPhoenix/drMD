@@ -64,3 +64,4 @@ def print_config_error() -> None:
 
 if __name__ == "__main__":
     print_drMD_logo()
+    print_config_error()
