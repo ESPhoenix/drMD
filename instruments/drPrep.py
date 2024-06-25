@@ -189,8 +189,8 @@ def split_input_pdb(inputPdb: str, config: dict, outDir: str) -> None:
     # Read whole pdb into a df
     pdbDf = pdbUtils.pdb2df(inputPdb)
     # Write each ligand to a separate pdb file
-    ligandsDict: List[dict] = config["ligandInfo"]["ligands"]
-    for ligand in ligandsDict:
+    ligandsInfo: List[dict] = config["ligandInfo"]
+    for ligand in ligandsInfo:
         ligandName: str = ligand["ligandName"]
         ligPrepDir: str = p.join(outDir, ligandName)
         os.makedirs(ligPrepDir, exist_ok=True)
@@ -367,17 +367,17 @@ def prepare_ligand_parameters(config: dict, outDir: str, prepLog: str = None) ->
     This function reads the inputs from the configuration file and prepares the ligand parameters. It creates a directory to save the parameter files and initializes a list to store the PDB files and a dictionary to store all the information. For each ligand in the configuration file, it finds the files and directories, performs ligand protonation, generates the ligand mol2 file, and creates the ligand toppar file. The function returns the list of ligand PDB files and the dictionary containing the ligand file information.
     """
     # read inputs from config file
-    ligandsDict: dict = config["ligandInfo"]["ligands"]
+    ligandsInfo: dict = config["ligandInfo"]
     inputDir: str = config["pathInfo"]["inputDir"]
     mainDir: str = p.dirname(config["pathInfo"]["outputDir"])
     # create a dir to save parameter files in (saves re-running on subsequent runs)
     ligParamDir: str = p.join(mainDir,"01_ligand_parameters")
     os.makedirs(ligParamDir,exist_ok=True)
-    # initialise list to store pdb files and dict to store all info
+    # initialise list to store pdb files and dict to store all infod
     ligandPdbs: list = []
     ligandFileDict: dict = {}
     # for each ligand in config
-    for ligand in ligandsDict:
+    for ligand in ligandsInfo:
         ligFileDict: dict = {}
         # find files and directories
         ligandName: str = ligand["ligandName"]

@@ -3,7 +3,6 @@
 - metaDynamicsInfo            [x]
 
 #### drClusterizer
-remove bool- just run if this if arg is there 
 
 #### drSelector
 - cope with single dict input [x]
@@ -20,7 +19,3 @@ remove bool- just run if this if arg is there
 Re-do all of this!
 move clustering here?
 
-#### analysis 
-Re-do 
-what do we actually want here
-should we remove this section for now?

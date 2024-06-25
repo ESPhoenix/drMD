@@ -2,8 +2,8 @@
 import os
 from os import path as p
 ## OPEN MM LIBS
-import simtk.openmm.app as app
-import simtk.openmm as openmm
+import openmm.app as app
+import openmm as openmm
 import  simtk.unit  as unit
 ## CUSTOM LIBS
 from  instruments import drRestraints
