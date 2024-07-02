@@ -29,30 +29,30 @@ def read_and_validate_config() -> dict:
     try:
         config: dict = read_input_yaml()
     except FileNotFoundError as e:
-        drSpash.print_config_error() ; print(e) ; exit(1)
+        drSpash.print_config_error(e) 
     except yaml.YAMLError as e:
-        drSpash.print_config_error() ; print(e) ; exit(1)
+        drSpash.print_config_error(e) 
     except KeyError as e:
-        drSpash.print_config_error() ; print(e) ; exit(1)
+        drSpash.print_config_error(e) 
     except TypeError as e:
-        drSpash.print_config_error() ; print(e) ; exit(1)
+        drSpash.print_config_error(e) 
     except ValueError as e:
-        drSpash.print_config_error() ; print(e) ; exit(1)
+        drSpash.print_config_error(e) 
         
     for function, infoName in zip([check_pathInfo, check_generalInfo, check_ligandInfo, check_simulationInfo],
                                   ["pathInfo", "generalInfo", "ligandInfo", "simulationInfo"]):
         try:
             function(config)
         except FileNotFoundError as e:
-            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+            drSpash.print_config_error(e) 
         except yaml.YAMLError as e:
-            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+            drSpash.print_config_error(e) 
         except KeyError as e:
-            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+            drSpash.print_config_error(e) 
         except TypeError as e:
-            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+            drSpash.print_config_error(e) 
         except ValueError as e:
-            drSpash.print_config_error() ; error_in_info(infoName) ; print(e) ; exit(1)
+            drSpash.print_config_error(e) 
 
     print("-->\tConfig file is correct")
     return config

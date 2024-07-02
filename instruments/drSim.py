@@ -9,8 +9,8 @@ import  simtk.unit  as unit
 from  instruments import drRestraints
 from  instruments import drCheckup 
 from  instruments import drClusterizer
-from instruments import drFixer
-
+from  instruments import drFixer
+from  instruments import drTriage
 ###########################################################################################
 def init_system(prmtop: app.Topology) -> openmm.System:
     """
@@ -43,7 +43,7 @@ def init_system(prmtop: app.Topology) -> openmm.System:
     return system
 
 ###########################################################################################
-def process_sim_data(sim: dict, timescale: dict) -> dict:
+def process_sim_data(sim: dict) -> dict:
     """
     Reads simulation variables from config file and processes them.
 
@@ -51,14 +51,21 @@ def process_sim_data(sim: dict, timescale: dict) -> dict:
     ----------
     sim : dict
         Dictionary containing simulation variables.
-    timescale : dict
-        Dictionary mapping time units to their corresponding values.
 
     Returns
     -------
     sim : dict
         Updated dictionary with processed simulation variables.
     """
+
+    if "processed" in sim:
+        return sim
+
+    # Set up unit translator
+    timescale: dict = {"fs":unit.femtoseconds,
+                 "ps":unit.picoseconds,
+                 "ns":unit.nanoseconds}
+    
     # Read timestep data and process it
     timestepData = sim["timestep"].split()
     timestep: unit.Quantity = float(timestepData[0]) * timescale[timestepData[1]]
@@ -72,8 +79,6 @@ def process_sim_data(sim: dict, timescale: dict) -> dict:
     logInterval: unit.Quantity = float(logIntervalData[0]) * timescale[logIntervalData[1]]
     logIntervalInSteps: int = int(round(logInterval / timestep))
 
-    # Print log interval in steps
-    print(logIntervalInSteps)
 
     # Calculate number of steps
     nSteps: int = int(duration / timestep)
@@ -86,7 +91,7 @@ def process_sim_data(sim: dict, timescale: dict) -> dict:
 
     # Update sim dictionary with processed variables
     sim.update({
-        "timeStep": timestep,
+        "timestep": timestep,
         "duration": duration,
         "nSteps": nSteps,
         "nLogSteps": nLogSteps,
@@ -94,6 +99,7 @@ def process_sim_data(sim: dict, timescale: dict) -> dict:
         "logInterval": logIntervalInSteps
     })
 
+    sim["processed"] = True
     return sim
 ###########################################################################################
 def init_reporters(simDir: str, nSteps: int, reportInterval) -> dict:
@@ -174,7 +180,8 @@ def load_simulation_state(simulation: app.Simulation, saveFile: str) -> app.Simu
     # Return the modified simulation object
     return simulation
 ###########################################################################################
-def run_npt(prmtop: str, inpcrd: str, sim: dict, saveFile: str, simDir: str, platform: openmm.Platform, refPdb: str) -> str:
+@drTriage.triage_handler(drTriage.run_triage_simulation, max_retries=5)
+def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
     """
     Run a simulation at constant pressure (NpT) step.
 
@@ -198,14 +205,27 @@ def run_npt(prmtop: str, inpcrd: str, sim: dict, saveFile: str, simDir: str, pla
     if specified in the simulation parameters, and saves the simulation state as an
     XML file.
     """
-    print("Running NpT Step!")
+    stepName = sim["stepName"]
+    print(f"Running Step:\t{stepName}")
+
+    sim = process_sim_data(sim)
+
+    # for key in sim:
+    #     print(f"\t{key}:\t{sim[key]}")
+
+
+    ## create simluation directory
+    simDir: str = p.join(outDir, sim["stepName"])
+    os.makedirs(simDir, exist_ok=True)
+
     ## initialise a new system from parameters
     system: openmm.System = init_system(prmtop)
     ## deal with any restraints
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
-    # add constant pressure force to system (makes this an NpT simulation)
-    system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
-    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
+    if sim["simulationType"].upper() == "NPT":
+        # add constant pressure force to system (makes this an NpT simulation)
+        system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
+    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timestep"])
     simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # set up intergrator and system
     # load state from previous simulation (or continue from checkpoint)
@@ -241,100 +261,10 @@ def run_npt(prmtop: str, inpcrd: str, sim: dict, saveFile: str, simDir: str, pla
     saveXml: str = p.join(simDir, "NpT_step.xml")
     simulation.saveState(saveXml)
     return saveXml
-###########################################################################################
-def run_nvt(
-        prmtop: str,
-        inpcrd: str,
-        sim: dict,
-        saveFile: str,
-        simDir: str,
-        platform: openmm.Platform,
-        refPdb: str
-) -> str:
-    """
-    Run a simulation at constant volume (NVT) step.
-
-    Args:
-        prmtop (str): The path to the topology file.
-        inpcrd (str): The path to the coordinates file.
-        sim (dict): The simulation parameters.
-        saveFile (str): The path to the checkpoint or XML file.
-        simDir (str): The path to the simulation directory.
-        platform (openmm.Platform): The simulation platform.
-        refPdb (str): The path to the reference PDB file.
-
-    Returns:
-        str: The path to the XML file containing the final state of the simulation.
-
-    This function runs a simulation at constant volume (NVT) step. The function
-    initializes the system, handles any restraints, checks the forces applied to the
-    system, sets up the integrator and system, loads the state from a checkpoint or XML
-    file, sets up reporters, runs the simulation, saves the final geometry as a PDB file,
-    resets the chain and residue Ids, runs drCheckup, performs trajectory clustering if
-    specified in the simulation parameters, and saves the simulation state as an XML file.
-    """
-    print("Running NVT Step!")
-
-    # Initialize a new system from parameters
-    system: openmm.System = init_system(prmtop)
-
-    # Deal with any restraints
-    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
-
-    # Check forces
-    for i in range(system.getNumForces()):
-        force: openmm.Force = system.getForce(i)
-        print("Force", i, "type:", type(force).__name__)
-        # If you want to explore properties of specific forces, you can add more detailed checks
-        if isinstance(force, openmm.CustomExternalForce):
-            print("  - Energy expression:", force.getEnergyFunction())
-            print("  - Number of global parameters:", force.getNumGlobalParameters())
-            for j in range(force.getNumGlobalParameters()):
-                parameterName = force.getGlobalParameterName(j)
-                print("    - Global parameter:", parameterName)
-
-    # Set up integrator and system
-    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
-    simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
-
-    # Load state from previous simulation (or continue from checkpoint)
-    simulation: app.Simulation = load_simulation_state(simulation, saveFile)
-
-    # Set up reporters
-    totalSteps: int = simulation.currentStep + sim["nSteps"]
-    reportInterval: int = sim["logInterval"]
-    reporters: dict = init_reporters(simDir=simDir,
-                                     nSteps=totalSteps,
-                                     reportInterval=reportInterval)
-    for rep in reporters:
-        simulation.reporters.append(reporters[rep][0])
-
-    # Run NVT simulation
-    simulation.step(sim["nSteps"])
-    # find name to call outFiles
-    protName = p.basename(p.dirname(simDir))
-    # save result as pdb - reset chain and residue Ids
-    state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
-    nvtPdb: str = p.join(simDir, f"{protName}.pdb")
-    with open(nvtPdb, 'w') as output:
-        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-    drFixer.reset_chains_residues(refPdb, nvtPdb)
-
-    # Run drCheckup
-    drCheckup.check_vitals(simDir, reporters["vitals"][1], reporters["progress"][1])
-
-    # Run trajectory clustering
-    if "clusterTrajectory" in sim and sim["clusterTrajectory"]["clusterBool"]:
-        drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
-
-    # Save simulation as XML
-    saveXml: str = p.join(simDir, "NVT_step.xml")
-    simulation.saveState(saveXml)
-
-    return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, simDir: str, platform: openmm.Platform, refPdb: str) -> str:
+def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, platform: openmm.Platform, refPdb: str, saveFile: str) -> str:
+
     """
     Run energy minimisation on a system.
 
@@ -355,11 +285,20 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, simDir: str, pl
     state as an XML file, and returns the path to the XML file.
     """
     print("Running Energy Minimisation!")
+    ## create simluation directory
+    simDir: str = p.join(outDir, sim["stepName"])
+    os.makedirs(simDir, exist_ok=True)
+
+
     # Initialize the system
     system: openmm.System = init_system(prmtop)
 
+
+    if isinstance(sim["temp"], int):
+        sim["temp"] = sim["temp"] * unit.kelvin
+
     # Set up integrator and simulation
-    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"]*unit.kelvin,
+    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"],
                                                                   1/unit.picosecond,
                                                                   0.004*unit.picoseconds)
     simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology,

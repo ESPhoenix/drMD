@@ -1,3 +1,5 @@
+from typing import Optional
+
 def print_drMD_logo() -> None:
     """
     Prints the DRMD logo.
@@ -34,7 +36,7 @@ d::::::ddddd::::::ddr:::::r            M::::::M               M::::::MDDD:::::DD
 
 
 
-def print_config_error() -> None:
+def print_config_error(error: Optional[str] = None) -> None:
     """
     Prints an error message indicating that the config file was not found.
 
@@ -60,6 +62,9 @@ def print_config_error() -> None:
 ░                                                                                           
           """
           +resetTextColor)
+    if error is not None:
+      print(f"-->\t{error}")
+    exit(1)
 
 
 if __name__ == "__main__":
