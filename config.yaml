@@ -41,23 +41,23 @@ simulationInfo:
       parameters:
         k: 1000
 ########################################################################
-  - stepName: "03_NpT_pre-equilibriation"
+  - stepName: "03_this_will_explode"
     simulationType: "NpT"
-    duration: "100 ps"
+    duration: "300 ps"
     timestep: "2 fs"
-    temp: 300
+    temp: 1400
     logInterval: "10 ps"
-    restraintInfo:
-    - restraintType: "position"
-      selection:
-        keyword: "protein"
-      parameters: 
-        k: 1000
-    - restraintType: "position"
-      selection: 
-        keyword: "ligands"  
-      parameters:
-        k: 1000
+    # restraintInfo:
+    # - restraintType: "position"
+    #   selection:
+    #     keyword: "protein"
+    #   parameters: 
+    #     k: 1000
+    # - restraintType: "position"
+    #   selection: 
+    #     keyword: "ligands"  
+    #   parameters:
+    #     k: 1000
 # ########################################################################
 #   - stepName: "04_NpT_slowIntergrator"
 #     simulationType: "NpT"
@@ -99,28 +99,28 @@ simulationInfo:
 
 ################################################
 
-postSimulationInfo:
-  # clusterInfo:
-  #   stepNames: ["05_RMSD_Metadynamics_Dummy", "03_NpT_pre-equilibriation"] 
-  #   nClusters: 3
-  #   clusterBy:
-  #     selection:
-  #       keyword: "custom"
-  #       customSelection: 
-  #       - {CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
-  #   removeAtoms:
-  #   - selection:
-  #     keyword: "water"
-  #   - selection:
-  #     keyword: "ions"
-  #   collate: True
-  endPointInfo:
-    stepNames: ["03_NpT_pre-equilibriation"]
-    removeAtoms:
-    - selection:
-      keyword: "water"
-    - selection:
-      keyword: "ions"
-    - selection:
-      keyword: "ligands"
-    collate: True
+# postSimulationInfo:
+#   # clusterInfo:
+#   #   stepNames: ["05_RMSD_Metadynamics_Dummy", "03_NpT_pre-equilibriation"] 
+#   #   nClusters: 3
+#   #   clusterBy:
+#   #     selection:
+#   #       keyword: "custom"
+#   #       customSelection: 
+#   #       - {CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
+#   #   removeAtoms:
+#   #   - selection:
+#   #     keyword: "water"
+#   #   - selection:
+#   #     keyword: "ions"
+#   #   collate: True
+#   endPointInfo:
+#     stepNames: ["03_NpT_pre-equilibriation"]
+#     removeAtoms:
+#     - selection:
+#       keyword: "water"
+#     - selection:
+#       keyword: "ions"
+#     - selection:
+#       keyword: "ligands"
+#     collate: True

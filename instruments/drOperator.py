@@ -11,8 +11,13 @@ from instruments import drPrep
 from instruments import drSim
 from instruments import drMeta
 from instruments import drConfigInspector
+from instruments import drTriage
 ## BASIC PDB <-> DF UTILS
 from pdbUtils import pdbUtils
+
+## clean code
+from typing import Tuple, List, Dict, Union, Any, Optional, Callable
+from os import PathLike
 #####################################################################################
 def drMD_protocol(configYaml: str) -> None:
     """
@@ -93,22 +98,33 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         if skipResumeSim == "resume":
             print(f"-->\tResuming {stepName} from checkpoint file for run:\t {pdbName}")
 
-        # Set up directories
-        os.makedirs(simDir,exist_ok=True)
-        os.chdir(simDir)
+    
 
-        # Run the simulation
-        if sim["simulationType"].upper() == "EM":
-            saveFile = drSim.run_energy_minimisation(prmtop, inpcrd, sim, simDir, platform, pdbFile)
-        elif sim["simulationType"].upper() == "NVT":
-            sim = drSim.process_sim_data(sim, timescale)
-            saveFile = drSim.run_nvt(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
-        elif sim["simulationType"].upper() == "NPT":
-            sim = drSim.process_sim_data(sim, timescale)
-            saveFile = drSim.run_npt(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
-        elif sim["simulationType"].upper() == "META":
-            sim = drSim.process_sim_data(sim, timescale)
-            saveFile = drMeta.run_metadynamics(prmtop, inpcrd, sim, saveFile, simDir, platform, pdbFile)
+        simulationFunction = choose_simulation_function(sim["simulationType"])
+
+        saveFile = simulationFunction(prmtop = prmtop, inpcrd = inpcrd, sim = sim, saveFile = saveFile, outDir = outDir, platform = platform, refPdb = pdbFile)
+
+
+
+
+def choose_simulation_function(simulationType: str) -> Callable:
+    """
+    Choose the appropriate simulation function based on the simulation type.
+
+    Args:
+        simulationType (str): The simulation type.
+
+    Returns:
+        Callable: The appropriate simulation function.
+
+    This function chooses the appropriate simulation function based on the simulation type.
+    """
+    if simulationType.upper() == "EM":
+        return drSim.run_energy_minimisation
+    elif simulationType.upper() in ["NPT","NVT"]:
+        return drSim.run_molecular_dynamics
+    elif simulationType.upper() == "META":
+        return drMeta.run_metadynamics
 ###########################################################################################
 def skip_resume_or_simulate(simDir: str, simulations: list, i: int, outDir: str) -> tuple:
     """
