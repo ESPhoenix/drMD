@@ -11,7 +11,6 @@ from instruments import drPrep
 from instruments import drSim
 from instruments import drMeta
 from instruments import drConfigInspector
-from instruments import drTriage
 ## BASIC PDB <-> DF UTILS
 from pdbUtils import pdbUtils
 
@@ -58,10 +57,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
     Returns:
         None
     """
-    # Set up unit translator
-    timescale: dict = {"fs":unit.femtoseconds,
-                 "ps":unit.picoseconds,
-                 "ns":unit.nanoseconds}
+
 
     # Set up platform
     usePlatform: str = config["generalInfo"]["platform"]

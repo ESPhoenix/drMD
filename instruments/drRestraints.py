@@ -54,7 +54,7 @@ def restraints_handler(
             kNumber += 1
 
     else:
-        print("Running with no restraints...")
+        # print("Running with no restraints...")
         if p.splitext(saveFile)[1] == ".chk":
             return system
         clear_all_restraints(saveFile)

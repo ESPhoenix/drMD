@@ -10,7 +10,7 @@ from  instruments import drRestraints
 from  instruments import drCheckup 
 from  instruments import drClusterizer
 from  instruments import drFixer
-from  instruments import drTriage
+from  instruments import drFirstAid
 ###########################################################################################
 def init_system(prmtop: app.Topology) -> openmm.System:
     """
@@ -177,10 +177,14 @@ def load_simulation_state(simulation: app.Simulation, saveFile: str) -> app.Simu
     elif saveFileExt == ".xml":
         simulation.loadState(saveFile)
 
+    ## reset time and step count of simulation to zero
+    simulation.context.setTime(0.0)
+    simulation.context.setStepCount(0)
+
     # Return the modified simulation object
     return simulation
 ###########################################################################################
-@drTriage.triage_handler(drTriage.run_triage_simulation, max_retries=5)
+@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_simulation, max_retries=5)
 def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
     """
     Run a simulation at constant pressure (NpT) step.
@@ -206,8 +210,8 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     XML file.
     """
     stepName = sim["stepName"]
-    print(f"Running Step:\t{stepName}")
-
+    simulationType = sim["simulationType"]
+    print(f"-->\tRunning {simulationType} Step:\t{stepName}")
     sim = process_sim_data(sim)
 
     # for key in sim:
@@ -284,7 +288,8 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, pl
     the result as a PDB file, resets the chain and residue Ids, saves the simulation
     state as an XML file, and returns the path to the XML file.
     """
-    print("Running Energy Minimisation!")
+    stepName = sim["stepName"]
+    print(f"-->\tRunning Energy Minimisation Step:\t{stepName}")
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
     os.makedirs(simDir, exist_ok=True)
