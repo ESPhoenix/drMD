@@ -19,7 +19,7 @@ from pdbUtils import pdbUtils
 ##TODO: allow for custom parameters to be passed from config file ---> bias force generation and metadynamics construction
 
 ########################################################################################################
-def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str, simDir: str, platform: openmm.Platform, pdbFile: str) -> str:
+def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
     """
     Run a simulation at constant pressure (NpT) step with biases.
 
@@ -43,11 +43,19 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
     if specified in the simulation parameters, and saves the simulation state as an
     XML file.
     """
-    print("Running MetaDynamics!")
+    stepName = sim["stepName"]
+    print(f"-->\tRunning MetaDynamics Step:\t{stepName}")
+    ## make a simulation directory
+    simDir: str = p.join(outDir, stepName)
+    os.makedirs(simDir, exist_ok=True)
+
+
+    sim = drSim.process_sim_data(sim)
+
     # Initialize a new system from parameters
     system: openmm.System = drSim.init_system(prmtop)
     # Deal with restraints (clear all lurking restraints and constants)
-    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, pdbFile)
+    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # Add a Monte Carlo Barostat to maintain constant pressure
     barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
     system.addForce(barostat)
@@ -59,7 +67,7 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
     biasVariables: list = []
     for bias in biases:
         # Get atom indexes and coordinates for the biases
-        atomIndexes: list = drSelector.get_atom_indexes(bias["selection"], pdbFile)
+        atomIndexes: list = drSelector.get_atom_indexes(bias["selection"], refPdb)
         atomCoords: list = get_atom_coords_for_metadynamics(prmtop, inpcrd)
         # Create bias variable based on the type of bias
         if bias["biasVar"].upper() == "RMSD":
@@ -84,7 +92,7 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
                                      saveFrequency=50,
                                      biasDir=simDir)
     # Set up integrator
-    integrator: openmm.LangevinMiddleIntegrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timeStep"])
+    integrator: openmm.LangevinMiddleIntegrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timestep"])
     # Create new simulation
     simulation: app.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # Load state from previous simulation (or continue from checkpoint)
@@ -200,10 +208,13 @@ def gen_dihedral_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: 
     dihedralBiasVariable : openmm.CustomTorsionForce
         The dihedral bias variable.
     """
+    ## express dihedral as a harmonic potential
+    dihedralEnergyExpression: str = "theta"
     
     ## generate a dihedral bias force:
     # Create a custom torsion force object
-    dihedralForce: openmm.CustomTorsionForce = openmm.CustomTorsionForce("phi")
+    dihedralForce: openmm.CustomTorsionForce = openmm.CustomTorsionForce(dihedralEnergyExpression)
+
     
     # Add the atom indexes for the dihedral angle
     dihedralForce.addTorsion(atomIndexes[0],
@@ -213,8 +224,8 @@ def gen_dihedral_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: 
 
     # Create a dihedral bias variable
     dihedralBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(force = dihedralForce,
-                                                     minValue = -180 * unit.degrees,
-                                                     maxValue = 180 * unit.degrees,
+                                                     minValue = -179 * unit.degrees,
+                                                     maxValue = 179 * unit.degrees,
                                                      biasWidth = 1 * unit.degrees,
                                                      periodic = True)
     

@@ -40,13 +40,13 @@ simulationInfo:
         keyword: "ligands"  
       parameters:
         k: 1000
-########################################################################
-  - stepName: "03_this_will_explode"
-    simulationType: "NpT"
-    duration: "300 ps"
-    timestep: "2 fs"
-    temp: 1400
-    logInterval: "10 ps"
+# ########################################################################
+#   - stepName: "03_this_will_explode"
+#     simulationType: "NpT"
+#     duration: "300 ps"
+#     timestep: "2 fs"
+#     temp: 1400
+#     logInterval: "10 ps"
     # restraintInfo:
     # - restraintType: "position"
     #   selection:
@@ -65,22 +65,25 @@ simulationInfo:
 #     timestep: "0.5 fs"
 #     temp: 300
 #     logInterval: "1 ps"
-# ########################################################################
-#   - stepName: "05_RMSD_Metadynamics_Dummy"
-#     simulationType: "Meta"
-#     duration: "100 ps"
-#     timestep: "2 fs"
-#     temp: 400
-#     logInterval: "5 ps"
-#     metaDynamicsInfo:
-#       height: 2
-#       biasFactor: 5
-#       biases: 
-#       - biasVar: "RMSD"
-#         selection: 
-#           keyword: "custom"
-#           customSelection: 
-#           - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "all"}
+########################################################################
+  - stepName: "05_RMSD_Metadynamics_Dummy"
+    simulationType: "Meta"
+    duration: "1 ns"
+    timestep: "2 fs"
+    temp: 400
+    logInterval: "5 ps"
+    metaDynamicsInfo:
+      height: 2
+      biasFactor: 5
+      biases: 
+      - biasVar: "DIHEDRAL"
+        selection: 
+          keyword: "custom"
+          customSelection: 
+          - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "N10"}
+          - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C1"}
+          - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C21"}
+          - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C3"}
 #     restraintInfo:
 #     - restraintType: "distance"
 #       selection: 
