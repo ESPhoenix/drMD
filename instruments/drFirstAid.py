@@ -72,7 +72,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                         ## let user know whats going on
                         print(f"-->\tSuccess after {retries} tries.")
                         ## merge partial reports and trajectories
-                        merge_partial_outputs(simDir, kwargs["refPdb"])
+                        merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
                     ## return the saveFile (XML) of the simulation to be used by subsequent simulations
                     return saveFile
                 ## if our simulation crashes due to a numeriacal error or an OpenMM exception
@@ -114,7 +114,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
             ## If we have got here, the firstAid has failed
             ## let user know and merge output reporters and trajectories
             print("-->\tMax retries reached. Stopping.")
-            merge_partial_outputs(simDir, kwargs["refPdb"])
+            merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
             return None
         return wrapper
     return decorator
@@ -250,7 +250,8 @@ def rename_output_files(outDir: Union[PathLike, str], retries: int) -> None:
             os.rename(p.join(outDir, file),
                        p.join(outDir,f"{p.splitext(file)[0]}_partial_{str(retries)}{p.splitext(file)[1]}"))
 #######################################################################
-def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, str]) -> None:
+def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, str], simInfo: Dict) -> None:
+    exit()
     """
     After firstAid protocols have been run, we need to merge the partial reports and trajectories
 
@@ -261,13 +262,36 @@ def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, 
     Returns:
         None
     """
+    print("-->\tMerging partial outputs...")
     ## merge vitals reports
-    merge_partial_reports(simDir, "vitals_report", removePartials=False)
+    vitalsDf = merge_partial_reports(simDir, "vitals_report", removePartials=True)
+    vitalsDf = fix_merged_vitals(vitalsDf, simInfo)
+    vitalsDf.to_csv(p.join(simDir, "vitals_report.csv"))
     ## merge progress reports
-    merge_partial_reports(simDir, "progress_report", removePartials=False)
+    merge_partial_reports(simDir, "progress_report", removePartials=True)
     ## merge trajectories
-    merge_partial_trajectories(simDir, prmtop, removePartials=False)
+    merge_partial_trajectories(simDir, prmtop, removePartials=True)
 
+
+def fix_merged_vitals(vitalsDf: pd.DataFrame, simInfo: Dict) -> pd.DataFrame:
+
+    ## read stuff from simInfo
+    logInterval_ps: int = simInfo["logInterval"]
+    timeStep: openmm.Quantity = simInfo["timestep"]
+    duration: openmm.Quantity = simInfo["duration"]
+
+    ## convert to ints 
+    duration_ps: int = duration.value_in_unit(unit.picoseconds)
+    timeStep_ps: int = timeStep.value_in_unit(unit.picoseconds)
+    timeRange_ps = range(logInterval_ps, duration_ps + logInterval_ps, logInterval_ps)
+
+    stepsPerLog = int(logInterval_ps / timeStep_ps)
+
+    stepsRange = [val * stepsPerLog for val in timeRange_ps]    
+
+    vitalsDf['Time (ps)'] = timeRange_ps
+    vitalsDf['#"Step"'] = stepsRange
+    return vitalsDf
 #######################################################################
 def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, removePartials: bool = False) -> None:
     """
@@ -279,54 +303,48 @@ def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, remove
         removePartials (bool, optional): Whether to remove partial reports. Defaults to False.  
     """
 
+
+    ## rename the last report to be made
+    lastReport = p.join(simDir, f"{matchString}.csv")
+    if p.isfile(lastReport):
+        os.rename(lastReport, p.join(simDir, f"{matchString}_partial_99.csv"))
+
+
     ## collect all partial reports into a list exept for last one written
     reports = []
     for file in os.listdir(simDir):
-        if ("partial" in file) and (file.startswith(matchString)) and (p.splitext(file)[1] == ".csv"):
+        if ("partial" in file) and (file.startswith(matchString)) and (p.splitext(file)[1] == ".csv") and (p.getsize(p.join(simDir, file)) > 0):
             reports.append(p.join(simDir, file))
+
 
     ## sort the list so that reports are in chronological order
     reports = sorted(reports)
-    ## add the last report to the list (this will not have partial suffix)
-    lastReport = p.join(simDir, f"{matchString}.csv")
-    if p.isfile(lastReport):
-        reports.append(lastReport)
 
 
-    ## read reports as dataframes | concatonate | write back to csv
-    dfsToConcat = [df for df in [pd.read_csv(report) for report in reports]]
-    df = pd.concat(dfsToConcat, ignore_index=True)
-    df.to_csv(lastReport, index=False)
+    ## merge reports
+    dfsToConcat = []
+    for report in reports:
+        dfsToConcat.append(pd.read_csv(report))
 
+    ## concatonate | write back to csv
     ## remove partial reports to tidy up 
-    if removePartials:
-        for report in reports:
-            os.remove(report)
+    [os.remove(report) for report in reports if removePartials]
+    ## concat dataframes and write to file
+    df = pd.concat(dfsToConcat, ignore_index=True)
+
+    return df
+
+
 
 #######################################################################
-
-
 def merge_dcd_files(dcdFiles: list[Union[PathLike, str]],
                     pdbFile: Union[PathLike, str],
                     outputDcd: Union[PathLike, str]) -> Union[PathLike, str]:
     
     traj = md.load_dcd(dcdFiles[0], top = pdbFile)
-    print("first frame")
-    print(traj.n_frames)
     for file in dcdFiles[1:]:
-
         newTraj = md.load_dcd(file, top = pdbFile)
-        print("new frame")
-
-        print(newTraj.n_frames)
-
         traj = traj + newTraj
-        print("concat frame")
-
-        print(traj.n_frames)
-
-
-
     traj.save_dcd(outputDcd)
 #######################################################################
 def merge_partial_trajectories(simDir, pdbFile, removePartials: bool = False) -> None:
@@ -338,6 +356,10 @@ def merge_partial_trajectories(simDir, pdbFile, removePartials: bool = False) ->
         pdbFile (Union[PathLike, str]): The path to the pdb file
         removePartials (bool, optional): Whether to remove partial trajectories. Defaults to False.  
     """
+    ## rename last trajectory to be made
+    lastTrajectory = p.join(simDir, "trajectory.dcd")
+    if p.isfile(lastTrajectory):
+        os.rename(lastTrajectory, p.join(simDir, "trajectory_partial_99.dcd"))
 
     ## collect all partial trajectories into a list exept for last one written
     ## collect all partial reports into a list exept for last one written
@@ -346,13 +368,8 @@ def merge_partial_trajectories(simDir, pdbFile, removePartials: bool = False) ->
         if ("partial" in file) and (file.startswith("trajectory")) and (p.splitext(file)[1] == ".dcd"):
             trajectories.append(p.join(simDir, file))
 
-
     ## sort the list so that trajectories are in chronological order
     trajectories = sorted(trajectories)
-    ## add the last trajectory to the list (this will not have partial suffix)
-    lastTrajectory = p.join(simDir, "trajectory.dcd")
-    if p.isfile(lastTrajectory):
-        trajectories.append(lastTrajectory)
 
 
     ## merge trajectories
@@ -361,14 +378,14 @@ def merge_partial_trajectories(simDir, pdbFile, removePartials: bool = False) ->
     ## delete partial trajectories
     if removePartials:
         for trajectory in trajectories:
+            if p.basename(trajectory) == "trajectory.dcd":
+                continue
             os.remove(trajectory)
 
-    # ## save merged trajectory
-    # mergedDcdFile = p.join(simDir, "trajectory.dcd")
-    # traj.save_dcd(mergedDcdFile)
+
 
 #######################################################################
-def run_firstAid_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, firstAidTries: int) -> None:
+def run_firstAid_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, firstAidTries: int) -> None:
     """
     Run a firstAid simulation
 
@@ -385,9 +402,7 @@ def run_firstAid_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, 
         str: The path to the XML file containing the final state of the simulation.
 
     This function runs a firstAid simulation. 
-    First, it makes a simulation dictionary containing parameters to run either an
-    energy minimisation or a constant pressure simulation.
-    Then it runs either an energy minimisation or a constant pressure simulation
+    First, it makes a simulation dictionary containing parameters to be passed to drSim.run_energy_minimisation
 
     """
     firstAidSimInfo =  {
@@ -410,3 +425,33 @@ def run_firstAid_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, 
                                                      platform = platform,
                                                       refPdb= refPdb)
     return firstAidSaveFile
+#######################################################################
+def run_firstAid_npt_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, firstAidTries: int) -> None:
+
+    firstAidSimInfo =  {
+        "stepName" : f"firstAid_step_{firstAidTries}",
+        "simulationType": "NPT",
+        "duration" : "10 ps",
+        "timestep" : "0.5 ps",
+        "temp" : 300,
+        "logInterval" : "2 ps",
+        }
+    
+    firstAidSimInfo = drSim.process_sim_data(firstAidSimInfo)
+
+    firstAidSaveFile = drSim.run_molecular_dynamics(prmtop = prmtop,
+                                                   inpcrd = inpcrd,
+                                                   sim = firstAidSimInfo,
+                                                    saveFile= saveFile,
+                                                     outDir = outDir,
+                                                     platform = platform,
+                                                      refPdb= refPdb)
+    return firstAidSaveFile
+
+#######################################################################
+
+def run_energy_minimisation_then_npt(prmtop: str, inpcrd: str, sim: dict, outDir: str, platform: openmm.Platform, refPdb: str, saveFile: str, firstAidTries: int) -> str:
+    firstAidSaveFile_energyMinimisation = run_firstAid_energy_minimisation(prmtop = prmtop, inpcrd = inpcrd, sim = sim, outDir = outDir, platform = platform, refPdb = refPdb, saveFile = saveFile, firstAidTries=firstAidTries)
+    firstAidSaveFile_nptSimulation = run_firstAid_npt_simulation(prmtop = prmtop, inpcrd = inpcrd, sim = sim, outDir = outDir, platform = platform, refPdb = refPdb, saveFile = firstAidSaveFile_energyMinimisation, firstAidTries=firstAidTries)
+
+    return firstAidSaveFile_nptSimulation

@@ -13,12 +13,14 @@ from instruments import drRestraints
 from instruments import drCheckup 
 from instruments import drClusterizer
 from instruments import drSelector
+from instruments import drFirstAid
 ## generic pdb <-> df utils
 from pdbUtils import pdbUtils
 ########################################################################################################
 ##TODO: allow for custom parameters to be passed from config file ---> bias force generation and metadynamics construction
 
 ########################################################################################################
+@drFirstAid.firstAid_handler(drFirstAid.run_energy_minimisation_then_npt, max_retries=10)
 def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
     """
     Run a simulation at constant pressure (NpT) step with biases.
@@ -57,7 +59,7 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
     # Deal with restraints (clear all lurking restraints and constants)
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # Add a Monte Carlo Barostat to maintain constant pressure
-    barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, 300*unit.kelvin)  # Set pressure and temperature
+    barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, sim["temp"])  # Set pressure and temperature
     system.addForce(barostat)
     # Read metaDynamicsInfo from sim config
     metaDynamicsInfo: dict = sim["metaDynamicsInfo"]

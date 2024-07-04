@@ -3,11 +3,44 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Agg")
+from functools import wraps
 
 from matplotlib.colors import to_rgba
 from PIL import Image
 import numpy as np
 from fpdf import FPDF
+
+
+from typing import Union, Dict, Tuple
+from os import PathLike
+######################################################################
+def check_up_handler():
+    def decorator(simulationFunction):
+        @wraps(simulationFunction)
+        def wrapper(*args, **kwargs):
+            saveFile: Union[PathLike, str] = simulationFunction(*args, **kwargs)
+
+            vitalsReport, progressReport, simDir = find_reporters(kwargs["sim"], kwargs["outDir"])
+
+            check_vitals(simDir = simDir, vitalsCsv = vitalsReport, progressCsv = progressReport)
+
+            return saveFile
+        return wrapper
+    return decorator
+######################################################################
+def find_reporters(simInfo: Dict, outDir: Union[PathLike, str]) -> Tuple[Union[PathLike, str], Union[PathLike, str]]:
+    simDir: Union[PathLike, str] = p.join(outDir, simInfo["stepName"])
+
+    vitalsReport: Union[PathLike, str] = p.join(simDir, "vitals_report.csv")
+    if not p.isfile(vitalsReport):
+        raise FileNotFoundError(f"->\tReporter file not found at {vitalsReport}")
+
+    progressReport: Union[PathLike, str] = p.join(simDir, "progress_report.csv")
+    if not p.isfile(progressReport):
+        raise FileNotFoundError(f"->\tReporter file not found at {progressReport}")
+    
+    return vitalsReport, progressReport, simDir
+
 
 ######################################################################
 def create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesConvTable, propertiesPlot):
