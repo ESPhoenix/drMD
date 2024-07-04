@@ -28,3 +28,7 @@ make a logger system for everything
 move this to outside of the simulation functions
 is this a decorator as well?
 is that mental?
+
+##drFirstAid
+skip zero length DCD and CSV files when concat at the end
+fix steps and time data in progress reports

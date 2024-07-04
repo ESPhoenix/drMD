@@ -184,7 +184,8 @@ def load_simulation_state(simulation: app.Simulation, saveFile: str) -> app.Simu
     # Return the modified simulation object
     return simulation
 ###########################################################################################
-@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_simulation, max_retries=5)
+@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=10)
+@drCheckup.check_up_handler()
 def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
     """
     Run a simulation at constant pressure (NpT) step.
@@ -213,10 +214,6 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     simulationType = sim["simulationType"]
     print(f"-->\tRunning {simulationType} Step:\t{stepName}")
     sim = process_sim_data(sim)
-
-    # for key in sim:
-    #     print(f"\t{key}:\t{sim[key]}")
-
 
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
@@ -254,8 +251,6 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     drFixer.reset_chains_residues(refPdb, nptPdb)
 
-    # run drCheckup
-    drCheckup.check_vitals(simDir, reporters["vitals"][1], reporters["progress"][1])
 
     # run trajectory clustering
     if "clusterTrajectory" in sim and sim["clusterTrajectory"]["clusterBool"]:
