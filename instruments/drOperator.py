@@ -59,14 +59,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
     """
 
 
-    # Set up platform
-    usePlatform: str = config["generalInfo"]["platform"]
-    if usePlatform == "CUDA":
-        platform=openmm.Platform.getPlatformByName("CUDA")
-    elif usePlatform == "OpenCL":
-        platform=openmm.Platform.getPlatformByName("OpenCL")
-    elif usePlatform == "CPU":
-        platform=openmm.Platform.getPlatformByName("CPU")
+    platform = choose_platform(config)
 
     # Load Amber files and create system
     prmtop: app.Topology = app.AmberPrmtopFile(amberParams)
@@ -101,6 +94,18 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         saveFile = simulationFunction(prmtop = prmtop, inpcrd = inpcrd, sim = sim, saveFile = saveFile, outDir = outDir, platform = platform, refPdb = pdbFile)
 
 
+
+def choose_platform(config: Dict) -> openmm.Platform:
+    # Set up platform
+    usePlatform: str = config["generalInfo"]["platform"]
+    if usePlatform == "CUDA":
+        platform=openmm.Platform.getPlatformByName("CUDA")
+    elif usePlatform == "OpenCL":
+        platform=openmm.Platform.getPlatformByName("OpenCL")
+    elif usePlatform == "CPU":
+        platform=openmm.Platform.getPlatformByName("CPU")
+
+    return platform
 
 
 def choose_simulation_function(simulationType: str) -> Callable:
