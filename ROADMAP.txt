@@ -30,5 +30,6 @@ is this a decorator as well?
 is that mental?
 
 ##drFirstAid
-skip zero length DCD and CSV files when concat at the end
-fix steps and time data in progress reports
+skip zero length DCD and CSV files when concat at the end [?]
+fix steps and time data in progress reports  [x]
+splash screen for max retries reached

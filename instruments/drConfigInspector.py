@@ -113,6 +113,9 @@ def check_ligandInfo(config: dict) -> None:
     ligandInfo,  = check_info_for_args(config, "config", ["ligandInfo"], optional=True)
     inputDir = config["pathInfo"]["inputDir"]
 
+    if not ligandInfo:
+        return
+
     # Check each entry in ligandInfo
     for ligand in ligandInfo:
         # Check if ligand is a dictionary

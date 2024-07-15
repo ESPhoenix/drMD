@@ -103,3 +103,4 @@ def print_config_error(error: Optional[str] = None) -> None:
 if __name__ == "__main__":
     print_drMD_logo()
     print_config_error()
+    print_performing_first_aid()

@@ -239,7 +239,7 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
                                 reportInterval=reportInterval)
     for rep in reporters:
         simulation.reporters.append(reporters[rep][0])
-    # run NVT simulation
+    # run NVT / NPT simulation
     simulation.step(sim["nSteps"])
 
     # find name to call outFiles
@@ -257,7 +257,7 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
         drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
 
     # save simulation as XML
-    saveXml: str = p.join(simDir, "NpT_step.xml")
+    saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
     return saveXml
 
