@@ -107,7 +107,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         outName: str = config["pathInfo"]["outputName"]
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
-                                                        pdbFile= mergedPdb,
+                                                        pdbFile= protPdb,
                                                         outName= outName,
                                                         prepLog = prepLog)
         return protPdb, inputCoords, amberParams
