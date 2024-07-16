@@ -16,7 +16,7 @@ from  instruments import drSpash
 import concurrent.futures as cf
 from tqdm import tqdm
 from subprocess import run
-
+import multiprocessing as mp
 ## CLEAN CODE
 from typing import Optional
 
@@ -61,27 +61,28 @@ def main():
     manage_cpu_usage_for_subprocesses("OFF")
 
 ######################################################################################################
-def manage_cpu_usage_for_subprocesses(mode , subprocessCpus = None):
+def manage_cpu_usage_for_subprocesses(mode, subprocessCpus=None):
     '''
-    In ON mode, sets thread useage for OpenMP and OpenMM 
-    In OFF mode, unsets thread useage
+    In ON mode, sets thread usage for OpenMP and OpenMM 
+    In OFF mode, unsets thread usage
 
     Args:
         mode (string): "ON" or "OFF"
-        subprocessCpus (int): will set thread useage if mode == "ON"
+        subprocessCpus (int): will set thread usage if mode == "ON"
     Returns:
         Nothing
     '''
     if mode == "ON":
-        # Set environment variables directly in Python
-        os.environ['OMP_NUM_THREADS'] = str(subprocessCpus)
-        os.environ['OPENMM_CPU_THREADS'] = str(subprocessCpus)
-
-        omp_num_threads = os.environ.get('OMP_NUM_THREADS')
+        if subprocessCpus is not None:
+            os.environ['OMP_NUM_THREADS'] = str(subprocessCpus)
+            os.environ['OPENMM_CPU_THREADS'] = str(subprocessCpus)
+        else:
+            raise ValueError("subprocessCpus must be provided when mode is 'ON'")
     elif mode == "OFF":
-        # remove cpu useage limits
-        run(f"unset OMP_NUM_THREADS", shell=True)
-        run(f"unset OPENMM_CPU_THREADS", shell=True)
+        os.environ.pop('OMP_NUM_THREADS', None)
+        os.environ.pop('OPENMM_CPU_THREADS', None)
+    else:
+        raise ValueError("mode must be 'ON' or 'OFF'")
 
 #####################################################################################################
 def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig):
@@ -203,14 +204,31 @@ def run_parallel(
     # Get list of PDB files in the directory
     pdbFiles: list[str] = [pdbFile for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
 
-    # Create a ThreadPoolExecutor with the desired number of worker threads
-    with cf.ThreadPoolExecutor(max_workers=parallelCPU) as executor:
-        # Prepare the arguments for process_pdb_file
-        inputArgs: list[tuple] = [(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig) for pdbFile in pdbFiles]
+    inputArgs: list[tuple] = [(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig) for pdbFile in pdbFiles]
 
-        # Use starmap to apply process_pdb_file to each PDB file
-        # Use tqdm to display progress bar
-        list(tqdm(executor.map(lambda args: process_pdb_file(*args), inputArgs), total=len(inputArgs)))
+# Function to update the progress bar
+    def update_progress_bar(*args):
+        with progress.get_lock():
+            progress.value += 1
+            pbar.update()
+
+
+            
+
+    # Create a Pool with the desired number of worker processes
+    with mp.Pool(processes=parallelCPU) as pool:
+        # Create a shared Value for progress tracking
+        progress = mp.Value('i', 0)
+        
+        # Create a tqdm progress bar
+        with tqdm(total=len(inputArgs)) as pbar:
+            # Submit tasks to the pool
+            results = [pool.apply_async(process_pdb_file, args=args, callback=update_progress_bar) for args in inputArgs]
+            
+            # Close the pool and wait for the work to finish
+            pool.close()
+            pool.join()
+
 
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
@@ -245,14 +263,13 @@ def extract_info(
                     'SER', 'THR', 'TRP', 'TYR', 'VAL']
     protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids)]
     ## CHECK TO SEE IF PROTEIN HAS HYDROGENS
-    protH = False
+    isProteinProtonated = False
     if (protDf["ELEMENT"] == "H").any():
-        protH = True
+        isProteinProtonated = True
 
     ## CREATE proteinInfo
-    proteinInfo = {"nProteins": 1,
-                   "proteins": [{"proteinName": f"{protName}",
-                                 "protons": protH}]}   
+    proteinInfo = {"proteinName":  protName,
+                    "protons": isProteinProtonated}   
     ## GET LIGAND INFORMATION 
     ligsDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids)]
     ligNames = ligsDf["RES_NAME"].unique().tolist()

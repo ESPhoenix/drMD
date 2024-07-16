@@ -1,0 +1,31 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+generalInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+########################################################################
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temp: 300
+    maxIterations: 1000
+
+################################################
+
+postSimulationInfo:
+  endPointInfo:
+    stepNames: ["01_energy_minimisation"]
+    removeAtoms:
+    - selection:
+      keyword: "water"
+    - selection:
+      keyword: "ions"
+    - selection:
+      keyword: "ligands"
+    collate: True
+

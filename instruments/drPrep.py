@@ -48,6 +48,9 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         The function assumes that the necessary directories and files are present in the configuration dictionary.
     """
     outDir: str = config["pathInfo"]["outputDir"]
+
+    protName: str = config["proteinInfo"]["proteinName"]
+
     prepDir: str = p.join(outDir,"00_prep")
     prepLog: str = p.join(prepDir,"prep.log")
 
@@ -63,7 +66,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
                 amberParams: str = p.join(wholeDir,file)
             elif p.splitext(file)[1] == ".inpcrd":
                 inputCoords: str = p.join(wholeDir,file)
-            if p.splitext(file)[1] == ".pdb" and not file == "MERGED.pdb":
+            if p.splitext(file)[1] == ".pdb" and not file == f"{protName}.pdb":
                 pdbFile: str = p.join(wholeDir, file)
             
     if amberParams and inputCoords:
@@ -79,13 +82,13 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
         ligandPdbs, ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
         ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs: List[str] = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
+        protPdb = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
         ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
         wholePrepDir: str = p.join(prepDir,"WHOLE")
         os.makedirs(wholePrepDir,exist_ok=True)
-        allPdbs: List[str] = proteinPdbs + ligandPdbs
+        allPdbs: List[str] = [protPdb] + ligandPdbs
         outName: str = config["pathInfo"]["outputName"]
-        mergedPdb: str = p.join(wholePrepDir,"MERGED.pdb")
+        mergedPdb: str = p.join(wholePrepDir,f"{protName}.pdb")
         pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
@@ -93,15 +96,17 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
                             pdbFile= mergedPdb,
                             outName= outName,
                             prepLog= prepLog)
+        
+
         return mergedPdb, inputCoords, amberParams
     
     else:
         ## PREPARE PROTEIN STRUCTURE
-        proteinPdbs: List[str] = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
+        protPdb = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
         ## MERGE PROTEIN PDBS
         outName: str = config["pathInfo"]["outputName"]
-        mergedPdb: str = p.join(p.join(prepDir,"PROT","MERGED.pdb"))
-        pdbUtils.mergePdbs(pdbList=proteinPdbs, outFile = mergedPdb)
+        mergedPdb: str = p.join(p.join(prepDir,"PROT",f"{protName}.pdb"))
+        copy(protPdb, mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                         pdbFile= mergedPdb,
@@ -439,28 +444,20 @@ def prepare_protein_structure(
         prepLog (str): The path to the preparation log file.
 
     Returns:
-        List[str]: A list of protein PDB files.
+       Union[os.PathLike, str]: The PATH to a PDB file.
     """
-    # Get the protein dictionary from the configuration
-    proteinDict: List[dict] = config["proteinInfo"]["proteins"]
-    proteinPdbs: List[str] = []
 
-    # For each protein in the configuration
-    for protein in proteinDict:
-        # Find files and directories
-        protPrepDir: str = p.join(outDir, "PROT")  # Directory to prepare the protein
-        os.makedirs(protPrepDir, exist_ok=True)
-        os.chdir(protPrepDir)
-        protPdb = p.join(protPrepDir, "PROT.pdb")  # Path to the protein PDB file
+    # Find files and directories
+    protPrepDir: str = p.join(outDir, "PROT")  # Directory to prepare the protein
+    os.makedirs(protPrepDir, exist_ok=True)
+    os.chdir(protPrepDir)
+    protPdb = p.join(protPrepDir, "PROT.pdb")  # Path to the protein PDB file
+    # Check for PROT.pdb in protPrepDir (won't be there if noLigand)
+    if not p.isfile(protPdb):
+        # Copy the input PDB file to the output directory
+        copy(config["pathInfo"]["inputPdb"], protPdb)
 
-        # Check for PROT.pdb in protPrepDir (won't be there if noLigand)
-        if not p.isfile(protPdb):
-            # Copy the input PDB file to the output directory
-            copy(config["pathInfo"]["inputPdb"], protPdb)
-
-        proteinPdbs.append(protPdb)
-
-    return proteinPdbs
+    return protPdb
 
 
 #####################################################################################
@@ -519,7 +516,7 @@ def make_amber_params(
 
         # Save the solvated protein structure and parameter files
         solvatedPdb: str = f"{outName}.pdb"
-        f.write(f"savepdb mol {solvatedPdb}\n")
+        # f.write(f"savepdb mol {solvatedPdb}\n")
         prmTop: str = p.join(outDir, f"{outName}.prmtop")
         inputCoords: str = p.join(outDir, f"{outName}.inpcrd")
         f.write(f"saveamberparm mol {prmTop} {inputCoords}\n")
@@ -536,7 +533,7 @@ def make_amber_params(
     inputCoords: str = p.join(outDir, f"{outName}.inpcrd")
     ## reset chain and residue IDs in amber PDB
     solvatedPdb: str = p.join(outDir, solvatedPdb)
-    drFixer.reset_chains_residues(pdbFile, solvatedPdb)
+    # drFixer.reset_chains_residues(pdbFile, solvatedPdb)
     return inputCoords, amberParams
 #####################################################################################
 def run_with_log(
@@ -555,35 +552,23 @@ def run_with_log(
     Returns:
         None
     """
-    # Maximum number of retries for the command
-    maxRetries: int = 5
-    retries: int = 0
-
     # Retry the command until it succeeds or reaches the maximum number of retries
-    while retries < maxRetries:
-        # Execute the command and capture its output
-        process: subprocess.CompletedProcess[str] = subprocess.run(
-            command,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True
-        )
+    # Execute the command and capture its output
+    process: subprocess.CompletedProcess[str] = subprocess.run(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True, 
+        env = os.environ
+    )
 
-        # Write the output to the log file if a log file is provided
-        if prepLog:
-            with open(prepLog, "a") as log:
-                log.write(process.stdout)
 
-        # Check if the expected output file exists
-        if expectedOutput is None or p.isfile(expectedOutput):
-            return
-        else:
-            print(f"Expected output:\n\t {expectedOutput}\n\t\t not found. Retrying...")
-            retries += 1
-            time.sleep(5)
+    # Check if the expected output file exists
+    if expectedOutput is None or p.isfile(expectedOutput):
+        return
+    else:
+        raise FileNotFoundError(f"Expected output:\n\t {expectedOutput}\n\t\t not found.")
 
-    # Print a message if the maximum number of retries is reached
-    print("Maximum retries reached. Exiting...")
 
 #####################################################################################

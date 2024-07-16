@@ -12,7 +12,7 @@ from  instruments import drClusterizer
 from  instruments import drFixer
 from  instruments import drFirstAid
 ###########################################################################################
-def init_system(prmtop: app.Topology) -> openmm.System:
+def initialise_simulation(prmtop: app.Topology, inpcrd, sim, saveFile, refPdb, platform, generalInfo) -> openmm.System:
     """
     Create an openmm.System from a prmtop.
 
@@ -39,8 +39,26 @@ def init_system(prmtop: app.Topology) -> openmm.System:
     system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
                                                 nonbondedCutoff=nonbondedCutoff,
                                                 constraints=hBondconstraints)
+    ## deal with any restraints
+    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
+    # add constant pressure force to system (makes this an NpT simulation)    
+    if sim["simulationType"].upper() == "NPT":
+        system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
+    ## setup an intergrator
+    if sim["simulationType"].upper() == "EM":
+        integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"],
+                                                                  1/unit.picosecond,
+                                                                  4*unit.femtosecond)
+    else:
+        integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"],
+                                                                         1/unit.picosecond,
+                                                                           sim["timestep"])
 
-    return system
+
+    simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
+    
+
+    return simulation
 
 ###########################################################################################
 def process_sim_data(sim: dict) -> dict:
@@ -186,7 +204,7 @@ def load_simulation_state(simulation: app.Simulation, saveFile: str) -> app.Simu
 ###########################################################################################
 @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=10)
 @drCheckup.check_up_handler()
-def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
+def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, config: dict) -> str:
     """
     Run a simulation at constant pressure (NpT) step.
 
@@ -211,8 +229,8 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     XML file.
     """
     stepName = sim["stepName"]
-    simulationType = sim["simulationType"]
-    print(f"-->\tRunning {simulationType} Step:\t{stepName}")
+    protName = sim["proteinInfo"]["proteinName"]
+    print(f"-->\tRunning {stepName} Step for:\t{protName}")
     sim = process_sim_data(sim)
 
     ## create simluation directory
@@ -220,14 +238,9 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     os.makedirs(simDir, exist_ok=True)
 
     ## initialise a new system from parameters
-    system: openmm.System = init_system(prmtop)
-    ## deal with any restraints
-    system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
-    if sim["simulationType"].upper() == "NPT":
-        # add constant pressure force to system (makes this an NpT simulation)
-        system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
-    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timestep"])
-    simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
+    generalInfo = config["generalInfo"]
+    simulation : app.Simulation = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
+
     # set up intergrator and system
     # load state from previous simulation (or continue from checkpoint)
     simulation: app.Simulation = load_simulation_state(simulation, saveFile)
@@ -262,7 +275,7 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, platform: openmm.Platform, refPdb: str, saveFile: str) -> str:
+def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, platform: openmm.Platform, refPdb: str, saveFile: str, config: dict) -> str:
 
     """
     Run energy minimisation on a system.
@@ -283,28 +296,24 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, pl
     the result as a PDB file, resets the chain and residue Ids, saves the simulation
     state as an XML file, and returns the path to the XML file.
     """
+
+  
     stepName = sim["stepName"]
-    print(f"-->\tRunning Energy Minimisation Step:\t{stepName}")
+    protName = config["proteinInfo"]["proteinName"]
+    print(f"-->\tRunning {stepName} Step for:\t{protName}")
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
     os.makedirs(simDir, exist_ok=True)
 
 
-    # Initialize the system
-    system: openmm.System = init_system(prmtop)
+    ## initialise a new system from parameters
+    generalInfo = config["generalInfo"]
+    simulation : app.Simulation = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
 
 
     if isinstance(sim["temp"], int):
         sim["temp"] = sim["temp"] * unit.kelvin
 
-    # Set up integrator and simulation
-    integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"],
-                                                                  1/unit.picosecond,
-                                                                  0.004*unit.picoseconds)
-    simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology,
-                                                                    system,
-                                                                    integrator,
-                                                                    platform)
     simulation.context.setPositions(inpcrd.positions)
 
     # Set box vectors if provided
