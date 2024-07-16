@@ -76,6 +76,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
                                                            simulations = simulations,
                                                            i = i, 
                                                            outDir=outDir)
+        
 
 
         pdbName = p.splitext(p.basename(pdbFile))[0]
@@ -87,8 +88,8 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         if skipResumeSim == "resume":
             print(f"-->\tResuming {stepName} from checkpoint file for run:\t {pdbName}")
 
-    
 
+        # Run simulation
         simulationFunction = choose_simulation_function(sim["simulationType"])
 
         saveFile = simulationFunction(prmtop = prmtop, inpcrd = inpcrd, sim = sim, saveFile = saveFile, outDir = outDir, platform = platform, refPdb = pdbFile, config = config)
