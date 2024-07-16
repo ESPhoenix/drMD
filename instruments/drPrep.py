@@ -105,14 +105,12 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         protPdb = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
         ## MERGE PROTEIN PDBS
         outName: str = config["pathInfo"]["outputName"]
-        mergedPdb: str = p.join(p.join(prepDir,"PROT",f"{protName}.pdb"))
-        copy(protPdb, mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                         pdbFile= mergedPdb,
                                                         outName= outName,
                                                         prepLog = prepLog)
-        return mergedPdb, inputCoords, amberParams
+        return protPdb, inputCoords, amberParams
 
 #####################################################################################
 def find_ligand_charge(
