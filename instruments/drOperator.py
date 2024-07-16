@@ -91,7 +91,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
 
         simulationFunction = choose_simulation_function(sim["simulationType"])
 
-        saveFile = simulationFunction(prmtop = prmtop, inpcrd = inpcrd, sim = sim, saveFile = saveFile, outDir = outDir, platform = platform, refPdb = pdbFile)
+        saveFile = simulationFunction(prmtop = prmtop, inpcrd = inpcrd, sim = sim, saveFile = saveFile, outDir = outDir, platform = platform, refPdb = pdbFile, config = config)
 
 
 

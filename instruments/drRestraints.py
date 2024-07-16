@@ -32,11 +32,11 @@ def restraints_handler(
         openmm.System: The system with restraints applied.
     """
 
+    if not p.isfile(saveFile):
+        return system
+
     if "restraintInfo" in sim:
         restraintInfo: list = sim["restraintInfo"]
-    
-
-
         kNumber: int = 0
         for restraint in restraintInfo:
             selection: list = restraint["selection"]
