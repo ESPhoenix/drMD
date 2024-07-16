@@ -57,7 +57,7 @@ def clean_up_handler(batchConfig: dict) -> None:
 def collate_pdbs(pdbFiles, pathInfo) -> None:
     print(f"-->\tCollating {len(pdbFiles)} PDB files into per-step directories")
     for pdbFile in pdbFiles:
-        stepName = p.basename(p.dirname(p.dirname(pdbFile)))
+        stepName = p.basename(p.dirname(pdbFile))
         stepCollateDir = p.join(pathInfo["outputDir"], "00_collated_pdbs", stepName)
         os.makedirs(stepCollateDir,exist_ok=True)
         copy(pdbFile, stepCollateDir)
@@ -65,6 +65,8 @@ def collate_pdbs(pdbFiles, pathInfo) -> None:
 
 ######################################################################################################
 def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict ) -> List[Union[PathLike, str]]:
+
+    print("-->\tGetting endpoint PDB files")
     outDir = pathInfo["outputDir"]
 
     notRunDirs = ["00_configs", "01_ligand_parameters", "00_collated_pdbs"]
