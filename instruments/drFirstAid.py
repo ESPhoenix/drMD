@@ -13,7 +13,7 @@ import mdtraj as md
 from instruments import drSim
 from instruments import drSpash
 ## clean code
-from typing import Tuple, Union, Dict, List
+from typing import Tuple, Union, Dict, List, Any
 from os import PathLike
 
 
@@ -85,7 +85,6 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                     if retries == 1:
                         drSpash.print_performing_first_aid()
 
-
                     print(f"-->\tAttempting simulation firstAid, try {retries} of {max_retries}")
                     ## find simulation output directory
                     runOutDir: Union[PathLike, str] = kwargs["outDir"]
@@ -101,25 +100,25 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                         ## the retries counter has still been incremented, so this will not cause an infinite loop
                         print(e)
                         continue
+                        # kwargs["firstAidTries"] = retries
+                        # saveFile: Union[PathLike, str] = run_firstAid_npt_simulation(*args, **kwargs)
 
                     ## get current timestep of simulation
                     currentNsteps: int = get_nsteps_at_crash(explodedCheckpoint, kwargs["prmtop"])
                     ## prepare arguments for firstAid simulation
                     kwargs: Dict = prepare_arguments_for_firstAid(kwargs, firstAidDir, explodedCheckpoint, retries)
                     ## run firstAid simulation using modified keyword arguments
-                    saveFile: Union[PathLike, str] = firstAid_function(*args, **kwargs)
+                    saveFile: Union[PathLike, str] = run_firstAid_energy_minimisation(*args, **kwargs)
 
                     ## reset keyword arguments so simulation can be resumed
                     reset_keyword_arguments(kwargs, runOutDir, currentNsteps)
             ## If we have got here, the firstAid has failed
             ## let user know and merge output reporters and trajectories
             print("-->\tMax retries reached. Stopping.")
-            merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
-            return None
+            exit(1)
         return wrapper
     return decorator
 #######################################################################
-
 def get_nsteps_at_crash(explodedCheckpoint: Union[PathLike, str], prmtop: app.AmberPrmtopFile) -> int:
     """
     Gets the current number of steps that have been run in the simulation
@@ -251,7 +250,6 @@ def rename_output_files(outDir: Union[PathLike, str], retries: int) -> None:
                        p.join(outDir,f"{p.splitext(file)[0]}_partial_{str(retries)}{p.splitext(file)[1]}"))
 #######################################################################
 def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, str], simInfo: Dict) -> None:
-    exit()
     """
     After firstAid protocols have been run, we need to merge the partial reports and trajectories
 
@@ -271,8 +269,7 @@ def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, 
     merge_partial_reports(simDir, "progress_report", removePartials=True)
     ## merge trajectories
     merge_partial_trajectories(simDir, prmtop, removePartials=True)
-
-
+#######################################################################
 def fix_merged_vitals(vitalsDf: pd.DataFrame, simInfo: Dict) -> pd.DataFrame:
 
     ## read stuff from simInfo
@@ -385,7 +382,15 @@ def merge_partial_trajectories(simDir, pdbFile, removePartials: bool = False) ->
 
 
 #######################################################################
-def run_firstAid_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, firstAidTries: int) -> None:
+def run_firstAid_energy_minimisation(prmtop: str,
+                                      inpcrd: str,
+                                        sim: dict,
+                                          saveFile: str,
+                                            outDir: str,
+                                              platform: openmm.Platform,
+                                                refPdb: str,
+                                                  firstAidTries: int,
+                                                    config: dict) -> None:
     """
     Run a firstAid simulation
 
@@ -423,10 +428,11 @@ def run_firstAid_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, saveFi
                                                     saveFile= saveFile,
                                                      outDir = outDir,
                                                      platform = platform,
-                                                      refPdb= refPdb)
+                                                      refPdb= refPdb,
+                                                      config= config)
     return firstAidSaveFile
 #######################################################################
-def run_firstAid_npt_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, firstAidTries: int) -> None:
+def run_firstAid_npt_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, firstAidTries: int, config: dict) -> None:
 
     firstAidSimInfo =  {
         "stepName" : f"firstAid_step_{firstAidTries}",
@@ -434,7 +440,7 @@ def run_firstAid_npt_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: s
         "duration" : "10 ps",
         "timestep" : "0.5 ps",
         "temp" : 300,
-        "logInterval" : "2 ps",
+        "logInterval" : "1 ps",
         }
     
     firstAidSimInfo = drSim.process_sim_data(firstAidSimInfo)
@@ -445,7 +451,8 @@ def run_firstAid_npt_simulation(prmtop: str, inpcrd: str, sim: dict, saveFile: s
                                                     saveFile= saveFile,
                                                      outDir = outDir,
                                                      platform = platform,
-                                                      refPdb= refPdb)
+                                                      refPdb= refPdb,
+                                                      config=config)
     return firstAidSaveFile
 
 #######################################################################

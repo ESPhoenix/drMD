@@ -38,10 +38,10 @@ def drMD_protocol(configYaml: str) -> None:
     os.makedirs(outDir, exist_ok=True)
 
     # Prepare the protocol
-    mergedPdb, inputCoords, amberParams = drPrep.prep_protocol(config)
+    solvatedPdb, inputCoords, amberParams = drPrep.prep_protocol(config)
 
     # Run the simulation
-    run_simulation(config, outDir, inputCoords, amberParams, mergedPdb)
+    run_simulation(config, outDir, inputCoords, amberParams, solvatedPdb)
 ###########################################################################################
 def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str, pdbFile: str) -> None:
     """

@@ -1,14 +1,21 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
 generalInfo:
-  parallelCPU: 30
+  parallelCPU: 1
   platform: "CUDA"
   subprocessCpus: 1
 ########################################################################
+ligandInfo:
+  - ligandName: "TPA"
+    protons: False
+    charge: -2
+    toppar: False
+    mol2: False
+
 simulationInfo:
   - stepName: "01_energy_minimisation"
     simulationType: "EM"
@@ -17,15 +24,15 @@ simulationInfo:
 
 ################################################
 
-postSimulationInfo:
-  endPointInfo:
-    stepNames: ["01_energy_minimisation"]
-    removeAtoms:
-    - selection:
-      keyword: "water"
-    - selection:
-      keyword: "ions"
-    - selection:
-      keyword: "ligands"
-    collate: True
+# postSimulationInfo:
+#   endPointInfo:
+#     stepNames: ["01_energy_minimisation"]
+#     removeAtoms:
+#     - selection:
+#       keyword: "water"
+#     - selection:
+#       keyword: "ions"
+#     - selection:
+#       keyword: "ligands"
+#     collate: True
 

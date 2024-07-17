@@ -110,7 +110,7 @@ def process_pdb_file(pdbFile, pdbDir, outDir, yamlDir, simInfo, batchConfig):
 
     # Convert to DataFrame, extract rest of info
     pdbDf = pdbUtils.pdb2df(pdbPath)
-    proteinInfo, ligandInfo, generalInfo = extract_info(pdbDf, pdbDir, protName, yamlDir, batchConfig)
+    proteinInfo, ligandInfo, generalInfo = make_per_protein_config(pdbDf, pdbDir, protName, yamlDir, batchConfig)
 
     # Get path info
     pathInfo = {
@@ -233,7 +233,7 @@ def run_parallel(
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
-def extract_info(
+def make_per_protein_config(
     pdbDf: pd.DataFrame,
     pdbDir: str,
     protName: str,
@@ -256,12 +256,14 @@ def extract_info(
 
     generalInfo = batchConfig["generalInfo"]
     
-    ## GET PROTEIN INFORMATION
-    aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
-                    'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
-                    'LEU', 'LYS', 'MET', 'PHE', 'PRO',
-                    'SER', 'THR', 'TRP', 'TYR', 'VAL']
-    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids)]
+    ## GET PROTEIN AND ION ATOMS IN INPUT GEOMETRY
+    aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
+    
+
+    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids) |
+                   pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) |
+                   pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
+    
     ## CHECK TO SEE IF PROTEIN HAS HYDROGENS
     isProteinProtonated = False
     if (protDf["ELEMENT"] == "H").any():
@@ -270,9 +272,13 @@ def extract_info(
     ## CREATE proteinInfo
     proteinInfo = {"proteinName":  protName,
                     "protons": isProteinProtonated}   
-    ## GET LIGAND INFORMATION 
-    ligsDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids)]
-    ligNames = ligsDf["RES_NAME"].unique().tolist()
+    ## GET LIGAND ATOMS IN INPUT GEOMETRY 
+    ligandsDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids) &
+                    ~pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) &
+                    ~pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
+
+    ## GET NAMES OF LIGANDS
+    ligNames = ligandsDf["RES_NAME"].unique().tolist()
 
     ## SKIP IF NOT LIGAND
     if len(ligNames) == 0:
@@ -285,37 +291,54 @@ def extract_info(
         return proteinInfo, ligandInfo, generalInfo
     ## CREATE ligandInfo AUTOMATICALLY (WORKS FOR SIMPLE LIGANDS)
     else:
-        ligList = []
+        ligandInfo = []
         for ligName in ligNames:
-            ligDf = ligsDf[ligsDf["RES_NAME"] == ligName]
-            # deal with protonation
-            ligH = False
-            if (ligDf["ELEMENT"] == "H").any():
-                ligH = True
-
-            # deal with mol2
+            ligandDf = ligandsDf[ligandsDf["RES_NAME"] == ligName]
+            # detect protons in ligand
+            isLigandProtonated = False
+            if (ligandDf["ELEMENT"] == "H").any():
+                isLigandProtonated = True
+            # check for mol2 file in input pdb directory
             ligMol2 = p.join(pdbDir, f"{ligName}.mol2")
-            mol2 = False
+            isLigandMol2 = False
             if p.isfile(ligMol2):
-                mol2 = True
-            # deal with frcmod
+                isLigandMol2 = True
+            # check for frcmod file in input pdb directory
             ligFrcmod = p.join(pdbDir, f"{ligName}.frcmod")
-            frcmod = False
+            isLigandFrcmod = False
             if p.isfile(ligFrcmod):
-                frcmod = True  
+                isLigandFrcmod = True  
             # deal with charge
-            charge = drPrep.find_ligand_charge(ligDf, ligName, yamlDir, pH=7.4)
+            charge = drPrep.find_ligand_charge(ligandDf, ligName, yamlDir, pH=7.4)
             # write to temporary dict, then to ligandInfo for config
             tmpDict = {"ligandName": ligName,
-                       "protons": ligH,
-                       "mol2": mol2,
-                       "toppar": frcmod,
+                       "protons": isLigandProtonated,
+                       "mol2": isLigandMol2,
+                       "toppar": isLigandFrcmod,
                        "charge": charge}
-            ligList.append(tmpDict)
-        nLigands = len(ligList)
-        ligandInfo = {"nLigands": nLigands,
-                      "ligands": ligList}
+            ligandInfo.append(tmpDict)
 
+        
         return proteinInfo, ligandInfo, generalInfo
 ######################################################################################################
+
+def init_residue_name_lists():
+    aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
+                    'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
+                    'LEU', 'LYS', 'MET', 'PHE', 'PRO',
+                    'SER', 'THR', 'TRP', 'TYR', 'VAL']
+    
+    
+    monovalentIons = ["LI", "NA", "K", "RB", "CS", "TL", "CU", "AG", "NH4", "H3O", "F", "CL", "BR", "I"]
+
+    multivalentIons = [
+        "BE2", "CU2", "NI2", "PT2", "ZN2", "CO2", "PD2", "AG2", "CR2", "FE2", 
+        "MG2", "V2", "MN2", "HG2", "CD2", "YB2", "CA2", "SN2", "PB2", "EU2", 
+        "SR2", "SM2", "BA2", "RA2", "AL3", "FE3", "CR3", "IN3", "TL3", "Y3", 
+        "LA3", "CE3", "PR3", "ND3", "SM3", "EU3", "GD3", "TB3", "DY3", "ER3", 
+        "TM3", "LU3", "HF4", "ZR4", "CE4", "U4", "PU4", "TH4"
+    ]
+
+    return aminoAcids, monovalentIons, multivalentIons
+
 main()
