@@ -90,15 +90,17 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         outName: str = config["pathInfo"]["outputName"]
         mergedPdb: str = p.join(wholePrepDir,f"{protName}.pdb")
         pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
+
+        mergedPdb = drFixer.reset_atom_numbers(pdbFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams = make_amber_params(outDir = wholePrepDir,
+        inputCoords, amberParams, solvatedPdb  = make_amber_params(outDir = wholePrepDir,
                             ligandFileDict=ligandFileDict,
                             pdbFile= mergedPdb,
                             outName= outName,
                             prepLog= prepLog)
-        
+        # solvatedPdb = drFixer.reset_chains_residues(goodPdb=mergedPdb, badPdb=solvatedPdb)
 
-        return mergedPdb, inputCoords, amberParams
+        return solvatedPdb, inputCoords, amberParams
     
     else:
         ## PREPARE PROTEIN STRUCTURE
@@ -106,11 +108,11 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         ## MERGE PROTEIN PDBS
         outName: str = config["pathInfo"]["outputName"]
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams = make_amber_params(outDir = p.join(prepDir,"PROT"),
+        inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                         pdbFile= protPdb,
                                                         outName= outName,
                                                         prepLog = prepLog)
-        return protPdb, inputCoords, amberParams
+        return solvatedPdb, inputCoords, amberParams
 
 #####################################################################################
 def find_ligand_charge(
@@ -238,7 +240,7 @@ def ligand_protonation(
         ligDf: pd.DataFrame = pdbUtils.pdb2df(ligPdb)
         ligDf: pd.DataFrame = pdbUtils.fix_atom_names(ligDf)
         pdbUtils.df2pdb(ligDf, ligPdb)
-        rename_hydrogens(ligPdb, ligPdb)
+        # rename_hydrogens(ligPdb, ligPdb)
         ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
 
@@ -513,8 +515,8 @@ def make_amber_params(
         f.write("addions mol Cl- 0\n")
 
         # Save the solvated protein structure and parameter files
-        solvatedPdb: str = f"{outName}.pdb"
-        # f.write(f"savepdb mol {solvatedPdb}\n")
+        solvatedPdb: str = f"{outName}_solvated.pdb"
+        f.write(f"savepdb mol {solvatedPdb}\n")
         prmTop: str = p.join(outDir, f"{outName}.prmtop")
         inputCoords: str = p.join(outDir, f"{outName}.inpcrd")
         f.write(f"saveamberparm mol {prmTop} {inputCoords}\n")
@@ -532,7 +534,7 @@ def make_amber_params(
     ## reset chain and residue IDs in amber PDB
     solvatedPdb: str = p.join(outDir, solvatedPdb)
     # drFixer.reset_chains_residues(pdbFile, solvatedPdb)
-    return inputCoords, amberParams
+    return inputCoords, amberParams, solvatedPdb
 #####################################################################################
 def run_with_log(
     command: str,

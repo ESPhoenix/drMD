@@ -42,7 +42,7 @@ def initialise_simulation(prmtop: app.Topology, inpcrd, sim, saveFile, refPdb, p
     ## deal with any restraints
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # add constant pressure force to system (makes this an NpT simulation)    
-    if sim["simulationType"].upper() == "NPT":
+    if sim["simulationType"].upper() in ["NPT","META"]:
         system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
     ## setup an intergrator
     if sim["simulationType"].upper() == "EM":
@@ -229,7 +229,7 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     XML file.
     """
     stepName = sim["stepName"]
-    protName = sim["proteinInfo"]["proteinName"]
+    protName = config["proteinInfo"]["proteinName"]
     print(f"-->\tRunning {stepName} Step for:\t{protName}")
     sim = process_sim_data(sim)
 
@@ -332,7 +332,7 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, pl
         app.pdbfile.PDBFile.writeFile(simulation.topology,
                                      state.getPositions(),
                                      output)
-    drFixer.reset_chains_residues(refPdb, minimisedPdb)
+    # drFixer.reset_chains_residues(refPdb, minimisedPdb)
 
     # Save simulation as XML
     saveXml: str = p.join(simDir, "energy_minimisation.xml")

@@ -21,7 +21,14 @@ from pdbUtils import pdbUtils
 
 ########################################################################################################
 @drFirstAid.firstAid_handler(drFirstAid.run_energy_minimisation_then_npt, max_retries=10)
-def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
+def run_metadynamics(prmtop: app.Topology,
+                      inpcrd: any,
+                        sim: dict,
+                          saveFile: str,
+                            outDir: str,
+                              platform: openmm.Platform,
+                                refPdb: str,
+                                config:dict) -> str:
     """
     Run a simulation at constant pressure (NpT) step with biases.
 
@@ -53,9 +60,17 @@ def run_metadynamics(prmtop: app.Topology, inpcrd: any, sim: dict, saveFile: str
 
 
     sim = drSim.process_sim_data(sim)
+    # Define the nonbonded method and cutoff.
+    nonbondedMethod: openmm.NonbondedForce = app.PME
+    nonbondedCutoff: unit.Quantity = 1 * unit.nanometer
 
-    # Initialize a new system from parameters
-    system: openmm.System = drSim.init_system(prmtop)
+    # Define the restraints.
+    hBondconstraints: openmm.Force = app.HBonds
+
+    # Create the system.
+    system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
+                                                nonbondedCutoff=nonbondedCutoff,
+                                                constraints=hBondconstraints)
     # Deal with restraints (clear all lurking restraints and constants)
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # Add a Monte Carlo Barostat to maintain constant pressure

@@ -5,6 +5,24 @@ from pdbUtils import pdbUtils
 import pandas as pd
 
 ##################################################################################################
+def  reset_atom_numbers(pdbFile: str) -> str:
+    """
+    Resets the atom numbers in a PDB file.
+
+    Parameters:
+        pdbFile (str): Path to the PDB file.
+
+    Returns:
+        str: Path to the modified PDB file.
+    """
+
+    pdbDf = pdbUtils.pdb2df(pdbFile)
+    pdbDf["ATOM_ID"] = range(1, len(pdbDf) + 1)
+
+    pdbUtils.df2pdb(pdbDf, pdbFile)
+
+    return pdbFile
+##################################################################################################
 def reset_chains_residues(goodPdb: str, badPdb: str) -> str:
     """
     Resets the chains and residues in a PDB file to match another PDB file.

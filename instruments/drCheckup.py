@@ -159,6 +159,8 @@ def create_vitals_pdf(simDir, basicPng, energyConvTable, energyPlot, propertiesC
 def check_convergance(df, columns, simDir, tag, windowSize = 5,):
     convergedDict = {}
     for column in columns:
+        if len(column) == 1:
+            continue
         dataRange = df[column].max() - df[column].min()
         converganceTolerance = dataRange * 0.05 
         runningAverage = df[column].rolling(window=windowSize).mean()
