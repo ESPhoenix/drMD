@@ -69,14 +69,12 @@ simulationInfo:
       height: 1
       biasFactor: 1
       biases: 
-        - biasVar: "torsion"
+        - biasVar: "RMSD"
           selection: 
             keyword: "custom"
             customSelection:
             - {CHAIN_ID: "A", RES_NAME: "TRP", RES_ID: 229, ATOM_NAME: "CA"}
-            - {CHAIN_ID: "A", RES_NAME: "TRP", RES_ID: 229, ATOM_NAME: "CB"}
-            - {CHAIN_ID: "A", RES_NAME: "TRP", RES_ID: 229, ATOM_NAME: "CG"}
-            - {CHAIN_ID: "A", RES_NAME: "TRP", RES_ID: 229, ATOM_NAME: "CD2"}
+
 
 # ################################################
 
