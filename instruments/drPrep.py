@@ -136,7 +136,7 @@ def find_ligand_charge(
     
     # Fix atom names in the ligand dataframe
     ligDf = pdbUtils.fix_atom_names(ligDf)
-    
+    ligDf = ligDf[ligDf["ELEMENT"] != "H"]
     # Create a temporary pdb file from the ligand dataframe
     tmpPdb = p.join(outDir, f"{ligName}.pdb")
     pdbUtils.df2pdb(ligDf, tmpPdb, chain=False)
@@ -173,8 +173,7 @@ def find_ligand_charge(
                     totalCharge += 1
     
     # Clean up temporary files
-    os.remove(tmpPdb)
-    os.remove(proPkaFile)
+    [os.remove(p.join(outDir, file)) for file in os.listdir(outDir) if not p.splitext(file)[1] == ".yaml"]
     
     return totalCharge
 

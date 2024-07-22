@@ -69,7 +69,7 @@ def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict ) -> List[Union[PathLik
     print("-->\tGetting endpoint PDB files")
     outDir = pathInfo["outputDir"]
 
-    notRunDirs = ["00_configs", "01_ligand_parameters", "00_collated_pdbs"]
+    notRunDirs = ["00_configs", "01_ligand_parameters", "00_collated_pdbs", "00_drMD_logs"]
 
     runDirs = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
     stepDirs = [p.join(runDir,stepDir) for runDir in runDirs for stepDir in endPointInfo["stepNames"]]
