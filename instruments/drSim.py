@@ -11,8 +11,17 @@ from  instruments import drCheckup
 from  instruments import drClusterizer
 from  instruments import drFixer
 from  instruments import drFirstAid
+
+from typing import Optional, Dict, List, Tuple, Union, Any
+from instruments.drCustomClasses import FilePath, DirectoryPath
 ###########################################################################################
-def initialise_simulation(prmtop: app.Topology, inpcrd, sim, saveFile, refPdb, platform, generalInfo) -> openmm.System:
+def initialise_simulation(prmtop: app.AmberPrmtopFile,
+                           inpcrd: app.AmberInpcrdFile,
+                             sim: Dict,
+                               saveFile: FilePath,
+                                 refPdb: FilePath,
+                                   platform: str,
+                                     generalInfo: Dict) -> openmm.System:
     """
     Create an openmm.System from a prmtop.
 
@@ -61,18 +70,18 @@ def initialise_simulation(prmtop: app.Topology, inpcrd, sim, saveFile, refPdb, p
     return simulation
 
 ###########################################################################################
-def process_sim_data(sim: dict) -> dict:
+def process_sim_data(sim: Dict) -> Dict:
     """
     Reads simulation variables from config file and processes them.
 
     Parameters
     ----------
-    sim : dict
+    sim : Dict
         Dictionary containing simulation variables.
 
     Returns
     -------
-    sim : dict
+    sim : Dict
         Updated dictionary with processed simulation variables.
     """
 
@@ -80,7 +89,7 @@ def process_sim_data(sim: dict) -> dict:
         return sim
 
     # Set up unit translator
-    timescale: dict = {"fs":unit.femtoseconds,
+    timescale: Dict = {"fs":unit.femtoseconds,
                  "ps":unit.picoseconds,
                  "ns":unit.nanoseconds}
     
@@ -120,7 +129,7 @@ def process_sim_data(sim: dict) -> dict:
     sim["processed"] = True
     return sim
 ###########################################################################################
-def init_reporters(simDir: str, nSteps: int, reportInterval) -> dict:
+def init_reporters(simDir: str, nSteps: int, reportInterval: int) -> dict:
     """
     Initializes and returns a dictionary of reporters for a simulation.
 
@@ -164,7 +173,7 @@ def init_reporters(simDir: str, nSteps: int, reportInterval) -> dict:
 
     return  reporters
 ###########################################################################################
-def load_simulation_state(simulation: app.Simulation, saveFile: str) -> app.Simulation:
+def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app.Simulation:
     """
     Load the simulation state from a checkpoint or XML file.
 
@@ -204,30 +213,29 @@ def load_simulation_state(simulation: app.Simulation, saveFile: str) -> app.Simu
 ###########################################################################################
 @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=10)
 @drCheckup.check_up_handler()
-def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str, config: dict) -> str:
+def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
+                           inpcrd: app.AmberInpcrdFile,
+                             sim: Dict,
+                               saveFile: FilePath,
+                                 outDir: FilePath,
+                                   platform: openmm.Platform,
+                                     refPdb: FilePath,
+                                       config: Dict) -> FilePath:
     """
-    Run a simulation at constant pressure (NpT) step.
+    Sets up and runs a molecular dynamics simulation
+    Using either the isothermal-isobaric (NpT) or cannonical (NVT) ensembles
 
     Args:
-        prmtop (str): The path to the topology file.
-        inpcrd (str): The path to the coordinates file.
-        sim (dict): The simulation parameters.
+        prmtop (app.Topology): The topology of the system.  
+        inpcrd (app.Topology): The coordinates of the system.
+        sim (Dict): dictionary containing simulation parameters
         saveFile (str): The path to the checkpoint or XML file.
-        simDir (str): The path to the simulation directory.
+        outDir (str): The path to the output directory.
         platform (openmm.Platform): The simulation platform.
         refPdb (str): The path to the reference PDB file.
-
-    Returns:
-        str: The path to the XML file containing the final state of the simulation.
-
-    This function runs a simulation at constant pressure (NpT) step. The function
-    initializes the system, handles any restraints, adds a constant pressure force,
-    sets up the integrator and system, loads the state from a checkpoint or XML file,
-    sets up reporters, runs the simulation, saves the final geometry as a PDB file,
-    resets the chain and residue Ids, runs drCheckup, performs trajectory clustering
-    if specified in the simulation parameters, and saves the simulation state as an
-    XML file.
+        config (Dict): Dictionary containing information for all simluations in this run
     """
+
     stepName = sim["stepName"]
     protName = config["proteinInfo"]["proteinName"]
     print(f"-->\tRunning {stepName} Step for:\t{protName}")
@@ -275,7 +283,14 @@ def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, o
     return saveXml
 
 ###########################################################################################
-def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, platform: openmm.Platform, refPdb: str, saveFile: str, config: dict) -> str:
+def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
+                           inpcrd: app.AmberInpcrdFile,
+                             sim: Dict,
+                               saveFile: FilePath,
+                                 outDir: FilePath,
+                                   platform: openmm.Platform,
+                                     refPdb: FilePath,
+                                       config: Dict) -> FilePath:
 
     """
     Run energy minimisation on a system.
@@ -297,23 +312,22 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, pl
     state as an XML file, and returns the path to the XML file.
     """
 
-  
-    stepName = sim["stepName"]
-    protName = config["proteinInfo"]["proteinName"]
+    stepName: str = sim["stepName"]
+    protName: str = config["proteinInfo"]["proteinName"]
     print(f"-->\tRunning {stepName} Step for:\t{protName}")
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
     os.makedirs(simDir, exist_ok=True)
 
-
     ## initialise a new system from parameters
-    generalInfo = config["generalInfo"]
+    generalInfo: Dict = config["generalInfo"]
     simulation : app.Simulation = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
 
-
+    ## if needed, convert temperature to kelvin
     if isinstance(sim["temp"], int):
         sim["temp"] = sim["temp"] * unit.kelvin
 
+    ## set coordinates of simulation 
     simulation.context.setPositions(inpcrd.positions)
 
     # Set box vectors if provided
@@ -323,8 +337,6 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, pl
     # Run energy minimisation
     simulation.minimizeEnergy(maxIterations=sim['maxIterations'])
 
-    # find name to call outFiles
-    protName = p.basename(p.dirname(simDir))
     # save result as pdb - reset chain and residue Ids
     state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
     minimisedPdb: str = p.join(simDir, f"{protName}.pdb")
@@ -332,6 +344,7 @@ def run_energy_minimisation(prmtop: str, inpcrd: str, sim: dict, outDir: str, pl
         app.pdbfile.PDBFile.writeFile(simulation.topology,
                                      state.getPositions(),
                                      output)
+    
     # drFixer.reset_chains_residues(refPdb, minimisedPdb)
 
     # Save simulation as XML

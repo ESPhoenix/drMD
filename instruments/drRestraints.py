@@ -6,27 +6,33 @@ import math
 ## OPENMM LIBS
 import openmm as openmm
 import simtk.unit as unit
+from openmm import app
 ## CUSTOM drMD LIBS
 import instruments.drSelector as drSelector
+## CUSTOM MODULES
+from pdbUtils import pdbUtils
+## CLEAN CODE
+from typing import Optional, Dict, List, Tuple, Union, Any
+from instruments.drCustomClasses import FilePath, DirectoryPath
 ###########################################################################################
 def restraints_handler(
         system: openmm.System,
-        prmtop: str,
-        inpcrd: str,
-        sim: dict,
-        saveFile: str,
-        pdbFile: str
+        prmtop: app.AmberPrmtopFile,
+        inpcrd: app.AmberInpcrdFile,
+        sim: Dict,
+        saveFile: FilePath,
+        pdbFile: FilePath
 ) -> openmm.System:
     """
     Handle restraints in the system.
 
     Args:
         system (openmm.System): The OpenMM system object.
-        prmtop (str): The path to the prmtop file.
-        inpcrd (str): The path to the inpcrd file.
+        prmtop (AmberPrmtopFile): The path to the prmtop file.
+        inpcrd (AmberInpcrdFile): The path to the inpcrd file.
         sim (dict): The simulation dictionary containing restraint information.
-        saveFile (str): The path to save the system.
-        pdbFile (str): The path to the pdb file.
+        saveFile (FilePath): The path to save the system.
+        pdbFile (FilePath): The path to the pdb file.
 
     Returns:
         openmm.System: The system with restraints applied.

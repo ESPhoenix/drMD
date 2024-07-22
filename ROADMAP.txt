@@ -24,12 +24,14 @@ sort out progress report - should be progress for this step only [x]
 ## drLogger
 make a logger system for everything  
 
-## drCheckup
-move this to outside of the simulation functions
-is this a decorator as well?
-is that mental?
 
 ##drFirstAid
 skip zero length DCD and CSV files when concat at the end [?]
 fix steps and time data in progress reports  [x]
 splash screen for max retries reached
+
+### config changes
+generalInfo -> hardwareInfo???
+
+
+## init lists as tuples in own script??

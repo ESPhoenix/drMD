@@ -1,19 +1,24 @@
-from pdbUtils import pdbUtils
+## BASIC LIBS
 import pandas as pd
 from typing import List
 import numpy as np
+## CUSTOM MODULES
+from pdbUtils import pdbUtils
+## CLEAN CODE
+from typing import Optional, Dict, List, Tuple, Union, Any
+from instruments.drCustomClasses import FilePath, DirectoryPath
 #######################################################################
-def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
+def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
     """
     This function takes a selection dictionary and a PDB file as input,
     and returns a list of atom indexes that correspond to the selection.
 
     Args:
-        selection (dict): A dictionary containing the selection type and input.
-        pdbFile (str): The path to the PDB file.
+        selection (Dict): A dictionary containing the selection type and input.
+        pdbFile (FilePath): The path to the PDB file.
 
     Returns:
-        list: A list of atom indexes that correspond to the selection.
+        atomIndexes (List[int]): A list of atom indexes that correspond to the selection.
     """
     # Read PDB file into a DataFrame
     pdbDf: pd.DataFrame = pdbUtils.pdb2df(pdbFile)
@@ -32,32 +37,31 @@ def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
         # Find indexes for all backbone atoms
         backboneDf: pd.DataFrame = pdbDf[pdbDf["ATOM_NAME"].isin(backboneAtomNames) &
                                           pdbDf["RES_NAME"].isin(aminoAcidResNames)]
-        atomIndexes = backboneDf.index.tolist()
+        atomIndexes: List[int] = backboneDf.index.tolist()
     elif selection["keyword"] == "protein":
         # Find indexes for all protein atoms
         proteinDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidResNames)]
-        atomIndexes = proteinDf.index.tolist()
+        atomIndexes: List[int] = = proteinDf.index.tolist()
     elif selection["keyword"] == "water":
         # Find indexes for water molecules
         waterDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(solventResNames) &
                                        ~pdbDf["RES_NAME"].isin([aminoAcidResNames])]
-        atomIndexes = waterDf.index.tolist()
+        atomIndexes: List[int] = = waterDf.index.tolist()
     elif selection["keyword"] == "ions":
         # Find indexes for ions
         ionDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(ionResNames) &
                                     ~pdbDf["RES_NAME"].isin([aminoAcidResNames])]
 
-        atomIndexes = ionDf.index.tolist()
+        atomIndexes: List[int] = = ionDf.index.tolist()
     elif selection["keyword"] == "ligands":
         # Find indexes for all ligands / organics / oddball molecules
         ligandDf: pd.DataFrame = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidResNames+solventResNames+ionResNames)]
-        atomIndexes = ligandDf.index.tolist()
+        atomIndexes: List[int] =  ligandDf.index.tolist()
     elif selection["keyword"] == "custom":
         # Find indexes for whole residue selections
-        customSelection = selection["customSelection"]
+        customSelection: List[Dict] = selection["customSelection"]
         ## check for "all" selections in selectionSytax
         for selection in customSelection:
-            ## create selection conditions
             ## init empty list to store conditions
             selectionConditions: list  = []
             ## for each selection key...
@@ -77,14 +81,14 @@ def get_atom_indexes(selection: dict, pdbFile: str) -> List[int]:
     return atomIndexes
 
 #######################################################################
-def init_name_lists():
-    aminoAcidResNames = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
+def init_name_lists() -> Tuple[List[str], List[str], List[str], List[str]]:
+    aminoAcidResNames: List = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
             'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
                 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR',
                 'VAL']
-    backboneAtomNames = ["N","CA","C","O"]
-    solventResNames = ["HOH", "WAT"]
-    ionResNames = ["NA", "K", "LI", "RB", "CS", "MG", "CA", "ZN", "CD", "HG", "MN"]
+    backboneAtomNames: List = ["N","CA","C","O"]
+    solventResNames: List = ["HOH", "WAT"]
+    ionResNames: List = ["NA", "K", "LI", "RB", "CS", "MG", "CA", "ZN", "CD", "HG", "MN"]
     return aminoAcidResNames, backboneAtomNames, solventResNames, ionResNames
 
 #######################################################################
