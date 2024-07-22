@@ -20,7 +20,7 @@ from tqdm import tqdm
 from subprocess import run
 import multiprocessing as mp
 ## CLEAN CODE
-from typing import Optional, Dict, List, Tuple, Union
+from typing import Optional, Dict, List, Tuple, Union, Any
 from instruments.drCustomClasses import FilePath, DirectoryPath
 
 ######################################################################################################
@@ -45,7 +45,6 @@ def main() -> None:
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]
     yamlDir: DirectoryPath = p.join(outDir,"00_configs")
     pdbDir: DirectoryPath = batchConfig["pathInfo"]["inputDir"]
-    simInfo: Dict = batchConfig["simulationInfo"]
     parallelCPU: int = batchConfig["generalInfo"]["parallelCPU"]
     subprocessCpus: int = batchConfig["generalInfo"]["subprocessCpus"]
 
@@ -182,16 +181,16 @@ def run_parallel(batchConfig: Dict) -> None:
             progress.value += 1
             pbar.update()
 
-    parallelCpus = batchConfig["generalInfo"]["parallelCPU"]
+    parallelCpus: int = batchConfig["generalInfo"]["parallelCPU"]
     # Create a Pool with the desired number of worker processes
     with mp.Pool(processes=parallelCpus) as pool:
         # Create a shared Value for progress tracking
-        progress = mp.Value('i', 0)
+        progress: int = mp.Value('i', 0)
         
         # Create a tqdm progress bar
         with tqdm(total=len(inputArgs)) as pbar:
             # Submit tasks to the pool
-            results = [pool.apply_async(process_pdb_file, args=args, callback=update_progress_bar) for args in inputArgs]
+            results: Any = [pool.apply_async(process_pdb_file, args=args, callback=update_progress_bar) for args in inputArgs]
             
             # Close the pool and wait for the work to finish
             pool.close()
