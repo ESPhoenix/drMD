@@ -12,6 +12,7 @@ from  instruments import drCleanup
 from  instruments import drOperator 
 from  instruments import drConfigInspector 
 from  instruments import drSpash
+from  instruments import drPdbTriage
 ## Multiprocessing
 import concurrent.futures as cf
 from tqdm import tqdm
@@ -45,7 +46,11 @@ def main():
     simInfo = batchConfig["simulationInfo"]
     parallelCPU = batchConfig["generalInfo"]["parallelCPU"]
     subprocessCpus = batchConfig["generalInfo"]["subprocessCpus"]
-    
+
+
+    ## run pdbTriage to detect commmon problems with pdb files
+    drPdbTriage.pdb_triage(pdbDir, batchConfig)
+    exit()
     ## set envorment variables for OpenMP and OpenMM
     manage_cpu_usage_for_subprocesses("ON",subprocessCpus)
 

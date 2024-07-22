@@ -1,0 +1,1202 @@
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		C:WPC:1: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		C:WPC:1: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		C:WPC:1: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		C:WPC:1: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		C:WPC:1: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		C:WPC:1: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Non-canonical amino acids found in organometallic.pdb for the following residues:
+		A:MET:1: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:2: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:3: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:4: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:5: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:6: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:7: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:8: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:9: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:10: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:11: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:12: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:13: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:14: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:15: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:16: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:17: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:18: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:19: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:20: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:21: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:22: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:23: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:24: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:25: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:26: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:27: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:28: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:29: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:30: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:31: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:32: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:33: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:34: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:35: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:36: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:37: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:38: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:39: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:40: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:41: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:42: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:43: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:44: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:45: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:46: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:47: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:48: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:49: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:50: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:51: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:52: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:53: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:54: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:55: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:56: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:57: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:58: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:59: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:60: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:61: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:62: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:63: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:64: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:65: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:66: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:67: non-canonical amino acid missing frcmod and mol2 files
+		A:TRP:68: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:69: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:70: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:71: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:72: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:73: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:74: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:75: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:76: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:77: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:78: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:79: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:80: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:81: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:82: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:83: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:84: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:85: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:86: non-canonical amino acid missing frcmod and mol2 files
+		A:HIS:87: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:88: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:89: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:90: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:91: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:92: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:93: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:94: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:95: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:96: non-canonical amino acid missing frcmod and mol2 files
+		A:TRP:97: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:98: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:99: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:100: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:101: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:102: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:103: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:104: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:105: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:106: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:107: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:108: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:109: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:110: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:111: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:112: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:113: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:114: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:115: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:116: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:117: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:118: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:119: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:120: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:121: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:122: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:123: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:124: non-canonical amino acid missing frcmod and mol2 files
+		A:TRP:125: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:126: non-canonical amino acid missing frcmod and mol2 files
+		A:HIS:127: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:128: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:129: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:130: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:131: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:132: non-canonical amino acid missing frcmod and mol2 files
+		B:MET:133: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:134: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:135: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:136: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:137: non-canonical amino acid missing frcmod and mol2 files
+		B:PRO:138: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:139: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:140: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:141: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:142: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:143: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:144: non-canonical amino acid missing frcmod and mol2 files
+		B:GLN:145: non-canonical amino acid missing frcmod and mol2 files
+		B:THR:146: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:147: non-canonical amino acid missing frcmod and mol2 files
+		B:VAL:148: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:149: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:150: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:151: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:152: non-canonical amino acid missing frcmod and mol2 files
+		B:VAL:153: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:154: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:155: non-canonical amino acid missing frcmod and mol2 files
+		B:GLN:156: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:157: non-canonical amino acid missing frcmod and mol2 files
+		B:ASP:158: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:159: non-canonical amino acid missing frcmod and mol2 files
+		B:TYR:160: non-canonical amino acid missing frcmod and mol2 files
+		B:VAL:161: non-canonical amino acid missing frcmod and mol2 files
+		B:TYR:162: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:163: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:164: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:165: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:166: non-canonical amino acid missing frcmod and mol2 files
+		B:GLN:167: non-canonical amino acid missing frcmod and mol2 files
+		B:VAL:168: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:169: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:170: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:171: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:172: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:173: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:174: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:175: non-canonical amino acid missing frcmod and mol2 files
+		B:MET:176: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:177: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:178: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:179: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:180: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:181: non-canonical amino acid missing frcmod and mol2 files
+		B:THR:182: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:183: non-canonical amino acid missing frcmod and mol2 files
+		B:TYR:184: non-canonical amino acid missing frcmod and mol2 files
+		B:THR:185: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:186: non-canonical amino acid missing frcmod and mol2 files
+		B:PHE:187: non-canonical amino acid missing frcmod and mol2 files
+		B:ASP:188: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:189: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:190: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:191: non-canonical amino acid missing frcmod and mol2 files
+		B:GLN:192: non-canonical amino acid missing frcmod and mol2 files
+		B:ASP:193: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:194: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:195: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:196: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:197: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:198: non-canonical amino acid missing frcmod and mol2 files
+		B:TYR:199: non-canonical amino acid missing frcmod and mol2 files
+		B:TRP:200: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:201: non-canonical amino acid missing frcmod and mol2 files
+		B:ASP:202: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:203: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:204: non-canonical amino acid missing frcmod and mol2 files
+		B:GLN:205: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:206: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:207: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:208: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:209: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:210: non-canonical amino acid missing frcmod and mol2 files
+		B:TYR:211: non-canonical amino acid missing frcmod and mol2 files
+		B:TYR:212: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:213: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:214: non-canonical amino acid missing frcmod and mol2 files
+		B:THR:215: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:216: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:217: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:218: non-canonical amino acid missing frcmod and mol2 files
+		B:HIS:219: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:220: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:221: non-canonical amino acid missing frcmod and mol2 files
+		B:MET:222: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:223: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:224: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:225: non-canonical amino acid missing frcmod and mol2 files
+		B:PHE:226: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:227: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:228: non-canonical amino acid missing frcmod and mol2 files
+		B:TRP:229: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:230: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:231: non-canonical amino acid missing frcmod and mol2 files
+		B:VAL:232: non-canonical amino acid missing frcmod and mol2 files
+		B:ASP:233: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:234: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:235: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:236: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:237: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:238: non-canonical amino acid missing frcmod and mol2 files
+		B:LEU:239: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:240: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:241: non-canonical amino acid missing frcmod and mol2 files
+		B:ASN:242: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:243: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:244: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:245: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:246: non-canonical amino acid missing frcmod and mol2 files
+		B:ALA:247: non-canonical amino acid missing frcmod and mol2 files
+		B:ILE:248: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:249: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:250: non-canonical amino acid missing frcmod and mol2 files
+		B:ARG:251: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:252: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:253: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:254: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:255: non-canonical amino acid missing frcmod and mol2 files
+		B:GLY:256: non-canonical amino acid missing frcmod and mol2 files
+		B:TRP:257: non-canonical amino acid missing frcmod and mol2 files
+		B:SER:258: non-canonical amino acid missing frcmod and mol2 files
+		B:HIS:259: non-canonical amino acid missing frcmod and mol2 files
+		B:PRO:260: non-canonical amino acid missing frcmod and mol2 files
+		B:GLN:261: non-canonical amino acid missing frcmod and mol2 files
+		B:PHE:262: non-canonical amino acid missing frcmod and mol2 files
+		B:GLU:263: non-canonical amino acid missing frcmod and mol2 files
+		B:LYS:264: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Non-canonical amino acids found in 4a29_FMN_1.pdb for the following residues:
+		A:PRO:1: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:2: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:3: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:4: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:5: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:6: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:7: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:8: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:9: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:10: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:11: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:12: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:13: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:14: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:15: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:16: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:17: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:18: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:19: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:20: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:21: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:22: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:23: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:24: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:25: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:26: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:27: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:28: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:29: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:30: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:31: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:32: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:33: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:34: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:35: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:36: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:37: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:38: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:39: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:40: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:41: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:42: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:43: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:44: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:45: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:46: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:47: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:48: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:49: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:50: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:51: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:52: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:53: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:54: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:55: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:56: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:57: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:58: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:59: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:60: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:61: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:62: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:63: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:64: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:65: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:66: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:67: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:68: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:69: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:70: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:71: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:72: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:73: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:74: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:75: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:76: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:77: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:78: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:79: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:80: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:81: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:82: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:83: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:84: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:85: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:86: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:87: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:88: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:89: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:90: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:91: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:92: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:93: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:94: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:95: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:96: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:97: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:98: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:99: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:100: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:101: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:102: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:103: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:104: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:105: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:106: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:107: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:108: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:109: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:110: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:111: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:112: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:113: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:114: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:115: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:116: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:117: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:118: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:119: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:120: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:121: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:122: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:123: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:124: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:125: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:126: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:127: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:128: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:129: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:130: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:131: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:132: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:133: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:134: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:135: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:136: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:137: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:138: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:139: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:140: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:141: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:142: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:143: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:144: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:145: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:146: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:147: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:148: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:149: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:150: non-canonical amino acid missing frcmod and mol2 files
+		A:TYR:151: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:152: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:153: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:154: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:155: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:156: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:157: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:158: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:159: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:160: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:161: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:162: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:163: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:164: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:165: non-canonical amino acid missing frcmod and mol2 files
+		A:ASP:166: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:167: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:168: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:169: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:170: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:171: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:172: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:173: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:174: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:175: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:176: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:177: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:178: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:179: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:180: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:181: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:182: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:183: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:184: non-canonical amino acid missing frcmod and mol2 files
+		A:THR:185: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:186: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:187: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:188: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:189: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:190: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:191: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:192: non-canonical amino acid missing frcmod and mol2 files
+		A:GLN:193: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:194: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:195: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:196: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:197: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:198: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:199: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:200: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:201: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:202: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:203: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:204: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:205: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:206: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:207: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:208: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:209: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:210: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:211: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:212: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:213: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:214: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:215: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:216: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:217: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:218: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:219: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:220: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:221: non-canonical amino acid missing frcmod and mol2 files
+		A:ARG:222: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:223: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:224: non-canonical amino acid missing frcmod and mol2 files
+		A:GLY:225: non-canonical amino acid missing frcmod and mol2 files
+		A:VAL:226: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:227: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:228: non-canonical amino acid missing frcmod and mol2 files
+		A:PHE:229: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:230: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:231: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:232: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:233: non-canonical amino acid missing frcmod and mol2 files
+		A:SER:234: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:235: non-canonical amino acid missing frcmod and mol2 files
+		A:MET:236: non-canonical amino acid missing frcmod and mol2 files
+		A:ALA:237: non-canonical amino acid missing frcmod and mol2 files
+		A:ASN:238: non-canonical amino acid missing frcmod and mol2 files
+		A:PRO:239: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:240: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:241: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:242: non-canonical amino acid missing frcmod and mol2 files
+		A:LYS:243: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:244: non-canonical amino acid missing frcmod and mol2 files
+		A:LEU:245: non-canonical amino acid missing frcmod and mol2 files
+		A:ILE:246: non-canonical amino acid missing frcmod and mol2 files
+		A:GLU:247: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	The following common problems were found in the PDB files:
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	Checking PDB file non_canonical_AA.pdb for common problems...
+-->	Multiple conformers found in non_canonical_AA.pdb for the following residues:
+		A:ASN:116: ['OD1', 'ND2', 'CA', 'CG', 'CB']
+		A:SER:165: ['CA', 'CB', 'OG']
+		A:SER:186: ['O', 'C', 'CA', 'N', 'CB', 'OG']
+		A:GLU:252: ['OE1', 'O', 'C', 'CA', 'N', 'CD', 'CG', 'CB', 'OE2']
+		B:ARG:4: ['O', 'C', 'NE', 'CZ', 'NH2', 'NH1', 'CA', 'N', 'CD', 'CG', 'CB']
+		B:ASP:7: ['OD1', 'OD2', 'CA', 'CG', 'CB']
+		B:GLU:17: ['OE1', 'O', 'C', 'CA', 'N', 'CD', 'CG', 'CB', 'OE2']
+		B:THR:25: ['OG1', 'O', 'C', 'CG2', 'CA', 'N', 'CB']
+		B:SER:26: ['O', 'C', 'CA', 'N', 'CB', 'OG']
+		B:ARG:27: ['O', 'C', 'CA', 'N', 'CB']
+		B:ALA:28: ['O', 'C', 'CA', 'N', 'CB']
+		B:ARG:78: ['O', 'C', 'NE', 'CZ', 'NH2', 'NH1', 'CA', 'N', 'CD', 'CG', 'CB']
+		B:ASN:91: ['OD1', 'ND2', 'CA', 'CG', 'CB']
+-->	Broken chains found in non_canonical_AA.pdb in the following chains, between these residues:
+		A: ['28 and 31']
+		B: ['28 and 32']
+-->	Missing sidechain atoms found in non_canonical_AA.pdb for the following residues:
+		A:ARG:27: ['CD', 'CG', 'CB']
+		A:GLN:31: ['CB']
+		A:GLU:32: ['CB']
+		A:ILE:33: ['CB']
+		A:LYS:46: ['CD', 'CG', 'CB']
+		A:ARG:75: ['CD', 'CG', 'CB']
+		A:GLU:93: ['CD', 'CG', 'CB']
+		A:GLU:209: ['CG', 'CB']
+		A:ARG:249: ['CG', 'CB']
+		B:ARG:27: ['CB']
+		B:GLU:32: ['CB']
+		B:ILE:33: ['CG2', 'CB']
+		B:GLU:83: ['CG', 'CB']
+		B:GLU:93: ['CG', 'CB']
+		B:GLU:169: ['CG', 'CB']
+		B:GLU:209: ['CG', 'CB']
+		B:GLU:216: ['CG', 'CB']
+		B:LYS:225: ['CD', 'CG', 'CB']
+		B:GLU:252: ['CD', 'CG', 'CB']
+		B:ILE:296: ['CB']
+-->	Organimetallic ligands found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: 5
+		A:PEG:401: 7
+		A:PEG:402: 7
+		A:FMT:403: 2
+		A:FMT:404: 2
+		B:CSD:142: 5
+		B:GOL:401: 6
+		B:FMT:402: 2
+		B:FMT:403: 2
+		B:FMT:404: 2
+-->	The following common problems were found in the PDB files:
+
+  * Multiple conformers found for sidechains of residues *
+	> This often occurs in X-ray structures when electron density is found for multiple conformers
+	> You can fix this in Pymol
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Some Residues are missing sidechain atoms *
+	> This often occurs in X-ray structures in areas of low electron density
+	> If you know the sequence of the protein, you can fix this in Scwrl4
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	Checking PDB file non_canonical_AA.pdb for common problems...
+-->	Multiple conformers found in non_canonical_AA.pdb for the following residues:
+		A:ASN:116: ['ND2', 'CG', 'CA', 'CB', 'OD1']
+		A:SER:165: ['OG', 'CB', 'CA']
+		A:SER:186: ['CA', 'CB', 'OG', 'C', 'N', 'O']
+		A:GLU:252: ['OE2', 'CG', 'CA', 'CB', 'OE1', 'C', 'CD', 'N', 'O']
+		B:ARG:4: ['CG', 'CA', 'NE', 'NH1', 'CB', 'NH2', 'C', 'CD', 'N', 'CZ', 'O']
+		B:ASP:7: ['CG', 'CA', 'CB', 'OD2', 'OD1']
+		B:GLU:17: ['OE2', 'CG', 'CA', 'CB', 'OE1', 'C', 'CD', 'N', 'O']
+		B:THR:25: ['CA', 'CB', 'OG1', 'C', 'N', 'CG2', 'O']
+		B:SER:26: ['CA', 'CB', 'OG', 'C', 'N', 'O']
+		B:ARG:27: ['CA', 'CB', 'C', 'N', 'O']
+		B:ALA:28: ['CA', 'CB', 'C', 'N', 'O']
+		B:ARG:78: ['CG', 'CA', 'NE', 'NH1', 'CB', 'NH2', 'C', 'CD', 'N', 'CZ', 'O']
+		B:ASN:91: ['ND2', 'CG', 'CA', 'CB', 'OD1']
+-->	Broken chains found in non_canonical_AA.pdb in the following chains, between these residues:
+		A: ['28 and 31']
+		B: ['28 and 32']
+-->	Missing sidechain atoms found in non_canonical_AA.pdb for the following residues:
+		A:ARG:27: ['CD', 'CG', 'CB']
+		A:GLN:31: ['CB']
+		A:GLU:32: ['CB']
+		A:ILE:33: ['CB']
+		A:LYS:46: ['CD', 'CG', 'CB']
+		A:ARG:75: ['CD', 'CG', 'CB']
+		A:GLU:93: ['CD', 'CG', 'CB']
+		A:GLU:209: ['CG', 'CB']
+		A:ARG:249: ['CG', 'CB']
+		B:ARG:27: ['CB']
+		B:GLU:32: ['CB']
+		B:ILE:33: ['CB', 'CG2']
+		B:GLU:83: ['CG', 'CB']
+		B:GLU:93: ['CG', 'CB']
+		B:GLU:169: ['CG', 'CB']
+		B:GLU:209: ['CG', 'CB']
+		B:GLU:216: ['CG', 'CB']
+		B:LYS:225: ['CD', 'CG', 'CB']
+		B:GLU:252: ['CD', 'CG', 'CB']
+		B:ILE:296: ['CB']
+-->	Organimetallic ligands found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: 5
+		A:PEG:401: 7
+		A:PEG:402: 7
+		A:FMT:403: 2
+		A:FMT:404: 2
+		B:CSD:142: 5
+		B:GOL:401: 6
+		B:FMT:402: 2
+		B:FMT:403: 2
+		B:FMT:404: 2
+-->	The following common problems were found in the PDB files:
+
+  * Multiple conformers found for sidechains of residues *
+	> This often occurs in X-ray structures when electron density is found for multiple conformers
+	> You can fix this in Pymol
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Some Residues are missing sidechain atoms *
+	> This often occurs in X-ray structures in areas of low electron density
+	> If you know the sequence of the protein, you can fix this in Scwrl4
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	Checking PDB file non_canonical_AA.pdb for common problems...
+-->	Multiple conformers found in non_canonical_AA.pdb for the following residues:
+		A:ASN:116: ['CA', 'CB', 'CG', 'ND2', 'OD1']
+		A:SER:165: ['OG', 'CA', 'CB']
+		A:SER:186: ['O', 'OG', 'CA', 'CB', 'N', 'C']
+		A:GLU:252: ['CD', 'O', 'CA', 'CB', 'OE1', 'N', 'CG', 'OE2', 'C']
+		B:ARG:4: ['CD', 'O', 'NH2', 'CZ', 'NE', 'CA', 'CB', 'N', 'CG', 'NH1', 'C']
+		B:ASP:7: ['CA', 'CB', 'OD2', 'CG', 'OD1']
+		B:GLU:17: ['CD', 'O', 'CA', 'CB', 'OE1', 'N', 'CG', 'OE2', 'C']
+		B:THR:25: ['O', 'OG1', 'CG2', 'CA', 'CB', 'N', 'C']
+		B:SER:26: ['O', 'OG', 'CA', 'CB', 'N', 'C']
+		B:ARG:27: ['O', 'CA', 'CB', 'N', 'C']
+		B:ALA:28: ['O', 'CA', 'CB', 'N', 'C']
+		B:ARG:78: ['CD', 'O', 'NH2', 'CZ', 'NE', 'CA', 'CB', 'N', 'CG', 'NH1', 'C']
+		B:ASN:91: ['CA', 'CB', 'CG', 'ND2', 'OD1']
+-->	Broken chains found in non_canonical_AA.pdb in the following chains, between these residues:
+		A: ['28 and 31']
+		B: ['28 and 32']
+-->	Missing sidechain atoms found in non_canonical_AA.pdb for the following residues:
+		A:ARG:27: ['CD', 'CG', 'CB']
+		A:GLN:31: ['CB']
+		A:GLU:32: ['CB']
+		A:ILE:33: ['CB']
+		A:LYS:46: ['CD', 'CG', 'CB']
+		A:ARG:75: ['CD', 'CG', 'CB']
+		A:GLU:93: ['CD', 'CG', 'CB']
+		A:GLU:209: ['CG', 'CB']
+		A:ARG:249: ['CG', 'CB']
+		B:ARG:27: ['CB']
+		B:GLU:32: ['CB']
+		B:ILE:33: ['CB', 'CG2']
+		B:GLU:83: ['CG', 'CB']
+		B:GLU:93: ['CG', 'CB']
+		B:GLU:169: ['CG', 'CB']
+		B:GLU:209: ['CG', 'CB']
+		B:GLU:216: ['CG', 'CB']
+		B:LYS:225: ['CD', 'CG', 'CB']
+		B:GLU:252: ['CD', 'CG', 'CB']
+		B:ILE:296: ['CB']
+-->	Organimetallic ligands found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: 5
+		A:PEG:401: 7
+		A:PEG:402: 7
+		A:FMT:403: 2
+		A:FMT:404: 2
+		B:CSD:142: 5
+		B:GOL:401: 6
+		B:FMT:402: 2
+		B:FMT:403: 2
+		B:FMT:404: 2
+-->	The following common problems were found in the PDB files:
+
+  * Multiple conformers found for sidechains of residues *
+	> This often occurs in X-ray structures when electron density is found for multiple conformers
+	> You can fix this in Pymol
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Some Residues are missing sidechain atoms *
+	> This often occurs in X-ray structures in areas of low electron density
+	> If you know the sequence of the protein, you can fix this in Scwrl4
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	Checking PDB file non_canonical_AA.pdb for common problems...
+-->	Multiple conformers found in non_canonical_AA.pdb for the following residues:
+		A:ASN:116: ['ND2', 'CG', 'CB', 'OD1', 'CA']
+		A:SER:165: ['CB', 'CA', 'OG']
+		A:SER:186: ['N', 'OG', 'O', 'C', 'CB', 'CA']
+		A:GLU:252: ['OE2', 'CD', 'N', 'OE1', 'CG', 'O', 'C', 'CB', 'CA']
+		B:ARG:4: ['NH1', 'CD', 'N', 'CZ', 'CG', 'NH2', 'O', 'NE', 'C', 'CB', 'CA']
+		B:ASP:7: ['OD2', 'CG', 'CB', 'OD1', 'CA']
+		B:GLU:17: ['OE2', 'CD', 'N', 'OE1', 'CG', 'O', 'C', 'CB', 'CA']
+		B:THR:25: ['OG1', 'N', 'O', 'C', 'CB', 'CG2', 'CA']
+		B:SER:26: ['N', 'OG', 'O', 'C', 'CB', 'CA']
+		B:ARG:27: ['N', 'O', 'C', 'CB', 'CA']
+		B:ALA:28: ['N', 'O', 'C', 'CB', 'CA']
+		B:ARG:78: ['NH1', 'CD', 'N', 'CZ', 'CG', 'NH2', 'O', 'NE', 'C', 'CB', 'CA']
+		B:ASN:91: ['ND2', 'CG', 'CB', 'OD1', 'CA']
+-->	Broken chains found in non_canonical_AA.pdb in the following chains, between these residues:
+		A: ['28 and 31']
+		B: ['28 and 32']
+-->	Missing sidechain atoms found in non_canonical_AA.pdb for the following residues:
+		A:ARG:27: ['CB', 'CD', 'CG']
+		A:GLN:31: ['CB']
+		A:GLU:32: ['CB']
+		A:ILE:33: ['CB']
+		A:LYS:46: ['CB', 'CD', 'CG']
+		A:ARG:75: ['CB', 'CD', 'CG']
+		A:GLU:93: ['CB', 'CD', 'CG']
+		A:GLU:209: ['CB', 'CG']
+		A:ARG:249: ['CB', 'CG']
+		B:ARG:27: ['CB']
+		B:GLU:32: ['CB']
+		B:ILE:33: ['CB', 'CG2']
+		B:GLU:83: ['CB', 'CG']
+		B:GLU:93: ['CB', 'CG']
+		B:GLU:169: ['CB', 'CG']
+		B:GLU:209: ['CB', 'CG']
+		B:GLU:216: ['CB', 'CG']
+		B:LYS:225: ['CB', 'CD', 'CG']
+		B:GLU:252: ['CB', 'CD', 'CG']
+		B:ILE:296: ['CB']
+-->	Non-canonical amino acids found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: non-canonical amino acid missing frcmod and mol2 files
+		B:CSD:142: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: 5
+		A:PEG:401: 7
+		A:PEG:402: 7
+		A:FMT:403: 2
+		A:FMT:404: 2
+		B:CSD:142: 5
+		B:GOL:401: 6
+		B:FMT:402: 2
+		B:FMT:403: 2
+		B:FMT:404: 2
+-->	The following common problems were found in the PDB files:
+
+  * Multiple conformers found for sidechains of residues *
+	> This often occurs in X-ray structures when electron density is found for multiple conformers
+	> You can fix this in Pymol
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Some Residues are missing sidechain atoms *
+	> This often occurs in X-ray structures in areas of low electron density
+	> If you know the sequence of the protein, you can fix this in Scwrl4
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: 1
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Organimetallic ligands found in 4a29_FMN_1.pdb for the following residues:
+		A:FMN:248: 50
+-->	Checking PDB file non_canonical_AA.pdb for common problems...
+-->	Multiple conformers found in non_canonical_AA.pdb for the following residues:
+		A:ASN:116: ['CB', 'OD1', 'CG', 'CA', 'ND2']
+		A:SER:165: ['CB', 'OG', 'CA']
+		A:SER:186: ['CB', 'O', 'C', 'N', 'CA', 'OG']
+		A:GLU:252: ['CB', 'O', 'C', 'CG', 'N', 'OE2', 'CA', 'CD', 'OE1']
+		B:ARG:4: ['CB', 'O', 'C', 'NH2', 'CG', 'N', 'CZ', 'CA', 'NH1', 'NE', 'CD']
+		B:ASP:7: ['OD2', 'CB', 'OD1', 'CG', 'CA']
+		B:GLU:17: ['CB', 'O', 'C', 'CG', 'N', 'OE2', 'CA', 'CD', 'OE1']
+		B:THR:25: ['CB', 'O', 'C', 'N', 'OG1', 'CA', 'CG2']
+		B:SER:26: ['CB', 'O', 'C', 'N', 'CA', 'OG']
+		B:ARG:27: ['CB', 'O', 'C', 'N', 'CA']
+		B:ALA:28: ['CB', 'O', 'C', 'N', 'CA']
+		B:ARG:78: ['CB', 'O', 'C', 'NH2', 'CG', 'N', 'CZ', 'CA', 'NH1', 'NE', 'CD']
+		B:ASN:91: ['CB', 'OD1', 'CG', 'CA', 'ND2']
+-->	Broken chains found in non_canonical_AA.pdb in the following chains, between these residues:
+		A: ['28 and 31']
+		B: ['28 and 32']
+-->	Missing sidechain atoms found in non_canonical_AA.pdb for the following residues:
+		A:ARG:27: ['CB', 'CD', 'CG']
+		A:GLN:31: ['CB']
+		A:GLU:32: ['CB']
+		A:ILE:33: ['CB']
+		A:LYS:46: ['CB', 'CD', 'CG']
+		A:ARG:75: ['CB', 'CD', 'CG']
+		A:GLU:93: ['CB', 'CD', 'CG']
+		A:GLU:209: ['CB', 'CG']
+		A:ARG:249: ['CB', 'CG']
+		B:ARG:27: ['CB']
+		B:GLU:32: ['CB']
+		B:ILE:33: ['CG2', 'CB']
+		B:GLU:83: ['CB', 'CG']
+		B:GLU:93: ['CB', 'CG']
+		B:GLU:169: ['CB', 'CG']
+		B:GLU:209: ['CB', 'CG']
+		B:GLU:216: ['CB', 'CG']
+		B:LYS:225: ['CB', 'CD', 'CG']
+		B:GLU:252: ['CB', 'CD', 'CG']
+		B:ILE:296: ['CB']
+-->	Non-canonical amino acids found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: non-canonical amino acid missing frcmod and mol2 files
+		B:CSD:142: non-canonical amino acid missing frcmod and mol2 files
+-->	Organimetallic ligands found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: 5
+		A:PEG:401: 7
+		A:PEG:402: 7
+		A:FMT:403: 2
+		A:FMT:404: 2
+		B:CSD:142: 5
+		B:GOL:401: 6
+		B:FMT:402: 2
+		B:FMT:403: 2
+		B:FMT:404: 2
+-->	The following common problems were found in the PDB files:
+
+  * Multiple conformers found for sidechains of residues *
+	> This often occurs in X-ray structures when electron density is found for multiple conformers
+	> You can fix this in Pymol
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Some Residues are missing sidechain atoms *
+	> This often occurs in X-ray structures in areas of low electron density
+	> If you know the sequence of the protein, you can fix this in Scwrl4
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Checking PDB file organometallic.pdb for common problems...
+-->	Broken chains found in organometallic.pdb in the following chains, between these residues:
+		A: OXT atom found in the middle of chain
+		B: OXT atom found in the middle of chain
+-->	Organimetallic ligands found in organometallic.pdb for the following residues:
+		C:WPC:1: ['FE']
+-->	Checking PDB file 4a29_FMN_1.pdb for common problems...
+-->	Checking PDB file non_canonical_AA.pdb for common problems...
+-->	Multiple conformers found in non_canonical_AA.pdb for the following residues:
+		A:ASN:116: ['CA', 'CG', 'ND2', 'CB', 'OD1']
+		A:SER:165: ['CA', 'CB', 'OG']
+		A:SER:186: ['CA', 'C', 'O', 'OG', 'N', 'CB']
+		A:GLU:252: ['CA', 'C', 'O', 'CG', 'OE2', 'CD', 'N', 'OE1', 'CB']
+		B:ARG:4: ['CA', 'C', 'O', 'NH2', 'CG', 'NH1', 'CD', 'NE', 'N', 'CZ', 'CB']
+		B:ASP:7: ['CA', 'CG', 'CB', 'OD2', 'OD1']
+		B:GLU:17: ['CA', 'C', 'O', 'CG', 'OE2', 'CD', 'N', 'OE1', 'CB']
+		B:THR:25: ['CA', 'C', 'O', 'OG1', 'CG2', 'N', 'CB']
+		B:SER:26: ['CA', 'C', 'O', 'OG', 'N', 'CB']
+		B:ARG:27: ['CA', 'C', 'O', 'N', 'CB']
+		B:ALA:28: ['CA', 'C', 'O', 'N', 'CB']
+		B:ARG:78: ['CA', 'C', 'O', 'NH2', 'CG', 'NH1', 'CD', 'NE', 'N', 'CZ', 'CB']
+		B:ASN:91: ['CA', 'CG', 'ND2', 'CB', 'OD1']
+-->	Broken chains found in non_canonical_AA.pdb in the following chains, between these residues:
+		A: ['28 and 31']
+		B: ['28 and 32']
+-->	Missing sidechain atoms found in non_canonical_AA.pdb for the following residues:
+		A:ARG:27: ['CB', 'CD', 'CG']
+		A:GLN:31: ['CB']
+		A:GLU:32: ['CB']
+		A:ILE:33: ['CB']
+		A:LYS:46: ['CB', 'CD', 'CG']
+		A:ARG:75: ['CB', 'CD', 'CG']
+		A:GLU:93: ['CB', 'CD', 'CG']
+		A:GLU:209: ['CB', 'CG']
+		A:ARG:249: ['CB', 'CG']
+		B:ARG:27: ['CB']
+		B:GLU:32: ['CB']
+		B:ILE:33: ['CG2', 'CB']
+		B:GLU:83: ['CB', 'CG']
+		B:GLU:93: ['CB', 'CG']
+		B:GLU:169: ['CB', 'CG']
+		B:GLU:209: ['CB', 'CG']
+		B:GLU:216: ['CB', 'CG']
+		B:LYS:225: ['CB', 'CD', 'CG']
+		B:GLU:252: ['CB', 'CD', 'CG']
+		B:ILE:296: ['CB']
+-->	Non-canonical amino acids found in non_canonical_AA.pdb for the following residues:
+		A:CSD:142: non-canonical amino acid missing frcmod and mol2 files
+		B:CSD:142: non-canonical amino acid missing frcmod and mol2 files
+-->	The following common problems were found in the PDB files:
+
+  * Multiple conformers found for sidechains of residues *
+	> This often occurs in X-ray structures when electron density is found for multiple conformers
+	> You can fix this in Pymol
+
+  * Problems with gaps in the protein's backbone *
+	> This often occurs with loops in X-ray structures
+	> If you know the sequence of the protein, you can fix this in RF-Diffusion
+
+  * Some Residues are missing sidechain atoms *
+	> This often occurs in X-ray structures in areas of low electron density
+	> If you know the sequence of the protein, you can fix this in Scwrl4
+
+  * non-canonical amino acids have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for non-canonical amino acids
+	> and supply them in the inputs directory
+
+  * Organimetallic ligands have been identified *
+	> This will cause parameterisation of your system to fail
+	> You can create your own parameters for organometallic ligands
+	> and supply them in the inputs directory
