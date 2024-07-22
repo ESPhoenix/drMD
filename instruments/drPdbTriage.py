@@ -2,21 +2,20 @@
 import os
 from os import path as p
 import pandas as pd
-
+import logging
 from collections import Counter
 ### typing
 from typing import List, Dict, Set, Optional, Tuple
 from os import PathLike
-from drCustomClasses import FilePath, DirectoryPath
-##TODO: add instruments. above
+from instruments.drCustomClasses import FilePath, DirectoryPath
 ### custom modules
 from pdbUtils import pdbUtils
 
 #################################################################################################
-def main(pdbDir: DirectoryPath) -> None:
+def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
     """
     This function iterates through all PDB files in a directory, checks for common problems,
-    and prints the results to the terminal.
+    and logging.infos the results to the terminal.
 
     Args:
         pdbDir (DirectoryPath): The directory containing the PDB files.
@@ -24,6 +23,20 @@ def main(pdbDir: DirectoryPath) -> None:
     Returns:
         None
     """
+    ## set up logging paths
+    outDir: DirectoryPath = config["pathInfo"]["outputDir"]
+    logDir: DirectoryPath = p.join(outDir, "00_drMD_logs")
+    os.makedirs(logDir, exist_ok=True)
+    pdbTriageLog: FilePath = p.join(logDir, "01_pdbTriage.log")
+    ## set up logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(message)s',
+        handlers=[
+            logging.FileHandler(pdbTriageLog),
+            logging.StreamHandler()
+        ]
+    )
 
     # Initialize a dictionary to store common PDB problems
     commonPdbProblems : Dict[bool] = {
@@ -77,35 +90,37 @@ def report_problems(commonPdbProblems: Dict[str, bool]) -> None:
     Args:
         commonPdbProblems (Dict[str, bool]): A dictionary containing the common problems found in the PDB files.
     """
+    logging.info("\n\n")
     if any(commonPdbProblems.values()):
-        print("\n\n")
-        print("-->\tThe following common problems were found in the PDB files:")
+        logging.info("-->\tThe following common problems were found in the PDB files:")
         if commonPdbProblems["isMultipleConformers"]:
-            print("\n  * Multiple conformers found for sidechains of residues *")
-            print("\t> This often occurs in X-ray structures when electron density is found for multiple conformers")
-            print("\t> You can fix this in Pymol")
+            logging.info("\n  * Multiple conformers found for sidechains of residues *")
+            logging.info("\t> This often occurs in X-ray structures when electron density is found for multiple conformers")
+            logging.info("\t> You can fix this in Pymol")
 
         if commonPdbProblems["isBrokenChains"]:
-            print("\n  * Problems with gaps in the protein's backbone *")
-            print("\t> This often occurs with loops in X-ray structures")
-            print("\t> If you know the sequence of the protein, you can fix this in RF-Diffusion")
+            logging.info("\n  * Problems with gaps in the protein's backbone *")
+            logging.info("\t> This often occurs with loops in X-ray structures")
+            logging.info("\t> If you know the sequence of the protein, you can fix this in RF-Diffusion")
 
         if commonPdbProblems["isMissingSidechains"]:
-            print("\n  * Some Residues are missing sidechain atoms *")
-            print("\t> This often occurs in X-ray structures in areas of low electron density")
-            print("\t> If you know the sequence of the protein, you can fix this in Scwrl4")
+            logging.info("\n  * Some Residues are missing sidechain atoms *")
+            logging.info("\t> This often occurs in X-ray structures in areas of low electron density")
+            logging.info("\t> If you know the sequence of the protein, you can fix this in Scwrl4")
 
         if commonPdbProblems["isNonCanonicalAminoAcids"]:
-            print("\n  * non-canonical amino acids have been identified *")
-            print("\t> This will cause parameterisation of your system to fail")
-            print("\t> You can create your own parameters for non-canonical amino acids")
-            print("\t> and supply them in the inputs directory")
+            logging.info("\n  * non-canonical amino acids have been identified *")
+            logging.info("\t> This will cause parameterisation of your system to fail")
+            logging.info("\t> You can create your own parameters for non-canonical amino acids")
+            logging.info("\t> and supply them in the inputs directory")
 
         if commonPdbProblems["isOrganimetallicLigands"]: 
-            print("\n  * Organimetallic ligands have been identified *")
-            print("\t> This will cause parameterisation of your system to fail")
-            print("\t> You can create your own parameters for organometallic ligands")
-            print("\t> and supply them in the inputs directory")
+            logging.info("\n  * Organimetallic ligands have been identified *")
+            logging.info("\t> This will cause parameterisation of your system to fail")
+            logging.info("\t> You can create your own parameters for organometallic ligands")
+            logging.info("\t> and supply them in the inputs directory")
+    else:
+        logging.info("-->\tNo common problems found in the PDB files.")
 #################################################################################################
 
 def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,bool]:
@@ -129,7 +144,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
         Dict[str,bool]: A dictionary containing the common problems found in the PDB file.
     """
     pdbName: str = p.basename(pdbFile)
-    print(f"-->\tChecking PDB file {pdbName} for common problems...")
+    logging.info(f"\n-->\tChecking PDB file {pdbName} for common problems...")
     
     ## load pdb file as a dataframe
     pdbDf: pd.DataFrame = pdbUtils.pdb2df(pdbFile)
@@ -151,26 +166,25 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
 
     ## report any problems found in pdb file
     if isMultipleConformers:
-        print(f"-->\tMultiple conformers found in {pdbName} for the following residues:")
+        logging.info(f"-->\tMultiple conformers found in {pdbName} for the following residues:")
         for key, value in multipleConformers.items():
-            print(f"\t\t{key}: {value}")
-
+            logging.info(f"\t\t{key}: {value}")
     if isBrokenChains:
-        print(f"-->\tBroken chains found in {pdbName} in the following chains, between these residues:")
+        logging.info(f"-->\tBroken chains found in {pdbName} in the following chains, between these residues:")
         for key, value in brokenChains.items():
-            print(f"\t\t{key}: {value}")
+            logging.info(f"\t\t{key}: {value}")
     if isMissingSidechains:
-        print(f"-->\tMissing sidechain atoms found in {pdbName} for the following residues:")
+        logging.info(f"-->\tMissing sidechain atoms found in {pdbName} for the following residues:")
         for key, value in missingSideChains.items():
-            print(f"\t\t{key}: {value}")
+            logging.info(f"\t\t{key}: {value}")
     if isNonCanonicalAminoAcids:
-        print(f"-->\tNon-canonical amino acids found in {pdbName} for the following residues:")
+        logging.info(f"-->\tNon-canonical amino acids found in {pdbName} for the following residues:")
         for key, value in nonCanonicalAminoAcids.items():
-            print(f"\t\t{key}: {value}")
+            logging.info(f"\t\t{key}: {value}")
     if isOrganimetallicLigands:
-        print(f"-->\tOrganimetallic ligands found in {pdbName} for the following residues:")
+        logging.info(f"-->\tOrganimetallic ligands found in {pdbName} for the following residues:")
         for key, value in organimetallicLigands.items():
-            print(f"\t\t{key}: {value}")
+            logging.info(f"\t\t{key}: {value}")
 
     problemsDict: Dict[str,bool] = {
         "isMultipleConformers": isMultipleConformers,
@@ -179,6 +193,9 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
         "isNonCanonicalAminoAcids": isNonCanonicalAminoAcids,
         "isOrganimetallicLigands": isOrganimetallicLigands
     }
+
+    if not any(problemsDict.values()):
+        logging.info("-->\tNo common problems found in the PDB file.")
 
     return problemsDict
 
@@ -196,7 +213,9 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optiona
     """
     # Initialize lists
     aminoAcidResNames, _, _, _ = initialise_lists()
-    organicElements = {"C","N","H","O","S","P"}
+    organicElements = {"C", "N", "H", "O", "S", "P", "F", "CL",
+                        "BR", "I", "SE", "B", "SI"}
+
 
     # Dictionary to store residue IDs and number of non-organic atoms
     organoMetallicResidues: Dict = {}
@@ -209,13 +228,16 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optiona
             # Skip if amino acid residue
             if resName in aminoAcidResNames:
                 continue
-
-            # Count the number of non-organic atoms in the residue
-            nonOrganicAtomCount: int = resDf["ATOM_NAME"].apply(lambda atom: atom not in organicElements).sum()
-
+            try: 
+                resElements: Set[str] = set(resDf["ELEMENT"])
+            except:
+                logging.info("No elements column found in pdb dataframe")
+                return False,  None
+            
             # If there are non-organic atoms, add the residue ID and atom count to the dictionary
-            if nonOrganicAtomCount > 0:
-                organoMetallicResidues[f"{chainId}:{resName}:{str(resId)}"] = nonOrganicAtomCount
+            inorganicElements = [ele for ele in resElements if ele.upper() not in organicElements]
+            if len(inorganicElements) > 0:
+                organoMetallicResidues[f"{chainId}:{resName}:{str(resId)}"] = inorganicElements
 
     # Return boolean indicating if organometallic ligands were found and the dictionary
     return bool(organoMetallicResidues), organoMetallicResidues or None
@@ -241,17 +263,16 @@ def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: Directory
 
     # Dictionary to store residue IDs and messages
     nonCanonicalAminoAcids: Dict = {}
-
     # Loop through chains and residues in the pdb dataframe
     for chainId, chainDf in pdbDf.groupby("CHAIN_ID"):
         for resId, resDf in chainDf.groupby("RES_ID"):
             resName: str = resDf["RES_NAME"].iloc[0]
-
-            # Skip if cannonical amio acid residue, water, ligand,
-            if (all(atom in backboneAtoms for atom in resDf["ATOM_NAME"].unique()) or
-                 resName in aminoAcidResNames or resName == "HOH"):
+            # Skip if cannonical amio acid residue, water,
+            if resName in aminoAcidResNames or resName == "HOH":
                 continue
-
+            # Skip residues with no backbone residues (i.e. ligands)
+            if  not  backboneAtoms.issubset(resDf["ATOM_NAME"].unique()):
+                continue
             # Look for missing frcmod and/or mol2 files
             resKey: str = f"{chainId}:{resName}:{str(resId)}"
             frcmodFile: FilePath = p.join(inputDir, f"{resName}.frcmod")
@@ -473,7 +494,8 @@ def initialise_lists() -> Tuple[Set[str], Set[str], Set[str], Dict[str, int]]:
 if __name__ == "__main__":
     ### for testing
     pdbDir = "/home/esp/scriptDevelopment/drMD/01_inputs/"
-    main(pdbDir)
+    dummyConfig = {"pathInfo": {"outputDir": "/home/esp/scriptDevelopment/drMD/03_outputs"}}
+    pdb_triage(pdbDir, dummyConfig)
 
 #################################################################################
 

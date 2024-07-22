@@ -9,12 +9,6 @@ generalInfo:
   platform: "CUDA"
   subprocessCpus: 1
 ########################################################################
-ligandInfo:
-  - ligandName: "TPA"
-    protons: False
-    charge: -2
-    toppar: False
-    mol2: False
 
 simulationInfo:
   - stepName: "01_energy_minimisation"
@@ -24,15 +18,15 @@ simulationInfo:
 
 ################################################
 
-# postSimulationInfo:
-#   endPointInfo:
-#     stepNames: ["01_energy_minimisation"]
-#     removeAtoms:
-#     - selection:
-#       keyword: "water"
-#     - selection:
-#       keyword: "ions"
-#     - selection:
-#       keyword: "ligands"
-#     collate: True
+postSimulationInfo:
+  endPointInfo:
+    stepNames: ["01_energy_minimisation"]
+    removeAtoms:
+    - selection:
+      keyword: "water"
+    - selection:
+      keyword: "ions"
+    - selection:
+      keyword: "ligands"
+    collate: True
 
