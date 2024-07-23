@@ -32,6 +32,9 @@ splash screen for max retries reached
 
 ### config changes
 generalInfo -> hardwareInfo???
-
+sim -> simInfo??
 
 ## init lists as tuples in own script??
+
+## drPrep
+change run_with_log to use logging

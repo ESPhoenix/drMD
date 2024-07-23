@@ -12,8 +12,8 @@ import instruments.drSelector as drSelector
 ## CUSTOM MODULES
 from pdbUtils import pdbUtils
 ## CLEAN CODE
-from typing import Optional, Dict, List, Tuple, Union, Any
-from instruments.drCustomClasses import FilePath, DirectoryPath
+from typing import  Dict, List
+from instruments.drCustomClasses import FilePath
 ###########################################################################################
 def restraints_handler(
         system: openmm.System,
@@ -21,8 +21,7 @@ def restraints_handler(
         inpcrd: app.AmberInpcrdFile,
         sim: Dict,
         saveFile: FilePath,
-        pdbFile: FilePath
-) -> openmm.System:
+        pdbFile: FilePath) -> openmm.System:
     """
     Handle restraints in the system.
 
@@ -37,32 +36,39 @@ def restraints_handler(
     Returns:
         openmm.System: The system with restraints applied.
     """
-
+    ## skip if not loading from a save file
+    ## this prevents crashes when running first simulation
     if not p.isfile(saveFile):
         return system
-
+    ## check if there are any restraints specified in simulation config
     if "restraintInfo" in sim:
-        restraintInfo: list = sim["restraintInfo"]
+        ## load restraintInfo from simluation config
+        restraintInfo: List[Dict] = sim["restraintInfo"]
+        ## create a counter for naming restraint parameters
         kNumber: int = 0
+        ## loop through restraints 
+        ## create position, distance, angle, and torsion restraints
         for restraint in restraintInfo:
-            selection: list = restraint["selection"]
+            selection: List = restraint["selection"]
             if restraint["restraintType"] == "position":
                 system: openmm.System = create_position_restraint(system, inpcrd, selection, kNumber, pdbFile)
             elif restraint["restraintType"] == "distance":
-                parameters: dict = restraint["parameters"]
+                parameters: Dict = restraint["parameters"]
                 system: openmm.System = create_distance_restraint(system, selection, parameters, kNumber, pdbFile)
             elif restraint["restraintType"] == "angle":
-                parameters: dict = restraint["parameters"]
+                parameters: Dict = restraint["parameters"]
                 system: openmm.System = create_angle_restraint(system, selection, parameters, kNumber, pdbFile)
             elif restraint["restraintType"] == "torsion":
-                parameters: dict = restraint["parameters"]
+                parameters: Dict = restraint["parameters"]
                 system: openmm.System = create_torsion_restraint(system, selection, parameters, kNumber, pdbFile)
             kNumber += 1
 
     else:
-        # print("Running with no restraints...")
+        ## if we have a checkpoint file, we are continuing a simulation
+        ## just return the checkpoint file as-is
         if p.splitext(saveFile)[1] == ".chk":
             return system
+        ## if we are loading from a XML file, we need to clear all restraints
         clear_all_restraints(saveFile)
 
     return system
@@ -70,11 +76,10 @@ def restraints_handler(
 ###########################################################################################
 def create_position_restraint(
     system: openmm.System,
-    inpcrd: any,
+    inpcrd: app.AmberInpcrdFile,
     selection: str,
     kNumber: int,
-    pdbFile: str
-) -> openmm.System:
+    pdbFile: FilePath) -> openmm.System:
     """
     Creates a position restraint for a given system.
 
@@ -88,26 +93,23 @@ def create_position_restraint(
     Returns:
         openmm.System: The system with the position restraint added.
     """
-    positionRestraint = openmm.CustomExternalForce(
-        f"k{str(kNumber)}*periodicdistance(x, y, z, x0, y0, z0)^2"
-    )
-    positionRestraint.addGlobalParameter(
-        f"k{str(kNumber)}", 1000.0 * unit.kilojoules_per_mole / unit.nanometer
-    )
+    ## create a position restraint object, add parameters
+    positionRestraint = openmm.CustomExternalForce(f"k{str(kNumber)}*periodicdistance(x, y, z, x0, y0, z0)^2")
+    positionRestraint.addGlobalParameter(f"k{str(kNumber)}", 1000.0 * unit.kilojoules_per_mole / unit.nanometer)
     positionRestraint.addPerParticleParameter("x0")
     positionRestraint.addPerParticleParameter("y0")
     positionRestraint.addPerParticleParameter("z0")
+    ## add position restrain to system
     system.addForce(positionRestraint)
-
-    restraintAtomIndexes = drSelector.get_atom_indexes(selection, pdbFile)
+    ## use selectio to get atom indexes, add them to the restraint object
+    restraintAtomIndexes: List[int] = drSelector.get_atom_indexes(selection, pdbFile)
     for restraintAtomIndex in restraintAtomIndexes:
-        positionRestraint.addParticle(
-            restraintAtomIndex, inpcrd.getPositions()[restraintAtomIndex]
-        )
+        positionRestraint.addParticle(restraintAtomIndex,
+                                       inpcrd.getPositions()[restraintAtomIndex])
     return system
 
 ###########################################################################################
-def create_distance_restraint(system: openmm.System, selection: list, parameters: dict, kNumber: int, pdbFile: str) -> openmm.System:
+def create_distance_restraint(system: openmm.System, selection: list, parameters: Dict, kNumber: int, pdbFile: FilePath) -> openmm.System:
     """
     Creates a distance restraint between two atoms for a given system.
 
@@ -122,6 +124,7 @@ def create_distance_restraint(system: openmm.System, selection: list, parameters
         openmm.System: The system with the distance restraint added.
     """
 
+    # Create the distance restraint object
     distanceRestraint: openmm.CustomBondForce = openmm.CustomBondForce(f"0.5 * k{str(kNumber)} * (r - r0)^2")
     ## add per bond parameters, k for force constant, r0 for desired distance
     distanceRestraint.addPerBondParameter(f"k{str(kNumber)}")
@@ -130,7 +133,7 @@ def create_distance_restraint(system: openmm.System, selection: list, parameters
     system.addForce(distanceRestraint)
 
     # Get the indices of the two atoms to be restrained
-    restraintAtomIndexes: list = drSelector.get_atom_indexes(selection, pdbFile)
+    restraintAtomIndexes: List[int] = drSelector.get_atom_indexes(selection, pdbFile)
     if len(restraintAtomIndexes) != 2:
         raise ValueError("Expected exactly two atom indices for a distance restraint.")
 
@@ -143,7 +146,7 @@ def create_distance_restraint(system: openmm.System, selection: list, parameters
 
     return system
 ###########################################################################################
-def create_angle_restraint(system: openmm.System, selection: list, parameters: dict, kNumber: int, pdbFile: str) -> openmm.System:
+def create_angle_restraint(system: openmm.System, selection: list, parameters: Dict, kNumber: int, pdbFile: FilePath) -> openmm.System:
     """
     Creates an angle restraint between three atoms for a given system.
 
@@ -157,6 +160,8 @@ def create_angle_restraint(system: openmm.System, selection: list, parameters: d
     Returns:
         openmm.System: The system with the angle restraint added.
     """
+
+    # Create the angle restraint object
     angleRestraint: openmm.CustomAngleForce = openmm.CustomAngleForce(f"0.5 * k{str(kNumber)} * (theta - theta0)^2")
 
     ## add per angle parameters, k for force constant, theta0 for desired angle
@@ -183,7 +188,7 @@ def create_angle_restraint(system: openmm.System, selection: list, parameters: d
 
     return system
 ###########################################################################################
-def create_torsion_restraint(system: openmm.System, selection: list, parameters: dict, kNumber: int, pdbFile: str) -> openmm.System:
+def create_torsion_restraint(system: openmm.System, selection: list, parameters: dict, kNumber: int, pdbFile: FilePath) -> openmm.System:
     """
     Creates a torsion restraint between four atoms for a given system.
 
@@ -197,7 +202,7 @@ def create_torsion_restraint(system: openmm.System, selection: list, parameters:
     Returns:
         openmm.System: The system with the torsion restraint added.
     """
-    # Note: Ensure 'phi' is the variable used for torsion calculation in OpenMM
+    ## create the torsion restraint object  
     torsionRestraint: openmm.CustomTorsionForce = openmm.CustomTorsionForce(f"0.5*k{str(kNumber)}*(1-cos(theta-theta0))")
     
     ## Add parameters: k for force constant, phi0 for desired torsion angle
@@ -225,7 +230,7 @@ def create_torsion_restraint(system: openmm.System, selection: list, parameters:
 
 
 ###########################################################################################
-def clear_all_restraints(saveXml):
+def clear_all_restraints(saveXml: FilePath) -> None:
     """
     Remove all custom force constants from the given XML file.
 
@@ -235,11 +240,15 @@ def clear_all_restraints(saveXml):
     Returns:
         None
     """
+
+    # Parse the XML file
     tree: ET.ElementTree = ET.parse(saveXml)
     root: ET.Element = tree.getroot()
+    ## get the parameters section of the XML file
     parametersElement: ET.Element = root.find("Parameters")
 
     # Safely remove any custom force constants
+    ## NB. our custom restrants are the only ones that use "k"
     paramsToPop: list = []
     if parametersElement is not None:
         for param in parametersElement.attrib:
@@ -247,6 +256,8 @@ def clear_all_restraints(saveXml):
                 paramsToPop.append(param)
     for param in paramsToPop:
         parametersElement.attrib.pop(param)
+
+    # Write the modified XML file
     tree.write(saveXml)
     
 ###########################################################################################
