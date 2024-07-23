@@ -11,6 +11,7 @@ from instruments import drPrep
 from instruments import drSim
 from instruments import drMeta
 from instruments import drConfigInspector
+from instruments import drLogger
 ## BASIC PDB <-> DF UTILS
 from pdbUtils import pdbUtils
 
@@ -57,7 +58,10 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
     Returns:
         None
     """
-
+    ## set up logging
+    logDir = p.join(p.dirname(outDir), "00_drMD_logs")
+    protName = p.dirname(outDir)
+    drLogger.setup_logging(p.join(logDir,f"{protName}_simulations.log"))
 
     platform = choose_platform(config)
 
@@ -83,10 +87,10 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         # Skip or resume simulation
         if skipResumeSim == "skip":
             stepName: str = sim["stepName"]
-            print(f"-->\tSkipping {stepName} for run:\t {pdbName}")
+            drLogger.log_info(f"-->\tSkipping {stepName} for run:\t {pdbName}", True)
             continue
         if skipResumeSim == "resume":
-            print(f"-->\tResuming {stepName} from checkpoint file for run:\t {pdbName}")
+            drLogger.log_info(f"-->\tResuming {stepName} from checkpoint file for run:\t {pdbName}", True)
 
 
         # Run simulation

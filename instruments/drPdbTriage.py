@@ -10,6 +10,9 @@ from os import PathLike
 from instruments.drCustomClasses import FilePath, DirectoryPath
 ### custom modules
 from pdbUtils import pdbUtils
+### drMD modules
+from instruments import drLogger
+
 
 #################################################################################################
 def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
@@ -29,14 +32,7 @@ def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
     os.makedirs(logDir, exist_ok=True)
     pdbTriageLog: FilePath = p.join(logDir, "01_pdbTriage.log")
     ## set up logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(message)s',
-        handlers=[
-            logging.FileHandler(pdbTriageLog),
-            logging.StreamHandler()
-        ]
-    )
+    drLogger.setup_logging(pdbTriageLog)
 
     # Initialize a dictionary to store common PDB problems
     commonPdbProblems : Dict[bool] = {
@@ -58,6 +54,9 @@ def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
         commonPdbProblems = update_problem_dict(commonPdbProblems, problemsDict)
     # Print the results to the terminal
     report_problems(commonPdbProblems)
+
+    ## deactivate logging
+    drLogger.close_logging()
 #################################################################################################
 def update_problem_dict(commonPdbProblems: Dict[str,bool], thisProblemDict: Dict[str,bool]) -> Dict[str,bool]:
     """

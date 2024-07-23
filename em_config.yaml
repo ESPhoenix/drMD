@@ -1,11 +1,11 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
 generalInfo:
-  parallelCPU: 1
+  parallelCPU: 18
   platform: "CUDA"
   subprocessCpus: 1
 ########################################################################

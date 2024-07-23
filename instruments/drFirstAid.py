@@ -11,7 +11,7 @@ import  simtk.unit  as unit
 import mdtraj as md
 ## drMD libraries
 from instruments import drSim
-from instruments import drSpash
+from instruments import drSplash
 ## clean code
 from typing import Tuple, Union, Dict, List, Any
 from os import PathLike
@@ -83,7 +83,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                     retries += 1
                     ## let user know whats going on
                     if retries == 1:
-                        drSpash.print_performing_first_aid()
+                        drSplash.print_performing_first_aid()
 
                     print(f"-->\tAttempting simulation firstAid, try {retries} of {max_retries}")
                     ## find simulation output directory
