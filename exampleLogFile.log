@@ -1,0 +1,23 @@
+2024-07-23 13:51:36,892 - This is the first message.
+2024-07-23 13:51:38,895 - This is the second message.
+2024-07-23 13:51:40,898 - This is the third message.
+2024-07-23 13:51:42,900 - This is the final message.
+
+2024-07-23 13:58:52,224 - This is the first message written to file only.
+2024-07-23 13:58:54,226 - This is the second message written to file and terminal.
+2024-07-23 13:58:56,229 - This is the third message written to file and terminal.
+2024-07-23 13:58:58,231 - This is the final message written to file and terminal.
+
+2024-07-23 13:59:46,740 - This is the first message written to file only.
+2024-07-23 13:59:47,741 - This is the second message written to file and terminal.
+2024-07-23 13:59:48,743 - This is the third message written to file and terminal.
+2024-07-23 13:59:49,744 - This is the final message written to file and terminal.
+
+2024-07-23 14:01:18,295 - This is the first message written to file only.
+2024-07-23 14:01:19,296 - This is the second message written to file and terminal.
+2024-07-23 14:01:20,298 - This is the third message written to file and terminal.
+2024-07-23 14:01:21,299 - This is the final message written to file and terminal.
+
+2024-07-23 14:01:23,660 - This is the first message written to file only.
+2024-07-23 14:01:24,661 - This is the second message written to file and terminal.
+2024-07-23 14:01:25,662 - This is the third message written to file and terminal.

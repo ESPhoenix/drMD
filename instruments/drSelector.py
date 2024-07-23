@@ -41,18 +41,18 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
     elif selection["keyword"] == "protein":
         # Find indexes for all protein atoms
         proteinDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidResNames)]
-        atomIndexes: List[int] = = proteinDf.index.tolist()
+        atomIndexes: List[int] = proteinDf.index.tolist()
     elif selection["keyword"] == "water":
         # Find indexes for water molecules
         waterDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(solventResNames) &
                                        ~pdbDf["RES_NAME"].isin([aminoAcidResNames])]
-        atomIndexes: List[int] = = waterDf.index.tolist()
+        atomIndexes: List[int] = waterDf.index.tolist()
     elif selection["keyword"] == "ions":
         # Find indexes for ions
         ionDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(ionResNames) &
                                     ~pdbDf["RES_NAME"].isin([aminoAcidResNames])]
 
-        atomIndexes: List[int] = = ionDf.index.tolist()
+        atomIndexes: List[int] = ionDf.index.tolist()
     elif selection["keyword"] == "ligands":
         # Find indexes for all ligands / organics / oddball molecules
         ligandDf: pd.DataFrame = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidResNames+solventResNames+ionResNames)]

@@ -7,9 +7,11 @@ import string
 from shutil import copy
 import logging
 import pandas as pd
-## drMD UTILS
+## CUSTOM MODULES
 from pdbUtils import pdbUtils
+## drMD MODULES
 from instruments import drFixer 
+from instruments import drLogger
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
 from instruments.drCustomClasses import FilePath, DirectoryPath
@@ -48,26 +50,101 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
     Note:
         The function assumes that the necessary directories and files are present in the configuration dictionary.
     """
+
+    ## read config for path info
     outDir: DirectoryPath = config["pathInfo"]["outputDir"]
-
     protName: str = config["proteinInfo"]["proteinName"]
-
+    ## create a prep dir if it doesn't exist
     prepDir: DirectoryPath = p.join(outDir,"00_prep")
-    prepLog: FilePath = p.join(prepDir,"prep.log")
-
     os.makedirs(prepDir,exist_ok=True)
 
-    ## set up logging
-    prepLog: FilePath = p.join(prepDir, f"prep_for_{protName}.log")
-    ## set up logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(message)s',
-        handlers=[logging.FileHandler(prepLog)]
-    )
+    set_up_logging(outDir, protName)
 
 
-    ###### skip prep if complete ######
+    skipPrep, prepFiles = choose_to_skip_prep(config=config, prepDir=prepDir, protName=protName)
+    if skipPrep:
+        drLogger.log_info(f"-->\tPrep steps already complete for {protName}!")
+        return prepFiles
+
+
+    ######### MAIN PREP PROTOCOL #########
+    if "ligandInfo" in config:
+        solvatedPdb, inputCoords, amberParams = ligand_prep_protocol(config=config,
+                                                                      protName=protName,
+                                                                        prepDir=prepDir)
+        
+
+    
+    else:
+        solvatedPdb, inputCoords, amberParams = no_ligands_prep_protocol(config=config,
+                                                                          protName=protName,
+                                                                            prepDir=prepDir)
+
+        
+    drLogger.log_info(f"-->\tPrep steps complete for {protName}!")
+    drLogger.close_logging()
+    return solvatedPdb, inputCoords, amberParams
+#####################################################################################
+def no_ligands_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) -> Tuple[FilePath, FilePath, FilePath]:
+    ## PREPARE PROTEIN STRUCTURE
+    protPdb: FilePath = prepare_protein_structure(config=config, outDir = prepDir)  
+    ## MERGE PROTEIN PDBS
+    outName: str = config["pathInfo"]["outputName"]
+    ## MAKE AMBER PARAMETER FILES WITH TLEAP
+    drLogger.log_info(f"-->\tSolvating, Charge Balencing and Creating parameters for {protName}...\n\n")
+    inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
+                                                    pdbFile= protPdb,
+                                                    outName= outName)
+
+    return solvatedPdb, inputCoords, amberParams
+
+
+
+
+#####################################################################################
+def ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) -> Tuple[str, str, str, str]:
+        ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
+        inputPdb: FilePath = config["pathInfo"]["inputPdb"]
+        split_input_pdb(inputPdb =inputPdb,
+                        config = config,
+                        outDir=prepDir)
+        ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
+        ligandPdbs, ligandFileDict = prepare_ligand_parameters(config = config)
+        ## PREPARE PROTEIN STRUCTURE
+        protPdb = prepare_protein_structure(config=config, outDir = prepDir)
+        ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
+        wholePrepDir: DirectoryPath = p.join(prepDir,"WHOLE")
+        os.makedirs(wholePrepDir,exist_ok=True)
+        allPdbs: List[str] = [protPdb] + ligandPdbs
+        outName: str = config["pathInfo"]["outputName"]
+        mergedPdb: FilePath = p.join(wholePrepDir,f"{protName}.pdb")
+        pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
+        ## RESET ATOM NUMBERS AFTER MERGING
+        mergedPdb: FilePath = drFixer.reset_atom_numbers(pdbFile = mergedPdb)
+        ## MAKE AMBER PARAMETER FILES WITH TLEAP
+        inputCoords, amberParams, solvatedPdb  = make_amber_params(outDir = wholePrepDir,
+                            ligandFileDict=ligandFileDict,
+                            pdbFile= mergedPdb,
+                            outName= outName)
+
+        return solvatedPdb, inputCoords, amberParams
+#####################################################################################   
+def choose_to_skip_prep(config: dict, prepDir: DirectoryPath, protName: str) -> Tuple[bool, Optional[Tuple[FilePath, FilePath, FilePath]]]:
+    """
+    Check if the preparation is already complete and return the relevant files if it is.
+
+    Args:
+        config (dict): The configuration dictionary containing the necessary information.
+        prepDir (str): The path to the preparation directory.
+        protName (str): The name of the protein.
+
+    Returns:
+        Tuple[FilePath, FilePath, FilePath]: A tuple containing the paths to the merged PDB file, input coordinates file, and Amber parameter files.
+    """
+    ## init some false booleans for check later
+    amberParams = False
+    inputCoords = False
+    pdbFile = False
     ## check if prmtop, inpcrd, and pdb files exist in prep dir
     wholeDir: str = p.join(prepDir,"WHOLE")
     if p.isdir(p.join(wholeDir)):
@@ -81,54 +158,21 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
     ## return to drOperator if files already have been made
     if p.isfile(amberParams) and p.isfile(inputCoords) and p.isfile(pdbFile):
-        return pdbFile, inputCoords, amberParams
-
-    ### MAIN PREP PROTOCOL ###
-    if "ligandInfo" in config:
-        ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
-        inputPdb: FilePath = config["pathInfo"]["inputPdb"]
-        split_input_pdb(inputPdb =inputPdb,
-                        config = config,
-                        outDir=prepDir)
-        ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
-        ligandPdbs, ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir)
-        ## PREPARE PROTEIN STRUCTURE
-        protPdb = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
-        ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
-        wholePrepDir: DirectoryPath = p.join(prepDir,"WHOLE")
-        os.makedirs(wholePrepDir,exist_ok=True)
-        allPdbs: List[str] = [protPdb] + ligandPdbs
-        outName: str = config["pathInfo"]["outputName"]
-        mergedPdb: FilePath = p.join(wholePrepDir,f"{protName}.pdb")
-        pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
-
-        mergedPdb: FilePath = drFixer.reset_atom_numbers(pdbFile = mergedPdb)
-        ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams, solvatedPdb  = make_amber_params(outDir = wholePrepDir,
-                            ligandFileDict=ligandFileDict,
-                            pdbFile= mergedPdb,
-                            outName= outName,
-                            prepLog= prepLog)
-        # solvatedPdb = drFixer.reset_chains_residues(goodPdb=mergedPdb, badPdb=solvatedPdb)
-
-        return solvatedPdb, inputCoords, amberParams
-    
+        return True, (amberParams, inputCoords, pdbFile)
     else:
-        ## PREPARE PROTEIN STRUCTURE
-        protPdb: FilePath = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
-        ## MERGE PROTEIN PDBS
-        outName: str = config["pathInfo"]["outputName"]
-        ## MAKE AMBER PARAMETER FILES WITH TLEAP
-        inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
-                                                        pdbFile= protPdb,
-                                                        outName= outName,
-                                                        prepLog = prepLog)
-        return solvatedPdb, inputCoords, amberParams
-
+        return False, None
+#####################################################################################
+def set_up_logging(outDir, protName):
+    ## set up logging
+    logDir = p.join(p.dirname(outDir), "00_drMD_logs")
+    os.makedirs(logDir, exist_ok=True)
+    prepLog: FilePath = p.join(logDir,f"{protName}_prep.log")
+    drLogger.setup_logging(prepLog)
+    drLogger.log_info(f"-->\tRunning Prep protocol for {protName}...\n\n")
 #####################################################################################
 def find_ligand_charge(ligDf: pd.DataFrame,
                         ligName: str,
-                          outDir: str,
+                          outDir: DirectoryPath,
                             pH: float) -> int:
     """
     This function uses propka to identify charges on a ligand.
@@ -142,21 +186,26 @@ def find_ligand_charge(ligDf: pd.DataFrame,
     Returns:
         int: Total charge of the ligand.
     """
-    
+    logDir = p.join(p.dirname(outDir), "00_drMD_logs")
+    drLogger.setup_logging(p.join(logDir, "02_ligand_pka_predictions.log"))
+    drLogger.log_info(f"-->\tRunning propka to predict ligand charges for {ligName} at pH {str(pH)}...", True)
     # Change working directory to the output directory
     ## propka3 needs this
     os.chdir(outDir)
     
     # Fix atom names in the ligand dataframe
     ligDf: pd.DataFrame = pdbUtils.fix_atom_names(ligDf)
+    # Remove hydrogen atoms and rename ATOM to HETATM
     ligDf: pd.DataFrame = ligDf[ligDf["ELEMENT"] != "H"]
+    ligDf["ATOM"] = "HETATM"
     # Create a temporary pdb file from the ligand dataframe
     tmpPdb: FilePath = p.join(outDir, f"{ligName}.pdb")
     pdbUtils.df2pdb(ligDf, tmpPdb, chain=False)
     
     # Run propka to predict charges on the ligand
     proPkaCommand: str = f"propka3 {tmpPdb}"
-    run_with_log(proPkaCommand, False, None)
+
+    run_with_log(proPkaCommand, None)
     
     # Read the propka output to extract charge at the specified pH
     proPkaFile: FilePath = f"{ligName}.pka"
@@ -184,10 +233,10 @@ def find_ligand_charge(ligDf: pd.DataFrame,
             elif atomType == "N":
                 if atomProb > pH:
                     totalCharge += 1
-    
+
     # Clean up temporary files
     [os.remove(p.join(outDir, file)) for file in os.listdir(outDir) if not p.splitext(file)[1] == ".yaml"]
-    
+    drLogger.close_logging()
     return totalCharge
 
 #####################################################################################
@@ -218,6 +267,7 @@ def split_input_pdb(inputPdb: FilePath, config: Dict, outDir: DirectoryPath) -> 
     protPrepDir: DirectoryPath = p.join(outDir, "PROT")
     os.makedirs(protPrepDir, exist_ok=True)
     pdbUtils.df2pdb(pdbDf, p.join(protPrepDir, "PROT.pdb"))
+
 #############################  PROTONATION & PDB CREATION ###############################
 
 
@@ -272,7 +322,7 @@ def ligand_protonation(
         # Run pdb4amber to get compatible types and fix atom numbering
         ligPdb_amber: FilePath = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
         pdb4amberCommand: str = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
-        run_with_log(pdb4amberCommand, prepLog, ligPdb_amber)
+        run_with_log(pdb4amberCommand, ligPdb_amber)
 
         ligandPdbs.append(ligPdb_amber)
         return ligPdb_amber, ligandPdbs
@@ -285,8 +335,7 @@ def ligand_mol2(
     ligandParamDir: DirectoryPath,
     ligandPrepDir: DirectoryPath,
     ligPdb: FilePath,
-    ligandFileDict: Dict[str, str],
-    prepLog: FilePath) -> Tuple[str, Dict[str, str]]:
+    ligandFileDict: Dict[str, str]) -> Tuple[str, Dict[str, str]]:
     """
     Create a mol2 file for the ligand.
 
@@ -321,7 +370,7 @@ def ligand_mol2(
             f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
         )
         # Run antechamber and log the command
-        run_with_log(antechamberCommand, prepLog, ligMol2)
+        run_with_log(antechamberCommand, ligMol2)
         # Copy to ligParamDir for future use
         copy(ligMol2, p.join(ligandParamDir, f"{ligandName}.mol2"))
     
@@ -336,8 +385,7 @@ def ligand_toppar(ligand: dict,
                        ligParamDir: DirectoryPath,
                          ligPrepDir: DirectoryPath,
                            ligMol2: FilePath,
-                             ligFileDict: dict,
-                               prepLog: FilePath) -> dict:
+                             ligFileDict: dict) -> dict:
     """
     Create a frcmod file for a given ligand.
 
@@ -368,7 +416,7 @@ def ligand_toppar(ligand: dict,
         # Create a new frcmod file using parmchk2
         ligFrcmod: FilePath = p.join(ligPrepDir, f"{ligandName}.frcmod")
         parmchk2Command: str = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
-        run_with_log(parmchk2Command, prepLog, ligFrcmod)
+        run_with_log(parmchk2Command, ligFrcmod)
         copy(ligFrcmod, p.join(ligParamDir, f"{ligandName}.frcmod"))
 
     # Add frcmod path to ligFileDict
@@ -401,22 +449,29 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
     ligandFileDict: Dict = {}
     # for each ligand in config
     for ligand in ligandsInfo:
+        ## init an empty dict to store the ligand file paths
         ligFileDict: Dict = {}
-        # find files and directories
+        ## get ligand name
         ligandName: str = ligand["ligandName"]
-        ligPrepDir: DirectoryPath = p.join(outDir,ligandName)
+        ## write to log
+        drLogger.log_info(f"-->\tPreparing ligand {ligandName}...\n\n")
+        # find files and directories
+        ligPrepDir: DirectoryPath = p.join(outDir,"00_prep",ligandName)
         os.chdir(ligPrepDir)
-
+        
         # Protonate the ligand
+        drLogger.log_info(f"\t--> Protonating ligand {ligandName}...\n\n")
         ligPdb, ligandPdbs = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
 
         # Create mol2 file
+        drLogger.log_info(f"\t--> Calculating partial charges for ligand {ligandName}...\n\n")
         ligMol2, ligFileDict = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
-                                          ligPrepDir,ligPdb,ligFileDict,prepLog)
+                                          ligPrepDir,ligPdb,ligFileDict)
         
         # Create frcmod file
+        drLogger.log_info(f"\t--> Creating parameter files for ligand {ligandName}...\n\n")
         ligFileDict = ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
-                                    ligPrepDir,ligMol2,ligFileDict,prepLog)
+                                    ligPrepDir,ligMol2,ligFileDict)
 
         ligandFileDict.update({ligandName:ligFileDict})
     return ligandPdbs, ligandFileDict
@@ -450,7 +505,7 @@ def rename_hydrogens(pdbFile: FilePath, outFile: DirectoryPath) -> None:
     # Write the modified DataFrame back to the PDB file
     pdbUtils.df2pdb(pdbDf, outFile, chain=False)
 #####################################################################################
-def prepare_protein_structure(config: Dict, outDir: DirectoryPath, prepLog: FilePath) -> FilePath:
+def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
     """
     Prepare the protein structure for simulations.
 
@@ -465,7 +520,6 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath, prepLog: File
     Returns:
        Union[os.PathLike, str]: The PATH to a PDB file.
     """
-
     # Find files and directories
     protPrepDir: DirectoryPath = p.join(outDir, "PROT")  # Directory to prepare the protein
     os.makedirs(protPrepDir, exist_ok=True)
@@ -484,7 +538,6 @@ def make_amber_params(
     outDir: DirectoryPath,
     pdbFile: FilePath,
     outName: str,
-    prepLog: FilePath,
     ligandFileDict: Optional[Dict[str, Dict[str, str]]] = None
 ) -> Tuple[FilePath, FilePath, FilePath]:
     """
@@ -545,7 +598,7 @@ def make_amber_params(
     tleapOutput: FilePath = p.join(outDir, "TLEAP.out")
     amberParams: FilePath = p.join(outDir, f"{outName}.prmtop")
     tleapCommand: str = f"tleap -f {tleapInput} > {tleapOutput}"
-    run_with_log(tleapCommand, prepLog, amberParams)
+    run_with_log(tleapCommand, amberParams)
 
     # Reset chain and residue IDs in Amber PDB file
     solvatedPdb: FilePath = p.join(outDir, solvatedPdb)
@@ -569,14 +622,23 @@ def run_with_log(
     Returns:
         None
     """
+    ## split command into list
+    commandList = command.split()
+
     # Execute the command and capture its output
     result: subprocess.CompletedProcess[str] = subprocess.run(
-        command,
+        commandList,
         capture_output=True,
-        check=True
+        check=True,
         text=True, 
         env = os.environ
     )
+
+    # Log the command output
+    if result.stdout:
+        drLogger.log_info(f"Command output:\n{result.stdout}")
+    if result.stderr:
+        logging.error(f"Command error output:\n{result.stderr}")
 
     
     # Check if the expected output file exists

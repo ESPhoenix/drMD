@@ -4,13 +4,16 @@ import yaml
 import os
 from os import path as p
 import re
+import multiprocessing as mp
+
 ## clean code
 from typing import Tuple, Union
 from os import PathLike
-import multiprocessing as mp
+from instruments.drCustomClasses import FilePath, DirectoryPath
 ## drMD modules
-from instruments import drSpash
-## WellsWood modules
+from instruments import drSplash
+from instruments import drLogger
+## custom modules
 from pdbUtils import pdbUtils
 #####################################################################################
 def read_and_validate_config() -> dict:
@@ -24,37 +27,46 @@ def read_and_validate_config() -> dict:
     Returns:
     - config (dict)
     """
-    print("-->\tChecking config file...")
+
+    ## set up logging
+
+    drLogger.setup_logging("WONK.log")
+
+    drLogger.log_info("-->\tChecking config file...",True)
+
+
+
 
     try:
         config: dict = read_input_yaml()
     except FileNotFoundError as e:
-        drSpash.print_config_error(e) 
+        drSplash.print_config_error(e) 
     except yaml.YAMLError as e:
-        drSpash.print_config_error(e) 
+        drSplash.print_config_error(e) 
     except KeyError as e:
-        drSpash.print_config_error(e) 
+        drSplash.print_config_error(e) 
     except TypeError as e:
-        drSpash.print_config_error(e) 
+        drSplash.print_config_error(e) 
     except ValueError as e:
-        drSpash.print_config_error(e) 
+        drSplash.print_config_error(e) 
         
     for function, infoName in zip([check_pathInfo, check_generalInfo, check_ligandInfo, check_simulationInfo],
                                   ["pathInfo", "generalInfo", "ligandInfo", "simulationInfo"]):
         try:
             function(config)
         except FileNotFoundError as e:
-            drSpash.print_config_error(e) 
+            drSplash.print_config_error(e) 
         except yaml.YAMLError as e:
-            drSpash.print_config_error(e) 
+            drSplash.print_config_error(e) 
         except KeyError as e:
-            drSpash.print_config_error(e) 
+            drSplash.print_config_error(e) 
         except TypeError as e:
-            drSpash.print_config_error(e) 
+            drSplash.print_config_error(e) 
         except ValueError as e:
-            drSpash.print_config_error(e) 
+            drSplash.print_config_error(e) 
 
-    print("-->\tConfig file is correct")
+    drLogger.log_info("-->\tConfig file is correct", True)
+    drLogger.close_logging()
     return config
 #####################################################################################
 def error_in_info(infoName):

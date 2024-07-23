@@ -11,7 +11,7 @@ from  instruments import drPrep
 from  instruments import drCleanup 
 from  instruments import drOperator 
 from  instruments import drConfigInspector 
-from  instruments import drSpash
+from  instruments import drSplash
 from  instruments import drPdbTriage
 
 ## Multiprocessing
@@ -51,6 +51,7 @@ def make_per_protein_config(
     outDir = batchConfig["pathInfo"]["outputDir"]
     runDir: DirectoryPath = p.join(outDir, protName)
     os.makedirs(runDir, exist_ok=True)
+
 
     ## copy generalInfo from batchConfig to new per run config
     generalInfo = batchConfig["generalInfo"]

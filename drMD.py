@@ -11,7 +11,7 @@ from  instruments import drPrep
 from  instruments import drCleanup 
 from  instruments import drOperator 
 from  instruments import drConfigInspector 
-from  instruments import drSpash
+from  instruments import drSplash
 from  instruments import drPdbTriage
 from  instruments import drConfigWriter
 ## Multiprocessing
@@ -37,7 +37,7 @@ def main() -> None:
         Nothing
     '''
     ## print drMD logo
-    drSpash.print_drMD_logo()
+    drSplash.print_drMD_logo()
 
     ## get batchConfig
     batchConfig: Dict = drConfigInspector.read_and_validate_config()
@@ -111,12 +111,6 @@ def process_pdb_file(pdbFile: FilePath, batchConfig: Dict):
     ## read batchConfig
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]
 
-    # Extract name of pdb file, use that to make a run directory
-    protName: str = fileData[0]
-    runDir: DirectoryPath = p.join(outDir, protName)
-
-    os.makedirs(runDir, exist_ok=True)
-
     ## create a per-protein config
     runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)
 
@@ -138,7 +132,6 @@ def run_serial(batchConfig: Dict) -> None:
     Returns:
         None
     """
-    print("-->\tRunning simulations in serial")
 
     ## unpack batchConfig to get pdbDir
     pdbDir: DirectoryPath = batchConfig["pathInfo"]["inputDir"]
@@ -171,7 +164,7 @@ def run_parallel(batchConfig: Dict) -> None:
     ## read input directory from batchConfig
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     # Get list of PDB files in the directory
-    pdbFiles: list[str] = [pdbFile for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
+    pdbFiles: list[str] = [p.join(pdbDir, pdbFile) for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
     ## construct inputArgs for multiprocessing
     inputArgs: list[tuple] = [(pdbFile, batchConfig) for pdbFile in pdbFiles]
 
@@ -188,7 +181,7 @@ def run_parallel(batchConfig: Dict) -> None:
         progress: int = mp.Value('i', 0)
         
         # Create a tqdm progress bar
-        with tqdm(total=len(inputArgs)) as pbar:
+        with tqdm(total=len(inputArgs), colour="CYAN") as pbar:
             # Submit tasks to the pool
             results: Any = [pool.apply_async(process_pdb_file, args=args, callback=update_progress_bar) for args in inputArgs]
             
