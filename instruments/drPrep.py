@@ -5,13 +5,14 @@ import subprocess
 from subprocess import run
 import string
 from shutil import copy
-import time
+import logging
 import pandas as pd
 ## drMD UTILS
 from pdbUtils import pdbUtils
 from instruments import drFixer 
 ## CLEAN CODE
-from typing import Tuple, List, Dict, Union, Any, Optional
+from typing import Optional, Dict, List, Tuple, Union, Any
+from instruments.drCustomClasses import FilePath, DirectoryPath
 #####################################################################################
 
 def prep_protocol(config: dict) -> Tuple[str, str, str]:
@@ -47,51 +48,61 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
     Note:
         The function assumes that the necessary directories and files are present in the configuration dictionary.
     """
-    outDir: str = config["pathInfo"]["outputDir"]
+    outDir: DirectoryPath = config["pathInfo"]["outputDir"]
 
     protName: str = config["proteinInfo"]["proteinName"]
 
-    prepDir: str = p.join(outDir,"00_prep")
-    prepLog: str = p.join(prepDir,"prep.log")
+    prepDir: DirectoryPath = p.join(outDir,"00_prep")
+    prepLog: FilePath = p.join(prepDir,"prep.log")
 
     os.makedirs(prepDir,exist_ok=True)
 
+    ## set up logging
+    prepLog: FilePath = p.join(prepDir, f"prep_for_{protName}.log")
+    ## set up logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(message)s',
+        handlers=[logging.FileHandler(prepLog)]
+    )
+
+
     ###### skip prep if complete ######
-    amberParams: str = False
-    inputCoords: str = False
+    ## check if prmtop, inpcrd, and pdb files exist in prep dir
     wholeDir: str = p.join(prepDir,"WHOLE")
     if p.isdir(p.join(wholeDir)):
         for file in os.listdir(wholeDir):
             if p.splitext(file)[1] == ".prmtop":
-                amberParams: str = p.join(wholeDir,file)
+                amberParams: FilePath = p.join(wholeDir,file)
             elif p.splitext(file)[1] == ".inpcrd":
-                inputCoords: str = p.join(wholeDir,file)
+                inputCoords: FilePath = p.join(wholeDir,file)
             if p.splitext(file)[1] == ".pdb" and not file == f"{protName}.pdb":
-                pdbFile: str = p.join(wholeDir, file)
-            
-    if amberParams and inputCoords:
+                pdbFile: FilePath = p.join(wholeDir, file)
+
+    ## return to drOperator if files already have been made
+    if p.isfile(amberParams) and p.isfile(inputCoords) and p.isfile(pdbFile):
         return pdbFile, inputCoords, amberParams
-    
+
     ### MAIN PREP PROTOCOL ###
     if "ligandInfo" in config:
         ## SPLIT INPUT PDB INTO PROT AND ONE FILE PER LIGAND
-        inputPdb: str = config["pathInfo"]["inputPdb"]
+        inputPdb: FilePath = config["pathInfo"]["inputPdb"]
         split_input_pdb(inputPdb =inputPdb,
                         config = config,
                         outDir=prepDir)
         ## PREPARE LIGAND PARAMETERS, OUTPUT LIGAND PDBS
-        ligandPdbs, ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir, prepLog = prepLog)
+        ligandPdbs, ligandFileDict = prepare_ligand_parameters(config = config, outDir = prepDir)
         ## PREPARE PROTEIN STRUCTURE
         protPdb = prepare_protein_structure(config=config, outDir = prepDir, prepLog=prepLog)
         ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
-        wholePrepDir: str = p.join(prepDir,"WHOLE")
+        wholePrepDir: DirectoryPath = p.join(prepDir,"WHOLE")
         os.makedirs(wholePrepDir,exist_ok=True)
         allPdbs: List[str] = [protPdb] + ligandPdbs
         outName: str = config["pathInfo"]["outputName"]
-        mergedPdb: str = p.join(wholePrepDir,f"{protName}.pdb")
+        mergedPdb: FilePath = p.join(wholePrepDir,f"{protName}.pdb")
         pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
 
-        mergedPdb = drFixer.reset_atom_numbers(pdbFile = mergedPdb)
+        mergedPdb: FilePath = drFixer.reset_atom_numbers(pdbFile = mergedPdb)
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
         inputCoords, amberParams, solvatedPdb  = make_amber_params(outDir = wholePrepDir,
                             ligandFileDict=ligandFileDict,
@@ -104,7 +115,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
     
     else:
         ## PREPARE PROTEIN STRUCTURE
-        protPdb = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
+        protPdb: FilePath = prepare_protein_structure(config=config, outDir = prepDir, prepLog = prepLog)  
         ## MERGE PROTEIN PDBS
         outName: str = config["pathInfo"]["outputName"]
         ## MAKE AMBER PARAMETER FILES WITH TLEAP
@@ -115,9 +126,10 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         return solvatedPdb, inputCoords, amberParams
 
 #####################################################################################
-def find_ligand_charge(
-    ligDf: pd.DataFrame, ligName: str, outDir: str, pH: float
-) -> int:
+def find_ligand_charge(ligDf: pd.DataFrame,
+                        ligName: str,
+                          outDir: str,
+                            pH: float) -> int:
     """
     This function uses propka to identify charges on a ligand.
     
@@ -132,21 +144,22 @@ def find_ligand_charge(
     """
     
     # Change working directory to the output directory
+    ## propka3 needs this
     os.chdir(outDir)
     
     # Fix atom names in the ligand dataframe
-    ligDf = pdbUtils.fix_atom_names(ligDf)
-    ligDf = ligDf[ligDf["ELEMENT"] != "H"]
+    ligDf: pd.DataFrame = pdbUtils.fix_atom_names(ligDf)
+    ligDf: pd.DataFrame = ligDf[ligDf["ELEMENT"] != "H"]
     # Create a temporary pdb file from the ligand dataframe
-    tmpPdb = p.join(outDir, f"{ligName}.pdb")
+    tmpPdb: FilePath = p.join(outDir, f"{ligName}.pdb")
     pdbUtils.df2pdb(ligDf, tmpPdb, chain=False)
     
     # Run propka to predict charges on the ligand
-    proPkaCommand = f"propka3 {tmpPdb}"
+    proPkaCommand: str = f"propka3 {tmpPdb}"
     run_with_log(proPkaCommand, False, None)
     
     # Read the propka output to extract charge at the specified pH
-    proPkaFile = f"{ligName}.pka"
+    proPkaFile: FilePath = f"{ligName}.pka"
     with open(proPkaFile, "r") as f:
         pkaPredictions: List[List[str]] = []
         extract = False
@@ -178,7 +191,7 @@ def find_ligand_charge(
     return totalCharge
 
 #####################################################################################
-def split_input_pdb(inputPdb: str, config: dict, outDir: str) -> None:
+def split_input_pdb(inputPdb: FilePath, config: Dict, outDir: DirectoryPath) -> None:
     """
     Split an input PDB file into separate PDB files for each ligand and a protein-only PDB file.
 
@@ -191,18 +204,18 @@ def split_input_pdb(inputPdb: str, config: dict, outDir: str) -> None:
         None
     """
     # Read whole pdb into a df
-    pdbDf = pdbUtils.pdb2df(inputPdb)
+    pdbDf: pd.DataFrame = pdbUtils.pdb2df(inputPdb)
     # Write each ligand to a separate pdb file
     ligandsInfo: List[dict] = config["ligandInfo"]
     for ligand in ligandsInfo:
         ligandName: str = ligand["ligandName"]
-        ligPrepDir: str = p.join(outDir, ligandName)
+        ligPrepDir: DirectoryPath = p.join(outDir, ligandName)
         os.makedirs(ligPrepDir, exist_ok=True)
         ligDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"] == ligandName]
         pdbUtils.df2pdb(ligDf, p.join(ligPrepDir, f"{ligandName}.pdb"), chain=False)
         pdbDf.drop(pdbDf[pdbDf["RES_NAME"] == ligandName].index, inplace=True)
     # Write protein only to pdb file
-    protPrepDir: str = p.join(outDir, "PROT")
+    protPrepDir: DirectoryPath = p.join(outDir, "PROT")
     os.makedirs(protPrepDir, exist_ok=True)
     pdbUtils.df2pdb(pdbDf, p.join(protPrepDir, "PROT.pdb"))
 #############################  PROTONATION & PDB CREATION ###############################
@@ -210,11 +223,9 @@ def split_input_pdb(inputPdb: str, config: dict, outDir: str) -> None:
 
 def ligand_protonation(
     ligand: Dict[str, Union[bool, int, str]],
-    ligPrepDir: str,
+    ligPrepDir: DirectoryPath,
     ligandName: str,
-    ligandPdbs: List[str],
-    prepLog: str,
-) -> Tuple[str, List[str]]:
+    ligandPdbs: List[FilePath]) -> Tuple[str, List[str]]:
     """
     Protonates a ligand if specified in the configuration, otherwise performs protonation using Open Babel and pdb4amber.
 
@@ -235,7 +246,7 @@ def ligand_protonation(
 
     # If the ligand is already protonated, return the ligand pdb file
     if ligand["protons"]:
-        ligPdb: str = p.join(ligPrepDir, f"{ligandName}.pdb")
+        ligPdb: FilePath = p.join(ligPrepDir, f"{ligandName}.pdb")
         ligDf: pd.DataFrame = pdbUtils.pdb2df(ligPdb)
         ligDf: pd.DataFrame = pdbUtils.fix_atom_names(ligDf)
         pdbUtils.df2pdb(ligDf, ligPdb)
@@ -246,54 +257,51 @@ def ligand_protonation(
     # If the ligand is not protonated, perform protonation using Open Babel and pdb4amber
     else:
         # # find pdb ligand pdb file
-        ligPdb: str = p.join(ligPrepDir, f"{ligandName}.pdb")
-        ligPdb_H: str = p.join(ligPrepDir, f"{ligandName}_H.pdb")
+        ligPdb: FilePath = p.join(ligPrepDir, f"{ligandName}.pdb")
+        ligPdb_H: FilePath = p.join(ligPrepDir, f"{ligandName}_H.pdb")
 
         # Protonate the ligand using Open Babel
         obabelCommand: str = f"obabel {ligPdb} -O {ligPdb_H} -h"
-        run_with_log(obabelCommand, prepLog, ligPdb_H)
+        run_with_log(obabelCommand, ligPdb_H)
 
-        ligPdb_newH: str = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
+        ligPdb_newH: FilePath = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
 
         # Rename the hydrogens in the ligand pdb file
         rename_hydrogens(ligPdb_H, ligPdb_newH)
 
         # Run pdb4amber to get compatible types and fix atom numbering
-        ligPdb_amber: str = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
+        ligPdb_amber: FilePath = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
         pdb4amberCommand: str = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
         run_with_log(pdb4amberCommand, prepLog, ligPdb_amber)
 
-        ligPdb = ligPdb_amber
-
-        ligandPdbs.append(ligPdb)
-        return ligPdb, ligandPdbs
+        ligandPdbs.append(ligPdb_amber)
+        return ligPdb_amber, ligandPdbs
 
 ###############################  MOL2 CREATION #####################################
 def ligand_mol2(
     ligand: Dict[str, Any],
-    input_dir: str,
-    ligand_name: str,
-    lig_param_dir: str,
-    lig_prep_dir: str,
-    lig_pdb: str,
-    lig_file_dict: Dict[str, str],
-    prep_log: str,
-) -> Tuple[str, Dict[str, str]]:
+    inputDir: DirectoryPath,
+    ligandName: str,
+    ligandParamDir: DirectoryPath,
+    ligandPrepDir: DirectoryPath,
+    ligPdb: FilePath,
+    ligandFileDict: Dict[str, str],
+    prepLog: FilePath) -> Tuple[str, Dict[str, str]]:
     """
     Create a mol2 file for the ligand.
 
-    This function looks for a mol2 file from the configuration, then in the ligParamDir. If not found, it creates a new
-    mol2 file using antechamber.
+    This function looks for a mol2 file from the configuration, then in the ligParamDir.
+    If not found, it creates a new mol2 file using antechamber.
 
     Args:
         ligand (Dict[str, Any]): Ligand information dictionary.
-        input_dir (str): Path to the input directory.
-        ligand_name (str): Name of the ligand.
-        lig_param_dir (str): Path to the ligand parameter directory.
-        lig_prep_dir (str): Path to the ligand preparation directory.
-        lig_pdb (str): Path to the ligand pdb file.
-        lig_file_dict (Dict[str, str]): Dictionary containing ligand file information.
-        prep_log (str): Path to the preparation log file.
+        inputDir (DirectoryPath): Path to the input directory.
+        ligandName (str): Name of the ligand.
+        ligandParamDir (DirectoryPath): Path to the ligand parameter directory.
+        ligandPrepDir (DirectoryPath): Path to the ligand preparation directory.
+        ligPdb (FilePath): Path to the ligand pdb file.
+        ligandFileDict (Dict[str, str]): Dictionary containing ligand file information.
+        prepLog (FilePath): Path to the preparation log file.
 
     Returns:
         Tuple[str, Dict[str, str]]: A tuple containing the path to the mol2 file and the updated lig_file_dict.
@@ -301,50 +309,64 @@ def ligand_mol2(
 
     # Look for mol2 from config, then in ligParamDir, if not found, create new mol2
     if ligand.get("mol2"):  # Look in config
-        lig_mol2: str = p.join(input_dir, f"{ligand_name}.mol2")
+        ligMol2: FilePath = p.join(inputDir, f"{ligandName}.mol2")
 
-    elif p.isfile(p.join(lig_param_dir, f"{ligand_name}.mol2")):  # Look in ligParamDir
-        lig_mol2: str = p.join(lig_param_dir, f"{ligand_name}.mol2")
+    elif p.isfile(p.join(ligandParamDir, f"{ligandName}.mol2")):  # Look in ligParamDir
+        ligMol2: FilePath = p.join(ligandParamDir, f"{ligandName}.mol2")
     else:  # Convert to mol2 with antechamber
         charge: int = int(ligand["charge"])
-        lig_mol2: str = p.join(lig_prep_dir, f"{ligand_name}.mol2")
-        antechamber_command = (
-            f"antechamber -i {lig_pdb} -fi pdb -o {lig_mol2} -fo mol2 -c bcc -s 2 -nc {charge}"
+        ligMol2: FilePath = p.join(ligandPrepDir, f"{ligandName}.mol2")
+        # Create antechamber command
+        antechamberCommand: str = (
+            f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
         )
-        run_with_log(antechamber_command, prep_log, lig_mol2)
+        # Run antechamber and log the command
+        run_with_log(antechamberCommand, prepLog, ligMol2)
         # Copy to ligParamDir for future use
-        copy(lig_mol2, p.join(lig_param_dir, f"{ligand_name}.mol2"))
+        copy(ligMol2, p.join(ligandParamDir, f"{ligandName}.mol2"))
+    
     # Add mol2 path to lig_file_dict
-    lig_file_dict.update({"mol2": lig_mol2})
-    return lig_mol2, lig_file_dict
+    ligandFileDict.update({"mol2": ligMol2})
+    
+    return ligMol2, ligandFileDict
 ######################### TOPPAR CREATION ##########################################
-def ligand_toppar(ligand: dict, inputDir: str, ligandName: str, ligParamDir: str, ligPrepDir: str, ligMol2: str, ligFileDict: dict, prepLog: str) -> dict:
+def ligand_toppar(ligand: dict,
+                   inputDir: DirectoryPath,
+                     ligandName: str,
+                       ligParamDir: DirectoryPath,
+                         ligPrepDir: DirectoryPath,
+                           ligMol2: FilePath,
+                             ligFileDict: dict,
+                               prepLog: FilePath) -> dict:
     """
-    This function looks for an frcmod file from the configuration, then in the ligParamDir. If not found, it creates a new frcmod file using parmchk2.
+    Create a frcmod file for a given ligand.
 
     Args:
-        ligand (dict): Ligand information dictionary.
-        inputDir (str): Path to the input directory.
-        ligandName (str): Name of the ligand.
-        ligParamDir (str): Path to the ligand parameter directory.
-        ligPrepDir (str): Path to the ligand preparation directory.
-        ligMol2 (str): Path to the ligand mol2 file.
-        ligFileDict (dict): Dictionary containing ligand file information.
-        prepLog (str): Path to the preparation log file.
+        ligand (dict): A dictionary containing information about the ligand.
+        inputDir (str): The path to the input directory.
+        ligandName (str): The name of the ligand.
+        ligParamDir (str): The path to the directory where the ligand parameter files are located.
+        ligPrepDir (str): The path to the directory where the ligand preparation files are located.
+        ligMol2 (str): The path to the ligand mol2 file.
+        ligFileDict (dict): A dictionary containing information about the ligand files.
+        prepLog (str): The log file for preparation.
 
     Returns:
-        dict: The updated ligFileDict with the path to the frcmod file.
+        dict: A dictionary containing information about the ligand files, including the path to the frcmod file.
     """
 
     # Look for frcmod from config, then in ligParamDir, if not found, create new frcmod
     if ligand.get("toppar"):  # Look in config
-        ligFrcmod: str = p.join(inputDir, f"{ligandName}.frcmod")
+        # Use the frcmod file from the config
+        ligFrcmod: FilePath = p.join(inputDir, f"{ligandName}.frcmod")
 
     elif p.isfile(p.join(ligParamDir, f"{ligandName}.frcmod")):  # Look in ligParamDir
-        ligFrcmod: str = p.join(ligParamDir, f"{ligandName}.frcmod")
+        # Use the existing frcmod file in ligParamDir
+        ligFrcmod: FilePath = p.join(ligParamDir, f"{ligandName}.frcmod")
 
     else:  # Create new frcmod using parmchk2
-        ligFrcmod: str = p.join(ligPrepDir, f"{ligandName}.frcmod")
+        # Create a new frcmod file using parmchk2
+        ligFrcmod: FilePath = p.join(ligPrepDir, f"{ligandName}.frcmod")
         parmchk2Command: str = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
         run_with_log(parmchk2Command, prepLog, ligFrcmod)
         copy(ligFrcmod, p.join(ligParamDir, f"{ligandName}.frcmod"))
@@ -354,52 +376,52 @@ def ligand_toppar(ligand: dict, inputDir: str, ligandName: str, ligParamDir: str
 
     return ligFileDict
 #####################################################################################
-def prepare_ligand_parameters(config: dict, outDir: str, prepLog: str = None) -> Tuple[List[str], Dict[str, Dict[str, str]]]:
+def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[str, str]]]:
     """
     Prepares the ligand parameters for a given configuration file.
 
     Args:
-        config (dict): The configuration file containing the ligand information.
-        outDir (str): The output directory where the ligand parameters will be saved.
-        prepLog (str, optional): The path to the preparation log file. Defaults to None.
+        config (dict): The configuration file containing all information needed
 
     Returns:
         Tuple[List[str], Dict[str, Dict[str, str]]]: A tuple containing two elements:
             - ligandPdbs (List[str]): A list of ligand PDB files.
             - ligandFileDict (Dict[str, Dict[str, str]]): A dictionary containing the ligand file information.
-
-    This function reads the inputs from the configuration file and prepares the ligand parameters. It creates a directory to save the parameter files and initializes a list to store the PDB files and a dictionary to store all the information. For each ligand in the configuration file, it finds the files and directories, performs ligand protonation, generates the ligand mol2 file, and creates the ligand toppar file. The function returns the list of ligand PDB files and the dictionary containing the ligand file information.
     """
     # read inputs from config file
+    outDir: DirectoryPath = config["pathInfo"]["outputDir"]
     ligandsInfo: dict = config["ligandInfo"]
-    inputDir: str = config["pathInfo"]["inputDir"]
-    mainDir: str = p.dirname(config["pathInfo"]["outputDir"])
+    inputDir: DirectoryPath = config["pathInfo"]["inputDir"]
+    mainDir: DirectoryPath = p.dirname(config["pathInfo"]["outputDir"])
     # create a dir to save parameter files in (saves re-running on subsequent runs)
-    ligParamDir: str = p.join(mainDir,"01_ligand_parameters")
+    ligParamDir: DirectoryPath = p.join(mainDir,"01_ligand_parameters")
     os.makedirs(ligParamDir,exist_ok=True)
     # initialise list to store pdb files and dict to store all infod
-    ligandPdbs: list = []
-    ligandFileDict: dict = {}
+    ligandPdbs: List[FilePath] = []
+    ligandFileDict: Dict = {}
     # for each ligand in config
     for ligand in ligandsInfo:
-        ligFileDict: dict = {}
+        ligFileDict: Dict = {}
         # find files and directories
         ligandName: str = ligand["ligandName"]
-        ligPrepDir: str = p.join(outDir,ligandName)
+        ligPrepDir: DirectoryPath = p.join(outDir,ligandName)
         os.chdir(ligPrepDir)
 
-        ligPdb, ligandPdbs       = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs,prepLog)  
+        # Protonate the ligand
+        ligPdb, ligandPdbs = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
 
-        ligMol2, ligFileDict    = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
-                                              ligPrepDir,ligPdb,ligFileDict,prepLog)
+        # Create mol2 file
+        ligMol2, ligFileDict = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
+                                          ligPrepDir,ligPdb,ligFileDict,prepLog)
         
-        ligFileDict             =       ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
-                                                      ligPrepDir,ligMol2,ligFileDict,prepLog)
+        # Create frcmod file
+        ligFileDict = ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
+                                    ligPrepDir,ligMol2,ligFileDict,prepLog)
 
         ligandFileDict.update({ligandName:ligFileDict})
     return ligandPdbs, ligandFileDict
 #####################################################################################
-def rename_hydrogens(pdbFile: str, outFile: str) -> None:
+def rename_hydrogens(pdbFile: FilePath, outFile: DirectoryPath) -> None:
     """
     Renames all hydrogens in a PDB file to new names.
 
@@ -428,9 +450,7 @@ def rename_hydrogens(pdbFile: str, outFile: str) -> None:
     # Write the modified DataFrame back to the PDB file
     pdbUtils.df2pdb(pdbDf, outFile, chain=False)
 #####################################################################################
-def prepare_protein_structure(
-    config: dict, outDir: str, prepLog: str
-) -> List[str]:
+def prepare_protein_structure(config: Dict, outDir: DirectoryPath, prepLog: FilePath) -> FilePath:
     """
     Prepare the protein structure for simulations.
 
@@ -438,19 +458,19 @@ def prepare_protein_structure(
     to the output directory if it doesn't exist.
 
     Args:
-        config (dict): The configuration dictionary.
-        outDir (str): The output directory.
-        prepLog (str): The path to the preparation log file.
+        config (Dict): The configuration dictionary.
+        outDir (DirectoryPath): The output directory.
+        prepLog (FilePath): The path to the preparation log file.
 
     Returns:
        Union[os.PathLike, str]: The PATH to a PDB file.
     """
 
     # Find files and directories
-    protPrepDir: str = p.join(outDir, "PROT")  # Directory to prepare the protein
+    protPrepDir: DirectoryPath = p.join(outDir, "PROT")  # Directory to prepare the protein
     os.makedirs(protPrepDir, exist_ok=True)
     os.chdir(protPrepDir)
-    protPdb = p.join(protPrepDir, "PROT.pdb")  # Path to the protein PDB file
+    protPdb: FilePath = p.join(protPrepDir, "PROT.pdb")  # Path to the protein PDB file
     # Check for PROT.pdb in protPrepDir (won't be there if noLigand)
     if not p.isfile(protPdb):
         # Copy the input PDB file to the output directory
@@ -461,26 +481,26 @@ def prepare_protein_structure(
 
 #####################################################################################
 def make_amber_params(
-    outDir: str,
-    pdbFile: str,
+    outDir: DirectoryPath,
+    pdbFile: FilePath,
     outName: str,
-    prepLog: str,
+    prepLog: FilePath,
     ligandFileDict: Optional[Dict[str, Dict[str, str]]] = None
-) -> Tuple[str, str]:
+) -> Tuple[FilePath, FilePath, FilePath]:
     """
     Prepare the protein structure for simulations using Amber.
 
     Args:
-        outDir (str): The output directory.
-        pdbFile (str): The path to the input PDB file.
+        outDir (DirectoryPath): The output directory.
+        pdbFile (FilePath): The path to the input PDB file.
         outName (str): The name of the prepared protein.
-        prepLog (str): The path to the preparation log file.
+        prepLog (FilePath): The path to the preparation log file.
         ligandFileDict (Optional[Dict[str, Dict[str, str]]]): A dictionary containing the paths to
             the mol2 and frcmod files for each ligand. Defaults to None.
 
     Returns:
-        Tuple[str, str]: The paths to the input coordinate file and the Amber
-            parameter files.
+        Tuple[FilePath, FilePath, FilePath]: The paths to the input coordinate file and the Amber
+            parameter files and a pdb file
     """
     # Change the working directory to the output directory
     os.chdir(outDir)
@@ -500,8 +520,8 @@ def make_amber_params(
         # Load molecular mechanics parameters for ligands
         if ligandFileDict:
             for ligandName, ligandInfo in ligandFileDict.items():
-                ligMol2 = ligandInfo["mol2"]
-                ligFrcmod = ligandInfo["frcmod"]
+                ligMol2: FilePath = ligandInfo["mol2"]
+                ligFrcmod: FilePath = ligandInfo["frcmod"]
                 f.write(f"{ligandName} = loadmol2 {ligMol2}\n")
                 f.write(f"loadamberparams {ligFrcmod}\n\n")
 
@@ -516,28 +536,27 @@ def make_amber_params(
         # Save the solvated protein structure and parameter files
         solvatedPdb: str = f"{outName}_solvated.pdb"
         f.write(f"savepdb mol {solvatedPdb}\n")
-        prmTop: str = p.join(outDir, f"{outName}.prmtop")
-        inputCoords: str = p.join(outDir, f"{outName}.inpcrd")
+        prmTop: FilePath = p.join(outDir, f"{outName}.prmtop")
+        inputCoords: FilePath = p.join(outDir, f"{outName}.inpcrd")
         f.write(f"saveamberparm mol {prmTop} {inputCoords}\n")
         f.write("quit\n")
 
     # Execute TLEAP and log the output
-    tleapOutput: str = p.join(outDir, "TLEAP.out")
-    amberParams: str = p.join(outDir, f"{outName}.prmtop")
+    tleapOutput: FilePath = p.join(outDir, "TLEAP.out")
+    amberParams: FilePath = p.join(outDir, f"{outName}.prmtop")
     tleapCommand: str = f"tleap -f {tleapInput} > {tleapOutput}"
     run_with_log(tleapCommand, prepLog, amberParams)
 
     # Reset chain and residue IDs in Amber PDB file
-    solvatedPdb: str = p.join(outDir, solvatedPdb)
-    inputCoords: str = p.join(outDir, f"{outName}.inpcrd")
+    solvatedPdb: FilePath = p.join(outDir, solvatedPdb)
+    inputCoords: FilePath = p.join(outDir, f"{outName}.inpcrd")
     ## reset chain and residue IDs in amber PDB
-    solvatedPdb: str = p.join(outDir, solvatedPdb)
+    solvatedPdb: FilePath = p.join(outDir, solvatedPdb)
     # drFixer.reset_chains_residues(pdbFile, solvatedPdb)
     return inputCoords, amberParams, solvatedPdb
 #####################################################################################
 def run_with_log(
     command: str,
-    prepLog: Optional[str] = None,
     expectedOutput: Optional[str] = None
 ) -> None:
     """
@@ -545,24 +564,21 @@ def run_with_log(
 
     Args:
         command (str): The command to execute.
-        prepLog (Optional[str], optional): The path to the log file. Defaults to None.
         expectedOutput (Optional[str], optional): The path to the expected output file. Defaults to None.
 
     Returns:
         None
     """
-    # Retry the command until it succeeds or reaches the maximum number of retries
     # Execute the command and capture its output
-    process: subprocess.CompletedProcess[str] = subprocess.run(
+    result: subprocess.CompletedProcess[str] = subprocess.run(
         command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        capture_output=True,
+        check=True
         text=True, 
         env = os.environ
     )
 
-
+    
     # Check if the expected output file exists
     if expectedOutput is None or p.isfile(expectedOutput):
         return

@@ -11,3 +11,4 @@ scipy
 adjustText
 tqdm
 pdbutils
+scikit-learn
