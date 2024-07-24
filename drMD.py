@@ -166,10 +166,7 @@ def run_parallel(batchConfig: Dict) -> None:
     Returns:
         None
     """
-    #################################################################################
 
-
-    #################################################################################
     ## read input directory from batchConfig
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     parallelCpus: int = batchConfig["generalInfo"]["parallelCPU"]
@@ -178,12 +175,14 @@ def run_parallel(batchConfig: Dict) -> None:
     pdbFiles: list[str] = [p.join(pdbDir, pdbFile) for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
     ## construct inputArgs for multiprocessing
     inputArgs: list[tuple] = [(pdbFile, batchConfig) for pdbFile in pdbFiles]
-
-
+    ## create batched inputs
     batchedArgsWithPos = [(batch, pos) for pos, batch in enumerate(np.array_split(inputArgs, parallelCpus))]
+    ## add a dummy batch to be used for printing logging
+    batchedArgsWithPos = [(["dummy"], -1)] + batchedArgsWithPos
 
-    process_map(per_core_worker, batchedArgsWithPos, max_workers=parallelCpus)
-
+    ## run simulations in parallel
+    process_map(per_core_worker, batchedArgsWithPos, 
+                max_workers=parallelCpus)
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
@@ -194,14 +193,22 @@ def per_core_worker(batchedArgsWithPos):
     cmap = plt.get_cmap('gist_rainbow', 32)
     colors = [mcolors.rgb2hex(cmap(i)) for i in range(32)]
 
-    with tqdm(desc=f"Core {str(pos)}", total=len(batchedArgs), position=pos,
-            colour=colors[pos % len(colors)], leave=False) as progress:
-        for args in batchedArgs:
-            ## unpack args
-            pdbFile, batchConfig = args
-            process_pdb_file(pdbFile, batchConfig)
-            progress.update(1)
-        progress.close()  # Ensure the progress bar is closed
+    if pos == -1:
+        with tqdm(total=1, position=0, bar_format='{desc}', 
+                  colour="#000000", leave=True) as dummy_progress:
+            dummy_progress.set_description_str("Logs:")
+            dummy_progress.refresh()
+    else:
+        with tqdm(desc=f"Core {str(pos)}", total=len(batchedArgs), 
+                position=pos+1, colour=colors[pos % len(colors)], 
+                leave=False) as progress:
+            for args in batchedArgs:
+                # Unpack args
+                pdbFile, batch_config = args
+                process_pdb_file(pdbFile, batch_config)
+                progress.update(1)
+            progress.close()  # Ensure the progress bar is closed
+######################################################################################################
 
-
-main()
+if __name__ == "__main__":
+    main()
