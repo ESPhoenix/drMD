@@ -2,6 +2,7 @@
 import logging
 import sys
 import time
+
 ## CLEAN CODE
 from typing import List, Dict, Union, Any
 
@@ -74,7 +75,7 @@ def close_logging():
 
 if __name__ == '__main__':
     logFile = 'exampleLogFile.log'
-    setupLogging(logFile)
+    setup_logging(logFile)
 
     # Log messages using the custom log_info function
     log_info('This is the first message written to file only.')
