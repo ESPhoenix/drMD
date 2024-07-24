@@ -2,6 +2,7 @@
 import os
 from os import path as p
 import pandas as pd
+import numpy as np
 ## INPUT LIBS
 import yaml
 import argpass
@@ -19,6 +20,10 @@ import concurrent.futures as cf
 from tqdm import tqdm
 from subprocess import run
 import multiprocessing as mp
+from tqdm.contrib.concurrent import process_map
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
 from instruments.drCustomClasses import FilePath, DirectoryPath
@@ -161,37 +166,42 @@ def run_parallel(batchConfig: Dict) -> None:
     Returns:
         None
     """
+    #################################################################################
+
+
+    #################################################################################
     ## read input directory from batchConfig
     pdbDir = batchConfig["pathInfo"]["inputDir"]
+    parallelCpus: int = batchConfig["generalInfo"]["parallelCPU"]
+
     # Get list of PDB files in the directory
     pdbFiles: list[str] = [p.join(pdbDir, pdbFile) for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
     ## construct inputArgs for multiprocessing
     inputArgs: list[tuple] = [(pdbFile, batchConfig) for pdbFile in pdbFiles]
 
-    # Function to update the progress bar
-    def update_progress_bar(*args):
-        with progress.get_lock():
-            progress.value += 1
-            pbar.update()
 
-    parallelCpus: int = batchConfig["generalInfo"]["parallelCPU"]
-    # Create a Pool with the desired number of worker processes
-    with mp.Pool(processes=parallelCpus) as pool:
-        # Create a shared Value for progress tracking
-        progress: int = mp.Value('i', 0)
-        
-        # Create a tqdm progress bar
-        with tqdm(total=len(inputArgs), colour="CYAN") as pbar:
-            # Submit tasks to the pool
-            results: Any = [pool.apply_async(process_pdb_file, args=args, callback=update_progress_bar) for args in inputArgs]
-            
-            # Close the pool and wait for the work to finish
-            pool.close()
-            pool.join()
+    batchedArgsWithPos = [(batch, pos) for pos, batch in enumerate(np.array_split(inputArgs, parallelCpus))]
 
+    process_map(per_core_worker, batchedArgsWithPos, max_workers=parallelCpus)
 
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
+def per_core_worker(batchedArgsWithPos):
+    """Process a batch of inputs."""
+    ## unpack batchedArgsWithPos
+    batchedArgs, pos = batchedArgsWithPos
+    cmap = plt.get_cmap('gist_rainbow', 32)
+    colors = [mcolors.rgb2hex(cmap(i)) for i in range(32)]
+
+    with tqdm(desc=f"Core {str(pos)}", total=len(batchedArgs), position=pos,
+            colour=colors[pos % len(colors)], leave=False) as progress:
+        for args in batchedArgs:
+            ## unpack args
+            pdbFile, batchConfig = args
+            process_pdb_file(pdbFile, batchConfig)
+            progress.update(1)
+        progress.close()  # Ensure the progress bar is closed
+
 
 main()
