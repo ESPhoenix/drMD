@@ -8,13 +8,7 @@ generalInfo:
   parallelCPU: 1
   platform: "CUDA"
   subprocessCpus: 1
-########################################################################
-ligandInfo:
-  - ligandName: "FMN"
-    protons: True
-    charge: -1
-    toppar: False
-    mol2: False
+
 ########################################################################
 simulationInfo:
   - stepName: "01_energy_minimisation"
@@ -102,28 +96,27 @@ simulationInfo:
 
 ################################################
 
-# postSimulationInfo:
-#   # clusterInfo:
-#   #   stepNames: ["05_RMSD_Metadynamics_Dummy", "03_NpT_pre-equilibriation"] 
-#   #   nClusters: 3
-#   #   clusterBy:
-#   #     selection:
-#   #       keyword: "custom"
-#   #       customSelection: 
-#   #       - {CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
-#   #   removeAtoms:
-#   #   - selection:
-#   #     keyword: "water"
-#   #   - selection:
-#   #     keyword: "ions"
-#   #   collate: True
-#   endPointInfo:
-#     stepNames: ["03_NpT_pre-equilibriation"]
-#     removeAtoms:
-#     - selection:
-#       keyword: "water"
-#     - selection:
-#       keyword: "ions"
-#     - selection:
-#       keyword: "ligands"
-#     collate: True
+postSimulationInfo:
+  clusterInfo:
+    stepNames: ["05_RMSD_Metadynamics_Dummy", "03_NpT_pre-equilibriation"] 
+    nClusters: 3
+    clusterBy:
+      selection:
+        keyword: "custom"
+        customSelection: [{CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}]
+    removeAtoms:
+    - selection:
+        keyword: "water"
+    - selection:
+        keyword: "ions"
+    collate: True
+  endPointInfo:
+    stepNames: ["03_NpT_pre-equilibriation"]
+    removeAtoms:
+    - selection:
+        keyword: "water"
+    - selection:
+        keyword: "ions"
+    - selection:
+        keyword: "ligands"
+    collate: True

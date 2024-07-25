@@ -3,6 +3,7 @@ import os
 from os import path as p
 import pandas as pd
 import numpy as np
+from shutil import move
 ## INPUT LIBS
 import yaml
 import argpass
@@ -11,7 +12,7 @@ from pdbUtils import pdbUtils
 from  instruments import drPrep 
 from  instruments import drCleanup 
 from  instruments import drOperator 
-from  instruments import drConfigInspector 
+from  instruments import drConfigTriage 
 from  instruments import drSplash
 from  instruments import drPdbTriage
 from  instruments import drConfigWriter
@@ -45,7 +46,7 @@ def main() -> None:
     drSplash.print_drMD_logo()
 
     ## get batchConfig
-    batchConfig: Dict = drConfigInspector.read_and_validate_config()
+    batchConfig, configTriageLog  = drConfigTriage.read_and_validate_config()
     ## unpack batchConfig into variables for this function
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]
     yamlDir: DirectoryPath = p.join(outDir,"00_configs")
@@ -53,6 +54,11 @@ def main() -> None:
     parallelCPU: int = batchConfig["generalInfo"]["parallelCPU"]
     subprocessCpus: int = batchConfig["generalInfo"]["subprocessCpus"]
 
+    ## create logDir if it doesn't exist
+    logDir: DirectoryPath = p.join(outDir, "00_drMD_logs")
+    os.makedirs(logDir, exist_ok=True)
+    os.replace(configTriageLog, p.join(logDir,"config_triage.log"))
+    exit()
 
     ## run pdbTriage to detect commmon problems with pdb files
     drPdbTriage.pdb_triage(pdbDir, batchConfig)
@@ -186,13 +192,24 @@ def run_parallel(batchConfig: Dict) -> None:
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
-def per_core_worker(batchedArgsWithPos):
-    """Process a batch of inputs."""
-    ## unpack batchedArgsWithPos
-    batchedArgs, pos = batchedArgsWithPos
-    cmap = plt.get_cmap('gist_rainbow', 32)
-    colors = [mcolors.rgb2hex(cmap(i)) for i in range(32)]
+def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
+    """
+    Each core is passed a batch of arguments to process
+    This function unpacks the arguments and handles the progress bar
 
+    Args:
+        batchedArgsWithPos List[(Tuple[Dict, int])]: 
+            Alist of tuples containing input argunents for process_pdb_file and 
+            the position of the core for the loading bar
+    Returns:
+        None
+    """
+
+    ## unpack batchedArgsWithPos into the batch of arguments for 
+    batchedArgs, pos = batchedArgsWithPos
+
+    cmap = plt.get_cmap('coolwarm', 32)
+    colors = [mcolors.rgb2hex(cmap(i)) for i in range(32)]
     if pos == -1:
         with tqdm(total=1, position=0, bar_format='{desc}', 
                   colour="#000000", leave=True) as dummy_progress:
@@ -203,11 +220,11 @@ def per_core_worker(batchedArgsWithPos):
                 position=pos+1, colour=colors[pos % len(colors)], 
                 leave=False) as progress:
             for args in batchedArgs:
-                # Unpack args
                 pdbFile, batch_config = args
                 process_pdb_file(pdbFile, batch_config)
                 progress.update(1)
-            progress.close()  # Ensure the progress bar is closed
+            progress.close()  
+
 ######################################################################################################
 
 if __name__ == "__main__":

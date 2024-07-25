@@ -1,40 +1,28 @@
 #### README updates
-- restraints -> retraintsInfo [x]
-- metaDynamicsInfo            [x]
-
-
-#### drSelector
-- cope with single dict input [x]
-- use "all" wildcards       [x]
-- use lists + isin as well as single args [x]
-- allow for "all" keyword [x]
-
-
-#### MetaDyanamics
-- distance MetaDyanamics    [x]
-- angle MetaDyanamics       [x]
-
-#### cleanUp
-Re-do all of this!          [x]
-move clustering here?       [x]
-
-## reports
-sort out progress report - should be progress for this step only [x]
-
-## drLogger
-make a logger system for everything  
+[]  redo installation instructions
+[]  work out what needs changing
 
 
 ##drFirstAid
-skip zero length DCD and CSV files when concat at the end [?]
-fix steps and time data in progress reports  [x]
-splash screen for max retries reached
+[]  skip zero length DCD and CSV files when concat at the end 
+[]  splash screen for max retries reached
 
 ### config changes
-generalInfo -> hardwareInfo???
-sim -> simInfo??
+[]  generalInfo -> hardwareInfo???
+[]  sim -> simInfo??
 
 ## init lists as tuples in own script??
 
-## drPrep
-change run_with_log to use logging
+## drFixer 
+[]  re-implement after simutaion steps run (but not during prep as this is slow)
+
+## drOperator/ drPrep
+[]  investigate odd pause before running simulations - is this skip_resume_simulate?
+
+## drConfigInspector
+[x]  rename configTriage 
+[x]  make sure selections are being checked for metaDynamicsInfo as well as restraintsInfo
+[x]  make sure resId allows for "all"
+[]  move clusterInfo and endpointInfo to another function
+
+

@@ -10,7 +10,7 @@ import simtk.unit  as unit
 from instruments import drPrep
 from instruments import drSim
 from instruments import drMeta
-from instruments import drConfigInspector
+from instruments import drConfigTriage
 from instruments import drLogger
 ## BASIC PDB <-> DF UTILS
 from pdbUtils import pdbUtils
@@ -32,7 +32,7 @@ def drMD_protocol(configYaml: str) -> None:
     This function reads the configuration file, prepares the protocol, and runs the simulation.
     """
     # Read the configuration file
-    config: dict = drConfigInspector.read_config(configYaml)
+    config: dict = drConfigTriage.read_config(configYaml)
 
     # Create the output directory if it doesn't exist
     outDir: str = config["pathInfo"]["outputDir"]
