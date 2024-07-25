@@ -5,16 +5,22 @@ import numpy as np
 import os
 from os import path as p
 import instruments.drSelector as drSelector
+
+## CLEAN CODE
+from instruments.drCustomClasses import FilePath, DirectoryPath
 from typing import Dict, Union, Any, List
 from os import PathLike
 
 #######################################################################
-def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> list[Union[PathLike, str]]: 
+def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> list[Union[FilePath]]: 
     ## unpack pathInfo to get outDir
 
-    outDir: str = pathInfo["outputDir"]
+    outDir: DirectoryPath = pathInfo["outputDir"]
 
-    notRunDirs = ["00_configs", "01_ligand_parameters", "00_collated_pdbs"]
+    clusterDir: DirectoryPath = p.join(outDir,"00_clustered_pdbs")
+    os.makedirs(clusterDir, exist_ok=True)
+
+    notRunDirs: list  = ["00_configs", "01_ligand_parameters", "00_collated_pdbs, 00_clustered_pdbs"]
 
     runDirs = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
     dirsToCluster = [p.join(runDir,stepDir) for stepDir in clusterInfo["stepNames"] for runDir in runDirs]
@@ -22,13 +28,13 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> list[Union[PathLike
 
     allClusterPdbs: list[Union[PathLike, str]] = []
     for dirToCluster in dirsToCluster:
-        clusterPdbs = rmsd_clustering_protocol(dirToCluster, clusterInfo)
+        clusterPdbs = rmsd_clustering_protocol(dirToCluster, clusterInfo, clusterDir)
         allClusterPdbs.extend(clusterPdbs)
     
     return allClusterPdbs
 
 #######################################################################
-def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str, Union[int, str]]) -> List[Union[PathLike, str]]:
+def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str, Union[int, str]], clusterDir) -> List[Union[PathLike, str]]:
     """
     Clusters a trajectory based on the RMSD values of a subset of atoms.
 
@@ -46,13 +52,9 @@ def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str,
     stepName: str = p.basename(inDir)
     protName: str = p.basename(p.dirname(inDir))
 
-
-
     print(f"-->\tClustering trajectory for system:\t {protName} \t and step:\t {stepName}")
 
-    ## make outDir if needed
-    outDir: str = p.join(inDir,"cluster_pdbs")
-    os.makedirs(outDir,exist_ok=True)
+    thisClusterDir = p.join(clusterDir, protName, stepName)
 
     ## unpack clusterInfo
     nClusters: int = clusterInfo["nClusters"]
@@ -81,7 +83,7 @@ def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str,
 
 
     # Perform clustering and save the clusters to PDB files
-    clusterPdbs = kmeans_clusters_to_pdb(rmsdMatrix, nClusters, outDir, traj, protName)
+    clusterPdbs = kmeans_clusters_to_pdb(rmsdMatrix, nClusters, thisClusterDir, traj, protName)
     
 
     return clusterPdbs

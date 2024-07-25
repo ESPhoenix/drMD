@@ -1,6 +1,6 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
@@ -21,12 +21,14 @@ simulationInfo:
 postSimulationInfo:
   endPointInfo:
     stepNames: ["01_energy_minimisation"]
-    removeAtoms:
+    removeAtoms: 
     - selection:
-      keyword: "water"
+        keyword: "ions"
     - selection:
-      keyword: "ions"
-    - selection:
-      keyword: "ligands"
+        keyword: "ligands"
     collate: True
+  directoryCleanUpInfo:
+    removeAllSimulationDirs: True
+    # stepsToRemove: ["00_prep"]
+
 

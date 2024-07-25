@@ -27,32 +27,81 @@ def clean_up_handler(batchConfig: dict) -> None:
     if not "postSimulationInfo" in batchConfig:
         return
 
+
+    cluster_handler(batchConfig)
+    endpoint_handler(batchConfig)
+    directory_cleanup_handler(batchConfig)
+
     
-    postSimulationInfo: Dict = batchConfig["postSimulationInfo"]
-    pathInfo: Dict = batchConfig["pathInfo"]
+######################################################################################################
+def cluster_handler(batchConfig: Dict) -> None:
+    postSimulationInfo = batchConfig["postSimulationInfo"]
+    pathInfo = batchConfig["pathInfo"]
+    if not "clusterInfo" in postSimulationInfo:
+        return
 
+    clusterInfo: Dict = postSimulationInfo["clusterInfo"]
+    allClusterPdbs: list[Union[PathLike, str]] = drClusterizer.clustering_manager(pathInfo, clusterInfo)
+    if "removeAtoms" in clusterInfo:
+        removeAtomsSelections = clusterInfo["removeAtoms"]
+        for removeAtomsSelection in removeAtomsSelections:
+            remove_atoms_from_pdbs(allClusterPdbs, removeAtomsSelection)
+    if "collate" in clusterInfo:
+        if clusterInfo["collate"]:
+            collate_pdbs(allClusterPdbs, pathInfo)
+######################################################################################################
+def endpoint_handler(batchConfig: Dict) -> None:
+    postSimulationInfo = batchConfig["postSimulationInfo"]
+    pathInfo = batchConfig["pathInfo"]
 
-    if "clusterInfo" in postSimulationInfo:
-        clusterInfo: Dict = postSimulationInfo["clusterInfo"]
-        allClusterPdbs: list[Union[PathLike, str]] = drClusterizer.clustering_manager(pathInfo, clusterInfo)
-        if "removeAtoms" in clusterInfo:
-            removeAtomsSelections = clusterInfo["removeAtoms"]
-            for removeAtomsSelection in removeAtomsSelections:
-                remove_atoms_from_pdbs(allClusterPdbs, removeAtomsSelection)
-        if "collate" in clusterInfo:
-            if clusterInfo["collate"]:
-                collate_pdbs(allClusterPdbs, pathInfo)
+    if not "endPointInfo" in postSimulationInfo:
+        return
+    endpointInfo: Dict = postSimulationInfo["endPointInfo"]
+    endpointPdbs: List[Union[PathLike, str]] = get_endpoint_pdbs(endpointInfo, pathInfo)
+    if "removeAtoms" in endpointInfo:
+        removeAtomsSelections = [sele["selection"] for sele in endpointInfo["removeAtoms"]]
+        remove_atoms_from_pdbs(endpointPdbs, removeAtomsSelections)
+    if "collate" in endpointInfo:
+        if endpointInfo["collate"]:
+            collate_pdbs(endpointPdbs, pathInfo)
+######################################################################################################
+def directory_cleanup_handler(batchConfig: dict) -> None:
+    postSimulationInfo = batchConfig["postSimulationInfo"]
+    print(postSimulationInfo)
+    if not "directoryCleanUpInfo" in postSimulationInfo:
+        return
+    directoryCleanupInfo: Dict = postSimulationInfo["directoryCleanUpInfo"]
+    if  "removeAllSimulationDirs" in directoryCleanupInfo:
+        if directoryCleanupInfo["removeAllSimulationDirs"]:
+            remove_siulation_directories(batchConfig)
+            return
+    if "stepsToRemove" in directoryCleanupInfo:
+        stepsToRemove = directoryCleanupInfo["stepsToRemove"]
+        remove_step_directories(batchConfig, stepsToRemove)
 
-    if "endPointInfo" in postSimulationInfo:
-        endpointInfo: Dict = postSimulationInfo["endPointInfo"]
-        endpointPdbs: List[Union[PathLike, str]] = get_endpoint_pdbs(endpointInfo, pathInfo)
-        if "removeAtoms" in endpointInfo:
-            removeAtomsSelections = endpointInfo["removeAtoms"]
-            for removeAtomsSelection in removeAtomsSelections:
-                remove_atoms_from_pdbs(endpointPdbs, removeAtomsSelection)
-        if "collate" in endpointInfo:
-            if endpointInfo["collate"]:
-                collate_pdbs(endpointPdbs, pathInfo)
+######################################################################################################
+def remove_step_directories(batchConfig: dict, stepsToRemove: list) -> None:
+    inputDir = batchConfig["pathInfo"]["inputDir"]
+    outDir = batchConfig["pathInfo"]["outputDir"]
+
+    dirsToRemove = [p.join(outDir,p.splitext(file)[0],stepName) for 
+                    file in os.listdir(inputDir) 
+                    if p.splitext(file)[1] == ".pdb" 
+                    for stepName in stepsToRemove]
+
+    for dir in dirsToRemove:
+        rmtree(dir)
+######################################################################################################
+def remove_siulation_directories(batchConfig: dict) -> None:
+    print("WONK")
+    inputDir = batchConfig["pathInfo"]["inputDir"]
+    outDir = batchConfig["pathInfo"]["outputDir"]
+
+    dirsToRemove = [p.join(outDir,p.splitext(file)[0]) for file in os.listdir(inputDir) if p.splitext(file)[1] == ".pdb"]
+    for dir in dirsToRemove:
+        print(dir)
+        rmtree(dir)
+
 ######################################################################################################
 def collate_pdbs(pdbFiles, pathInfo) -> None:
     print(f"-->\tCollating {len(pdbFiles)} PDB files into per-step directories")
@@ -81,18 +130,13 @@ def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict ) -> List[Union[PathLik
 ######################################################################################################
 def remove_atoms_from_pdbs(
     pdbFiles: List[Union[PathLike, str]],
-    removeAtomsSelection: List[Dict]) -> None:  
-    """
-    Uses selection syntax to remove atoms from a list of pdb files.
-    Args:
-        pdbFiles (List[Union[PathLike, str]]): List of pdb files.
-        removeAtomsSelection (Dict): Dict containing either a keyword or custom selection syntax
-    """
-    
+    removeAtomsSelections: List[Dict]) -> None:  
+
     for pdbFile in pdbFiles:
-        indexesToRemove = drSelector.get_atom_indexes(removeAtomsSelection, pdbFile)
         pdbDf = pdbUtils.pdb2df(pdbFile)
-        droppedDf = pdbDf.drop(indexesToRemove)
+        for removeAtomsSelection in removeAtomsSelections:
+            indexesToRemove = drSelector.get_atom_indexes(removeAtomsSelection, pdbFile)
+            droppedDf = pdbDf.drop(indexesToRemove)
         pdbUtils.df2pdb(droppedDf, pdbFile)
 ######################################################################################################
 

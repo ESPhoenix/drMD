@@ -103,7 +103,8 @@ postSimulationInfo:
     clusterBy:
       selection:
         keyword: "custom"
-        customSelection: [{CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}]
+        customSelection: 
+        - {CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
     removeAtoms:
     - selection:
         keyword: "water"
