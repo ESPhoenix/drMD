@@ -10,7 +10,7 @@ from pdbUtils import pdbUtils
 from  instruments import drPrep 
 from  instruments import drCleanup 
 from  instruments import drOperator 
-from  instruments import drConfigInspector 
+from  instruments import drConfigTriage 
 from  instruments import drSplash
 from  instruments import drPdbTriage
 
