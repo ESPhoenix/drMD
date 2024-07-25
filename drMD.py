@@ -58,12 +58,13 @@ def main() -> None:
     logDir: DirectoryPath = p.join(outDir, "00_drMD_logs")
     os.makedirs(logDir, exist_ok=True)
     os.replace(configTriageLog, p.join(logDir,"config_triage.log"))
-    exit()
 
     ## run pdbTriage to detect commmon problems with pdb files
-    drPdbTriage.pdb_triage(pdbDir, batchConfig)
+    pdbTriageLog = p.join(logDir,"pdb_triage.log")
+    if not p.exists(pdbTriageLog):
+        drPdbTriage.pdb_triage(pdbDir, batchConfig)
 
-    ## set envorment variables for OpenMP and OpenMM
+    ## set environment variables for OpenMP and OpenMM - this should limit their CPU useage
     manage_cpu_usage_for_subprocesses("ON",subprocessCpus)
 
     ## create yamlDir if it doesn't exist, this will be used to store per-run yaml files
@@ -78,7 +79,7 @@ def main() -> None:
     manage_cpu_usage_for_subprocesses("OFF")
 
 ######################################################################################################
-def manage_cpu_usage_for_subprocesses(mode, subprocessCpus=None):
+def manage_cpu_usage_for_subprocesses(mode: str, subprocessCpus: Optional[int] = None) -> None:
     '''
     In ON mode, sets thread usage for OpenMP and OpenMM 
     In OFF mode, unsets thread usage
@@ -114,13 +115,6 @@ def process_pdb_file(pdbFile: FilePath, batchConfig: Dict):
         simInfo (dict): simulation information
         batchConfig (dict): batch configuration information
     """
-    # Skip if not a PDB file
-    fileData: List[str] = p.splitext(pdbFile)
-    if fileData[1] != ".pdb":
-        return
-
-    ## read batchConfig
-    outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]
 
     ## create a per-protein config
     runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)

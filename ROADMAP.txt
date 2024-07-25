@@ -23,6 +23,18 @@
 [x]  rename configTriage 
 [x]  make sure selections are being checked for metaDynamicsInfo as well as restraintsInfo
 [x]  make sure resId allows for "all"
-[]  move clusterInfo and endpointInfo to another function
+[x]  move clusterInfo and endpointInfo to another function
 
+
+## post simulations
+
+[] remove atoms should only act on pdbfiles made in this step
+[] add options for deleting prep 
+[] add options for deleting all folders except collate/ cluster dirs
+[] move cluster dirs to somewhere else??
+
+
+## drSelector
+
+[] issuses with selection["keyword] for endpointInfo
 
