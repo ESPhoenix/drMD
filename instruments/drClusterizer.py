@@ -1,40 +1,57 @@
 import mdtraj as md
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 import glob
 import numpy as np
 import os
 from os import path as p
-import instruments.drSelector as drSelector
-
+from instruments import drSelector
+from instruments import drLogger
 ## CLEAN CODE
 from instruments.drCustomClasses import FilePath, DirectoryPath
 from typing import Dict, Union, Any, List
 from os import PathLike
+from instruments.drCustomClasses import FilePath, DirectoryPath
 
 #######################################################################
-def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> list[Union[FilePath]]: 
-    ## unpack pathInfo to get outDir
+def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]: 
+    """
+    Identifies the directories to cluster and performs clustering on them.
 
+    Args:
+        pathInfo (Dict): The path information dictionary.
+        clusterInfo (Dict): The clustering information dictionary.
+
+    Returns:
+        clusterPdbs (List[FilePath]): The list of cluster PDB files.
+    """
+    ## unpack pathInfo to get outDir
     outDir: DirectoryPath = pathInfo["outputDir"]
 
+    ## define and creare a cluster directory
     clusterDir: DirectoryPath = p.join(outDir,"00_clustered_pdbs")
     os.makedirs(clusterDir, exist_ok=True)
 
+    ## list of dirs created by drMD that we don't want to cluster
     notRunDirs: list  = ["00_configs", "01_ligand_parameters", "00_collated_pdbs, 00_clustered_pdbs"]
 
-    runDirs = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
-    dirsToCluster = [p.join(runDir,stepDir) for stepDir in clusterInfo["stepNames"] for runDir in runDirs]
+    ## create list of dirs to cluster
+    runDirs: List[DirectoryPath] = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
+    dirsToCluster: List[DirectoryPath] = [p.join(runDir,stepDir) for stepDir in clusterInfo["stepNames"] for runDir in runDirs]
 
-
-    allClusterPdbs: list[Union[PathLike, str]] = []
+    ## init a list of to store pdb files that have been created by clustering
+    allClusterPdbs: list[FilePath] = []
+    ## Run clustering on each specified directory
     for dirToCluster in dirsToCluster:
-        clusterPdbs = rmsd_clustering_protocol(dirToCluster, clusterInfo, clusterDir)
+        drLogger.log_info(f"-->\tClustering trajectory for system:\t {p.basename(p.dirname(dirToCluster))} \t and step:\t {p.basename(dirToCluster)}", True)
+        clusterPdbs: List[FilePath] = rmsd_clustering_protocol(dirToCluster, clusterInfo, clusterDir)
+        ## add cluster pdbs to list 
         allClusterPdbs.extend(clusterPdbs)
     
     return allClusterPdbs
 
 #######################################################################
-def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str, Union[int, str]], clusterDir) -> List[Union[PathLike, str]]:
+def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[int, str]], clusterDir: DirectoryPath) -> List[FilePath]:
     """
     Clusters a trajectory based on the RMSD values of a subset of atoms.
 
@@ -44,7 +61,7 @@ def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str,
             and the selection of atoms to be used for clustustering (str).
 
     Returns:
-        None
+        clusterPdbs (List[FilePath]): The list of cluster PDB files.
     """
 
 
@@ -54,20 +71,19 @@ def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str,
 
     print(f"-->\tClustering trajectory for system:\t {protName} \t and step:\t {stepName}")
 
-    thisClusterDir = p.join(clusterDir, protName, stepName)
+    thisClusterDir: DirectoryPath = p.join(clusterDir, protName, stepName)
 
     ## unpack clusterInfo
     nClusters: int = clusterInfo["nClusters"]
     clusterSelection: str = clusterInfo["clusterBy"]["selection"]
 
     ## find output files
-    dcdFile: str = p.join(inDir, "trajectory.dcd")
-    pdbFile: str = glob.glob(p.join(inDir,"*.pdb"))[0]
+    dcdFile: FilePath = p.join(inDir, "trajectory.dcd")
+    pdbFile: FilePath = glob.glob(p.join(inDir,"*.pdb"))[0]
 
-    # Check if the trajectory.dcd and output.pdb  files exist
+    # Check if the trajectory.dcd and output.pdb files exist, return an empty list if not
     if not p.isfile(dcdFile) or not p.isfile(pdbFile):
-        print("-->\tOutput files not found!")
-        print("-->\tBetter call the Doctor!")
+        drLogger.log_info(f"  * No PDB file or DCD file found in {inDir} *", True, True)
         return []
 
     # Get the atom indexes for the selected atoms
@@ -81,11 +97,9 @@ def rmsd_clustering_protocol(inDir: Union[PathLike, str], clusterInfo: Dict[str,
     # Convert trajectory to RMSD matrix
     rmsdMatrix: np.ndarray = convert_traj_to_rmsdMatrix(traj,clusterSelectionAtomIndexes)
 
-
     # Perform clustering and save the clusters to PDB files
-    clusterPdbs = kmeans_clusters_to_pdb(rmsdMatrix, nClusters, thisClusterDir, traj, protName)
+    clusterPdbs: List[FilePath] = kmeans_clusters_to_pdb(rmsdMatrix, nClusters, thisClusterDir, traj, protName)
     
-
     return clusterPdbs
 #######################################################################
 def convert_traj_to_rmsdMatrix(traj: md.Trajectory, atomIndexes: List[int]) -> np.ndarray:
@@ -97,13 +111,13 @@ def convert_traj_to_rmsdMatrix(traj: md.Trajectory, atomIndexes: List[int]) -> n
         atomIndexes (List[int]): The atom indexes to be included in the subtrajectory.
 
     Returns:
-        np.ndarray: The RMSD matrix.
+        rmsdMatrix (np.ndarray): The RMSD matrix.
     """
     # Create a subtrajectory only containing the selected atoms
-    sectionTraj = traj.atom_slice(atomIndexes)
+    sectionTraj: md.Trajectory = traj.atom_slice(atomIndexes)
 
     # Compute the pairwise RMSD matrix for all frames
-    nFrames = sectionTraj.n_frames  # Get the number of frames
+    nFrames: int = sectionTraj.n_frames  # Get the number of frames
     rmsdMatrix = np.empty((nFrames, nFrames))  # Create an empty RMSD matrix
     for i in range(nFrames):
         rmsdMatrix[i] = md.rmsd(sectionTraj, sectionTraj, frame=i)  # Compute the RMSD for each pair of frames
@@ -114,9 +128,9 @@ def convert_traj_to_rmsdMatrix(traj: md.Trajectory, atomIndexes: List[int]) -> n
 #######################################################################
 def kmeans_clusters_to_pdb(rmsdMatrix: np.ndarray,
                             bestK: int,
-                              outDir: str,
+                              outDir: DirectoryPath,
                                 traj: md.Trajectory,
-                                protName: str) -> List[Union[PathLike, str]]:
+                                protName: str) -> List[FilePath]:
     """
     Saves the cluster centers of a k-means clustering to PDB files.
 
@@ -125,23 +139,57 @@ def kmeans_clusters_to_pdb(rmsdMatrix: np.ndarray,
         bestK (int): The number of clusters.
         outDir (str): The output directory.
         traj (md.Trajectory): The input trajectory.
-    """
-    kmeans = KMeans(n_clusters=bestK)  # Create a KMeans object
-    _ = kmeans.fit_predict(rmsdMatrix)  # Fit the KMeans object to the RMSD matrix
 
-    # Save cluster centers
-    representative_frames: List[int] = []  # List to store the indices of representative frames
+    Returns:
+        clusterPdbs (List[FilePath]): The list of cluster PDB files.
+    """
+    ## If the user has specified bestK to be -1
+    ## We will use silhouette scores to find the best number of clusters
+    ## NOTE that this takes a while and produces less clusters than you may want!
+    if bestK == -1:
+        bestK = find_best_k_with_silhouette(rmsdMatrix)
+
+    ## create a KMeans object and fit it to the RMSD matrix
+    kmeansModel = KMeans(n_clusters=bestK)  # Create a KMeans object
+    _ = kmeansModel.fit_predict(rmsdMatrix)  # Fit the KMeans object to the RMSD matrix
+
     ## create an empty list to store pdb file locations
-    clusterPdbs: List[Union[PathLike, str]] = []
+    clusterPdbs: List[FilePath] = []
     for i in range(bestK):
         # Find the frame closest to each cluster center
-        cluster_center: int = np.argmin(np.linalg.norm(rmsdMatrix - kmeans.cluster_centers_[i], axis=1))
-        representative_frames.append(cluster_center)
-
+        clusterCentroidIndex: int = np.argmin(np.linalg.norm(rmsdMatrix - kmeansModel.cluster_centers_[i], axis=1))
         # Save the representative frame as a PDB file
         clusterPdb: Union[PathLike, str] = p.join(outDir, f"{protName}_cluster_{i+1}.pdb")
-        traj[cluster_center].save_pdb(clusterPdb)
+        traj[clusterCentroidIndex].save_pdb(clusterPdb)
+        ## add the PDB file location to the list
         clusterPdbs.append(clusterPdb)
+
     return clusterPdbs
+
+#######################################################################
+
+def find_best_k_with_silhouette(rmsdMatrix: np.ndarray) -> int:
+    """
+    Finds the best number of clusters using the silhouette score.
+
+    Args:
+        rmsdMatrix (np.ndarray): The RMSD matrix.
+
+    Returns:
+        bestK (int): The best number of clusters.
+    """
+
+
+    # Perform silhouette score analysis to find the best number of clusters
+    silhouetteScores: List[float] = []
+    nClusterRange: range = range(2, 25)  
+    for nClusters in nClusterRange:
+        kmeans = KMeans(n_clusters=nClusters)
+        cluster_labels: np.ndarray = kmeans.fit_predict(rmsdMatrix)
+        silhouette_avg: float = silhouette_score(rmsdMatrix, cluster_labels)
+        silhouetteScores.append(silhouette_avg)
+    bestK: int = nClusterRange[np.argmax(silhouetteScores)]
+
+    return bestK    
 
 #######################################################################

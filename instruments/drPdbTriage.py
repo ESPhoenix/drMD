@@ -12,7 +12,7 @@ from instruments.drCustomClasses import FilePath, DirectoryPath
 from pdbUtils import pdbUtils
 ### drMD modules
 from instruments import drLogger
-
+from instruments import drSplash
 
 #################################################################################################
 def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
@@ -53,7 +53,7 @@ def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
         # Update the dictionary that looks at all PDB files
         commonPdbProblems = update_problem_dict(commonPdbProblems, problemsDict)
     # Print the results to the terminal
-    report_problems(commonPdbProblems)
+    report_problems(commonPdbProblems, pdbTriageLog)
 
     ## deactivate logging
     drLogger.close_logging()
@@ -82,7 +82,7 @@ def update_problem_dict(commonPdbProblems: Dict[str,bool], thisProblemDict: Dict
     # Return the updated commonPdbProblems dictionary
     return commonPdbProblems
 #################################################################################################
-def report_problems(commonPdbProblems: Dict[str, bool]) -> None:
+def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) -> None:
     """
     Prints out the common problems found in the PDB files based on the commonPdbProblems dictionary.
     
@@ -120,6 +120,15 @@ def report_problems(commonPdbProblems: Dict[str, bool]) -> None:
             logging.info("\t> and supply them in the inputs directory")
     else:
         logging.info("-->\tNo common problems found in the PDB files.")
+
+    if any(commonPdbProblems.values()):
+        drSplash.print_pdb_error()
+        drLogger.log_info("\n\n")
+        drLogger.log_info("-->\tProblems with the PDB files will cause parameterisation to fail", True, True)
+        drLogger.log_info("-->\tConsult the following log file for more details:", True, True)
+        drLogger.log_info(f"\t{pdbTriageLog}", True, True)
+        exit(1)
+
 #################################################################################################
 
 def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,bool]:
@@ -165,23 +174,23 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
 
     ## report any problems found in pdb file
     if isMultipleConformers:
-        logging.info(f"-->\tMultiple conformers found in {pdbName} for the following residues:")
+        logging.info(f"  * Multiple conformers found in {pdbName} for the following residues: *")
         for key, value in multipleConformers.items():
             logging.info(f"\t\t{key}: {value}")
     if isBrokenChains:
-        logging.info(f"-->\tBroken chains found in {pdbName} in the following chains, between these residues:")
+        logging.info(f"  * Broken chains found in {pdbName} in the following chains, between these residues: *")
         for key, value in brokenChains.items():
             logging.info(f"\t\t{key}: {value}")
     if isMissingSidechains:
-        logging.info(f"-->\tMissing sidechain atoms found in {pdbName} for the following residues:")
+        logging.info(f"  * Missing sidechain atoms found in {pdbName} for the following residues: *")
         for key, value in missingSideChains.items():
             logging.info(f"\t\t{key}: {value}")
     if isNonCanonicalAminoAcids:
-        logging.info(f"-->\tNon-canonical amino acids found in {pdbName} for the following residues:")
+        logging.info(f"  * Non-canonical amino acids found in {pdbName} for the following residues: *")
         for key, value in nonCanonicalAminoAcids.items():
             logging.info(f"\t\t{key}: {value}")
     if isOrganimetallicLigands:
-        logging.info(f"-->\tOrganimetallic ligands found in {pdbName} for the following residues:")
+        logging.info(f"  * Organimetallic ligands found in {pdbName} for the following residues: *")
         for key, value in organimetallicLigands.items():
             logging.info(f"\t\t{key}: {value}")
 
