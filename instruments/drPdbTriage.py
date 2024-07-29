@@ -194,7 +194,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
     }
 
     if not any(problemsDict.values()):
-        logging.info("-->\tNo common problems found in the PDB file.")
+        logging.info("  * No common problems found in the PDB file *")
 
     return problemsDict
 
@@ -354,10 +354,17 @@ def check_for_broken_chains(pdbDf: pd.DataFrame) -> tuple[bool, Optional[Dict[st
             brokenChains[chainId] = nonConsecutiveResidues
         
         # Look for termini in the middle of chains
-        notLastResIds = resIds[1:]
-        notLastAtomNames = chainDf[chainDf["RES_ID"].isin(notLastResIds)]["ATOM_NAME"].tolist()
-        if "OXT" in notLastAtomNames:
-            brokenChains[chainId] = "OXT atom found in the middle of chain"
+
+        resIdsWithOxt = chainDf[chainDf["ATOM_NAME"] == "OXT"]["RES_ID"].tolist()
+        lastResidueId = resIds[-1]
+        try:
+            resIdsWithOxt.remove(lastResidueId)
+        except:
+            pass
+        if len(resIdsWithOxt) == 0:
+            continue
+        
+        brokenChains[chainId] = "OXT atom name found in residues " + ", ".join(map(str, resIdsWithOxt))
 
     return bool(brokenChains), brokenChains or None
 
