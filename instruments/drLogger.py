@@ -40,7 +40,7 @@ def setup_logging(logFile):
     # Add the file handler to the root logger
     rootLogger.addHandler(fileHandler)
 
-def log_info(message, printToTerminal=False):
+def log_info(message, printToTerminal=False, persist=False):
     """
     Log an info message to the log file and optionally print to the terminal.
     """
@@ -49,7 +49,10 @@ def log_info(message, printToTerminal=False):
     
     # Optionally print to the terminal
     if printToTerminal:
-        streamHandler = OverwriteStreamHandler(sys.stdout)
+        if persist:
+            streamHandler = logging.StreamHandler(sys.stdout)
+        else:
+            streamHandler = OverwriteStreamHandler(sys.stdout)
         streamFormatter = logging.Formatter('%(message)s')
         streamHandler.setFormatter(streamFormatter)
         streamHandler.emit(logging.LogRecord(name='', level=logging.INFO, pathname='', lineno=0, msg=message, args=(), exc_info=None))
