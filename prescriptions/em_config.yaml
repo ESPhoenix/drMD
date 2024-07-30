@@ -1,0 +1,34 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+generalInfo:
+  parallelCPU: 18
+  platform: "CUDA"
+  subprocessCpus: 1
+########################################################################
+
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temp: 300
+    maxIterations: 1000
+
+################################################
+
+postSimulationInfo:
+  endPointInfo:
+    stepNames: ["01_energy_minimisation"]
+    removeAtoms: 
+    - selection:
+        keyword: "ions"
+    - selection:
+        keyword: "ligands"
+    collate: True
+  directoryCleanUpInfo:
+    removeAllSimulationDirs: True
+    # stepsToRemove: ["00_prep"]
+
+

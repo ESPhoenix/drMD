@@ -274,10 +274,6 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     drFixer.reset_chains_residues(refPdb, nptPdb)
 
 
-    # run trajectory clustering
-    if "clusterTrajectory" in sim and sim["clusterTrajectory"]["clusterBool"]:
-        drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
-
     # save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)

@@ -6,7 +6,7 @@ import time
 ## CLEAN CODE
 from typing import List, Dict, Union, Any
 
-# from instruments.drCustomClasses import FilePath, DirectoryPath
+from instruments.drCustomClasses import FilePath, DirectoryPath
 
 
 class OverwriteStreamHandler(logging.StreamHandler):
