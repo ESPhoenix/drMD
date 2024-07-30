@@ -27,8 +27,6 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
     # solvent residue names, and ion residue names
     aminoAcidResNames, backboneAtomNames, solventResNames, ionResNames = init_name_lists()
 
-    print(selection)
-
     # Initialize list of atom indexes
     atomIndexes: List[int] = []
     # Check selection type and find required atom indexes

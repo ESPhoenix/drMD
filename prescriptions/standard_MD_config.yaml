@@ -1,0 +1,85 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+generalInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+
+########################################################################
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temp: 300
+    maxIterations: 1000
+########################################################################
+  - stepName: "02_NVT_pre-equilibraition"
+    simulationType: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temp: 300
+    logInterval: "10 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
+
+    - restraintType: "position"
+      selection: 
+        keyword: "ligands"  
+      parameters:
+        k: 1000
+# ########################################################################
+  - stepName: "03_NPT_pre-equilibraition"
+    simulationType: "NPT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temp: 300
+    logInterval: "10 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
+
+    - restraintType: "position"
+      selection: 
+        keyword: "ligands"  
+      parameters:
+        k: 1000
+
+########################################################################
+#   - stepName: "04_NpT_slowIntergrator"
+#     simulationType: "NpT"
+#     duration: "10 ps"
+#     timestep: "0.5 fs"
+#     temp: 300
+#     logInterval: "1 ps"
+# ########################################################################
+#   - stepName: "05_Production_MD"
+#     simulationType: "NpT"
+#     duration: "50 ns"
+#     timestep: "2 fs"
+#     temp: 300
+#     logInterval: "50 ps"
+# ################################################
+# postSimulationInfo:
+#   clusterInfo:
+#     stepNames: ["05_Production_MD"] 
+#     nClusters: 25
+#     clusterBy:
+#       selection:
+#         keyword: "all"
+#     removeAtoms:
+#     - selection:
+#         keyword: "water"
+#     - selection:
+#         keyword: "ions"
+#     collate: True
+

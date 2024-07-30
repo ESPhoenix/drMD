@@ -1,0 +1,92 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+generalInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+########################################################################
+ligandInfo:
+  - ligandName: "WPC"
+    protons: True
+    charge: 2
+    toppar: True
+    mol2: True
+
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temp: 300
+    maxIterations: 1000
+
+
+  - stepName: "02_NPT_pre-equilibraition"
+    simulationType: "NPT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temp: 300
+    logInterval: "5 ps"
+    # restraintInfo:
+    # - restraintType: "position"
+    #   parameters:
+    #     k: 1000
+    #   selection:
+    #     keyword: "protein"
+
+
+  - stepName: "03_NPT_pre-equilibraition"
+    simulationType: "NPT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temp: 300
+    logInterval: "5 ps"
+    # restraintInfo:
+    # - restraintType: "position"
+    #   parameters:
+    #     k: 2
+    #   selection:
+    #     keyword: "protein"
+
+
+  - stepName: "04_speedbump"
+    simulationType: "NPT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temp: 300
+    logInterval: "1 ps"
+
+
+  - stepName: "05_mad_metadynamics"
+    simulationType: "META"
+    duration: "1 ns"
+    timestep: "0.5 fs"
+    temp: 300
+    logInterval: "5 ps"
+    metaDynamicsInfo:
+      height: 1
+      biasFactor: 1
+      biases: 
+        - biasVar: "RMSD"
+          selection: 
+            keyword: "custom"
+            customSelection:
+            - {CHAIN_ID: "A", RES_NAME: "TRP", RES_ID: 229, ATOM_NAME: "CA"}
+
+
+# ################################################
+
+# postSimulationInfo:
+#   endPointInfo:
+#     stepNames: ["01_energy_minimisation"]
+#     removeAtoms:
+#     - selection:
+#       keyword: "water"
+#     - selection:
+#       keyword: "ions"
+#     - selection:
+#       keyword: "ligands"
+#     collate: True
+
