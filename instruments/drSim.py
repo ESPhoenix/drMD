@@ -49,18 +49,29 @@ def initialise_simulation(prmtop: app.AmberPrmtopFile,
     system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
                                                 nonbondedCutoff=nonbondedCutoff,
                                                 constraints=hBondconstraints)
+    
+    ## use static temperature if specified, or use first value in temperatureRange to start with
+    if "temperature" in sim:
+        initailSimulationTemp = sim["temperature"]
+    elif "temperatureRange" in sim:
+        initailSimulationTemp = sim["temperatureRange"][0]
+
     ## deal with any restraints
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # add constant pressure force to system (makes this an NpT simulation)    
     if sim["simulationType"].upper() in ["NPT","META"]:
-        system.addForce(openmm.MonteCarloBarostat(1*unit.bar, sim["temp"]))
+        if "temperature" in sim:
+            system.addForce(openmm.MonteCarloBarostat(1*unit.bar, initailSimulationTemp))
+        elif "temperatureRange" in sim:
+            system.addForce(openmm.MonteCarloBarostat(1*unit.bar, initailSimulationTemp))
+
     ## setup an intergrator
     if sim["simulationType"].upper() == "EM":
-        integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"],
+        integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(initailSimulationTemp,
                                                                   1/unit.picosecond,
                                                                   4*unit.femtosecond)
     else:
-        integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(sim["temp"],
+        integrator: openmm.Integrator = openmm.LangevinMiddleIntegrator(initailSimulationTemp,
                                                                          1/unit.picosecond,
                                                                            sim["timestep"])
 
@@ -68,7 +79,7 @@ def initialise_simulation(prmtop: app.AmberPrmtopFile,
     simulation: app.simulation.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     
 
-    return simulation
+    return simulation , integrator
 
 ###########################################################################################
 def process_sim_data(sim: Dict) -> Dict:
@@ -97,40 +108,39 @@ def process_sim_data(sim: Dict) -> Dict:
     # Read timestep data and process it
     timestepData = sim["timestep"].split()
     timestep: unit.Quantity = float(timestepData[0]) * timescale[timestepData[1]]
+    sim["timestep"] = timestep
 
     # Read duration data and process it
     durationData = sim["duration"].split()
     duration: int = int(durationData[0]) * timescale[durationData[1]]
+    sim["duration"] = duration
 
     # Read log interval data and process it
     logIntervalData = sim["logInterval"].split()
     logInterval: unit.Quantity = float(logIntervalData[0]) * timescale[logIntervalData[1]]
     logIntervalInSteps: int = int(round(logInterval / timestep))
-
+    sim["logInterval"] = logIntervalInSteps
 
     # Calculate number of steps
     nSteps: int = int(duration / timestep)
+    sim["nSteps"] = nSteps
 
     # Calculate number of log steps (every 500 steps)
     nLogSteps: int = round(nSteps / 500)
+    sim["nLogSteps"] = nLogSteps
 
     # Process temperature
-    temp: unit.Quantity = sim["temp"] * unit.kelvin
-
-    # Update sim dictionary with processed variables
-    sim.update({
-        "timestep": timestep,
-        "duration": duration,
-        "nSteps": nSteps,
-        "nLogSteps": nLogSteps,
-        "temp": temp,
-        "logInterval": logIntervalInSteps
-    })
+    if "teperature" in sim:
+        temperature: unit.Quantity = sim["teperature"] * unit.kelvin
+        sim["teperature"] = temperature
+    elif "temperatureRange" in sim:
+        tempRange = [int(val) * unit.kelvin for val in sim["temperatureRange"]]
+        sim["temperatureRange"] = tempRange
 
     sim["processed"] = True
     return sim
 ###########################################################################################
-def init_reporters(simDir: str, nSteps: int, reportInterval: int) -> dict:
+def init_reporters(simDir: str, nSteps: int, reportInterval: int, simulation: app.Simulation) -> app.Simulation:
     """
     Initializes and returns a dictionary of reporters for a simulation.
 
@@ -171,8 +181,10 @@ def init_reporters(simDir: str, nSteps: int, reportInterval: int) -> dict:
                 "progress": [progressStateReporter,progressCsv],
                  "trajectory": [dcdTrajectoryReporter, dcdFile],
                  "checkpoint": [chkReporter, chkFile]}
+    for rep in reporters:
+        simulation.reporters.append(reporters[rep][0])
 
-    return  reporters
+    return  simulation
 ###########################################################################################
 def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app.Simulation:
     """
@@ -248,7 +260,7 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
 
     ## initialise a new system from parameters
     generalInfo = config["generalInfo"]
-    simulation : app.Simulation = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
+    simulation, integrator = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
 
     # set up intergrator and system
     # load state from previous simulation (or continue from checkpoint)
@@ -256,16 +268,16 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     # set up reporters
     totalSteps: int = simulation.currentStep + sim["nSteps"]
     reportInterval: int = sim["logInterval"]
-    reporters: dict = init_reporters(simDir=simDir,
+    simulation: app.Simulation = init_reporters(simDir=simDir,
                                 nSteps=totalSteps,
-                                reportInterval=reportInterval)
-    for rep in reporters:
-        simulation.reporters.append(reporters[rep][0])
+                                reportInterval=reportInterval,
+                                simulation=simulation)
+
     # run NVT / NPT simulation
-    simulation.step(sim["nSteps"])
+    simulation: app.Simulation = step_simulation(simulation, integrator, sim)
 
     # find name to call outFiles
-    protName = p.basename(p.dirname(simDir))
+    protName: str = p.basename(p.dirname(simDir))
     # save result as pdb - reset chain and residue Ids
     state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
     nptPdb: str = p.join(simDir, f"{protName}.pdb")
@@ -278,6 +290,22 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
     return saveXml
+
+
+##########################################################################################
+def step_simulation(simulation: app.Simulation, integrator: openmm.Integrator, sim: Dict) ->  app.Simulation:
+    ## for simulations with constant temperature
+    if "temperature" in sim:
+        simulation.step(sim["nSteps"])
+        return simulation
+    ## for simulations with stepped temperature
+    nTempSteps = len(sim["temperatureRange"])
+    nStepsPerTempStep = round(sim["nSteps"] / nTempSteps)
+    for temperature in sim["temperatureRange"]:
+        integrator.setTemperature(temperature)
+        simulation.step(nStepsPerTempStep)
+    return simulation
+
 
 ###########################################################################################
 def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
@@ -318,11 +346,11 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
 
     ## initialise a new system from parameters
     generalInfo: Dict = config["generalInfo"]
-    simulation : app.Simulation = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
+    simulation, _ = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
 
     ## if needed, convert temperature to kelvin
-    if isinstance(sim["temp"], int):
-        sim["temp"] = sim["temp"] * unit.kelvin
+    if isinstance(sim["temperature"], int):
+        sim["temperature"] = sim["temperature"] * unit.kelvin
 
     ## set coordinates of simulation 
     simulation.context.setPositions(inpcrd.positions)
