@@ -98,7 +98,7 @@ def print_config_error(error: Optional[str] = None) -> None:
           """
           +resetTextColor)
     if error is not None:
-      print(f"-->\t{error}")
+      print(error)
     exit(1)
 ###########################################################################################
 def print_pdb_error() -> None:

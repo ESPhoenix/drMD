@@ -1,0 +1,2526 @@
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!
+-->	Running Prep protocol for A...
+
+
+-->	Solvating, Charge Balencing and Creating parameters for A...
+
+
+Command output:
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/prep to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/lib to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/parm to search path.
+-I: Adding /home/esp/anaconda3/envs/MD/dat/leap/cmd to search path.
+-f: Source /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/TLEAP.in
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/oldff/leaprc.ff14SB done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/parm10.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ff14SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff14SB protein backbone and sidechain parameters
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/amino12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminoct12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/aminont12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/nucleic12.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.gaff2 done
+Log file: ./leap.log
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/gaff2.dat
+Reading title:
+AMBER General Force Field for organic molecules (Version 2.2.20, March 2021)
+----- Source: /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p
+----- Source of /home/esp/anaconda3/envs/MD/dat/leap/cmd/leaprc.water.tip3p done
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/atomic_ions.lib
+Loading library: /home/esp/anaconda3/envs/MD/dat/leap/lib/solvents.lib
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+This is the additional/replacement parameter set for TIP3P water
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ionsjc_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions1lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of monovalent ions for TIP3P water model (12-6 normal usage set)
+Loading parameters: /home/esp/anaconda3/envs/MD/dat/leap/parm/frcmod.ions234lm_126_tip3p
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of divalent to tetravalent ions for TIP3P water model (12-6 normal usage set)
+Loading PDB file: /home/esp/scriptDevelopment/drMD/03_output/A/00_prep/PROT/PROT.pdb
+  Added missing heavy atom: .R<CILE 281>.A<OXT 20>
+  total atoms in file: 2137
+  Leap added 2193 missing atoms according to residue templates:
+       1 Heavy
+       2192 H / lone pairs
+  Solute vdw bounding box:              61.219 70.320 58.712
+  Total bounding box for atom centers:  81.219 90.320 78.712
+  Solvent unit box:                     18.774 18.774 18.774
+  Total vdw box size:                   84.291 93.085 81.867 angstroms.
+  Volume: 642351.432 A^3 
+  Total mass 318659.350 amu,  Density 0.824 g/cc
+  Added 15989 residues.
+7 Na+ ions required to neutralize.
+Adding 7 counter ions to "mol" using 1A grid
+Grid extends from solute vdw + 2.95  to  8.95
+Resolution:      1.00 Angstrom.
+Solvent present: replacing closest with ion
+	 when steric overlaps occur
+Calculating grid charges
+(Replacing solvent molecule)
+Placed Na+ in mol at (-10.25, 4.75, -12.23).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-2.51, 20.30, -24.86).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-8.26, 18.94, -1.77).
+(Replacing solvent molecule)
+Placed Na+ in mol at (12.33, 26.16, -24.11).
+(Replacing solvent molecule)
+Placed Na+ in mol at (7.12, -30.04, 11.75).
+(Replacing solvent molecule)
+Placed Na+ in mol at (-11.61, 10.84, -8.47).
+(Replacing solvent molecule)
+Placed Na+ in mol at (3.86, 11.18, -25.38).
+
+Done adding ions.
+ 0.000000 0 1 0
+0 Cl- ion required to neutralize.
+Adding 0 counter ions to "mol" using 1A grid
+Writing pdb file: A_solvated.pdb
+   printing CRYST1 record to PDB file with box info
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting N-terminal residue name to PDB format: NGLN -> GLN
+
+/home/esp/anaconda3/envs/MD/bin/teLeap: Warning!
+ Converting C-terminal residue name to PDB format: CILE -> ILE
+Checking Unit.
+Building topology.
+Building atom parameters.
+Building bond parameters.
+Building angle parameters.
+Building proper torsion parameters.
+Building improper torsion parameters.
+ total 801 improper torsions applied
+Building H-Bond parameters.
+Incorporating Non-Bonded adjustments.
+Not Marking per-residue atom chain types.
+Marking per-residue atom chain types.
+  (Residues lacking connect0/connect1 - 
+   these don't have chain types marked:
+
+	res	total affected
+
+	CILE	1
+	NGLN	1
+	WAT	15982
+  )
+ (no restraints)
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 2; Notes = 0.
+
+-->	Prep steps complete for A!

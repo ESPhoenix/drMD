@@ -50,17 +50,20 @@ def restraints_handler(
         ## create position, distance, angle, and torsion restraints
         for restraint in restraintInfo:
             selection: List = restraint["selection"]
+            parameters: Dict = restraint["parameters"]
+            ## add a position restraint
             if restraint["restraintType"] == "position":
-                system: openmm.System = create_position_restraint(system, inpcrd, selection, kNumber, pdbFile)
+                system: openmm.System = create_position_restraint(system, inpcrd, selection, parameters, kNumber, pdbFile)
+            ## add a distance restraint
             elif restraint["restraintType"] == "distance":
-                parameters: Dict = restraint["parameters"]
                 system: openmm.System = create_distance_restraint(system, selection, parameters, kNumber, pdbFile)
+            ## add an angle restraint
             elif restraint["restraintType"] == "angle":
-                parameters: Dict = restraint["parameters"]
                 system: openmm.System = create_angle_restraint(system, selection, parameters, kNumber, pdbFile)
+            ## add a torsion restraint
             elif restraint["restraintType"] == "torsion":
-                parameters: Dict = restraint["parameters"]
                 system: openmm.System = create_torsion_restraint(system, selection, parameters, kNumber, pdbFile)
+            ## increment kNumber
             kNumber += 1
 
     else:
@@ -78,6 +81,7 @@ def create_position_restraint(
     system: openmm.System,
     inpcrd: app.AmberInpcrdFile,
     selection: str,
+    parameters: Dict,
     kNumber: int,
     pdbFile: FilePath) -> openmm.System:
     """
@@ -95,7 +99,9 @@ def create_position_restraint(
     """
     ## create a position restraint object, add parameters
     positionRestraint = openmm.CustomExternalForce(f"k{str(kNumber)}*periodicdistance(x, y, z, x0, y0, z0)^2")
-    positionRestraint.addGlobalParameter(f"k{str(kNumber)}", 1000.0 * unit.kilojoules_per_mole / unit.nanometer)
+
+    kForceConstant: int =  parameters["k"]
+    positionRestraint.addGlobalParameter(f"k{str(kNumber)}", kForceConstant* unit.kilojoules_per_mole / unit.nanometer**2)
     positionRestraint.addPerParticleParameter("x0")
     positionRestraint.addPerParticleParameter("y0")
     positionRestraint.addPerParticleParameter("z0")

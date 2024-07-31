@@ -10,6 +10,8 @@
 ### config changes
 []  generalInfo -> hardwareInfo???
 []  sim -> simInfo??
+[]  temp -> temperature
+[]  add temperatureRange
 
 ## init lists as tuples in own script??
 
@@ -19,22 +21,11 @@
 ## drOperator/ drPrep
 []  investigate odd pause before running simulations - is this skip_resume_simulate?
 
-## drConfigInspector
-[x]  rename configTriage 
-[x]  make sure selections are being checked for metaDynamicsInfo as well as restraintsInfo
-[x]  make sure resId allows for "all"
-[x]  move clusterInfo and endpointInfo to another function
+## find random print
 
 
-## post simulations
+## drSim
+[] implement temperature stepping
 
-[] remove atoms should only act on pdbfiles made in this step
-[] add options for deleting prep 
-[] add options for deleting all folders except collate/ cluster dirs
-[] move cluster dirs to somewhere else??
-
-
-## drSelector
-
-[] issuses with selection["keyword] for endpointInfo
-
+## drRestraint
+[x] add k values to position restraints

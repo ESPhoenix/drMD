@@ -1,0 +1,158 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_output"
+  
+########################################################################
+generalInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+
+########################################################################
+simulationInfo:
+  ## EM STEPS
+  - stepName: "011_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 1000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 500
+      selection:
+        keyword: "protein"
+    - restraintType: "position"
+      parameters:
+        k: 500
+      selection:
+        keyword: "ligands"
+  # ##
+  # - stepName: "012_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+  #   restraintInfo:
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 430
+  #     selection:
+  #       keyword: "protein"
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 430
+  #     selection:
+  #       keyword: "ligands"
+  # ##
+  # - stepName: "013_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+  #   restraintInfo:
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 360
+  #     selection:
+  #       keyword: "protein"
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 360
+  #     selection:
+  #       keyword: "ligands"
+  # ##
+  # - stepName: "014_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+  #   restraintInfo:
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 290
+  #     selection:
+  #       keyword: "protein"
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 290
+  #     selection:
+  #       keyword: "ligands"
+  # ##
+  # - stepName: "015_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+  #   restraintInfo:
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 220
+  #     selection:
+  #       keyword: "protein"
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 220
+  #     selection:
+  #       keyword: "ligands"
+  # ##
+  # - stepName: "015_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+  #   restraintInfo:
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 150
+  #     selection:
+  #       keyword: "protein"
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 150
+  #     selection:
+  #       keyword: "ligands"
+  # ##
+  # - stepName: "016_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+  #   restraintInfo:
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 80
+  #     selection:
+  #       keyword: "protein"
+  #   - restraintType: "position"
+  #     parameters:
+  #       k: 80
+  #     selection:
+  #       keyword: "ligands"
+  # ##
+  # - stepName: "017_energy_minimisation"
+  #   simulationType: "EM"
+  #   temperature: 0
+  #   maxIterations: 10000
+########################################################################
+## EQUILIBRATION STEPS
+  - stepName: "021_NVT"
+    simulationType: "NVT"
+    duration: "20 ps"
+    timestep: "2 fs"
+    temperatureRange: [10,20,30,40,50,60,70,80,100]
+    logInterval: "1 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150
+      selection:
+        keyword: "ligands"
+  ##
+  - stepName: "022_NpT"
+    simulationType: "NPT"
+    duration: "9 ns"
+    timestep: "2 fs"
+    temperatureRange: [100, 125, 150, 175, 200, 225, 250, 275, 300]
+    logInterval: "100 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150
+      selection:
+        keyword: "ligands"
+########################################################################

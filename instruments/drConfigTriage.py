@@ -310,7 +310,7 @@ def check_simulationInfo(config: dict) -> None:
 
         ## check for illigal args
         alowedArgsForSimulations = ["stepName", "simulationType", "duration", "maxIterations",
-                                     "timestep", "temp", "logInterval", "restraintInfo",
+                                     "timestep", "temperature", "temperatureRange", "logInterval", "restraintInfo",
                                        "metaDynamicsInfo", "clusterTrajectory"]
         check_info_for_illigal_args(simulation, stepName, alowedArgsForSimulations)
 
@@ -492,7 +492,7 @@ def check_time_input(timeInputValue: str, timeInputName: str, stepName: str) -> 
 #########################################################################
 def check_shared_simulation_options(simulation) -> str:
     ## check for shared required args in simulation
-    stepName, simulationType, temp = check_info_for_args(simulation, "simulation", ["stepName", "simulationType", "temp"], optional=False)
+    stepName, simulationType = check_info_for_args(simulation, "simulation", ["stepName", "simulationType"], optional=False)
     ## make sure stepName is correct
     if not isinstance(stepName, str):
         raise TypeError(f"-->\tstepName {str(stepName)} must be a a string")
@@ -501,11 +501,36 @@ def check_shared_simulation_options(simulation) -> str:
     ## make sure simulationType is an allowed value
     if not simulationType.upper() in ["EM", "NVT", "NPT", "META"]:
         raise ValueError(f"-->\tsimulationType in {stepName} must be the following:\n-->\tEM, NVT, NPT, META")
-    ## make sure temp is an int
-    if not isinstance(temp, int):
-        raise TypeError(f"-->\tTemperature in {stepName} must be an int")
-    if temp < 0:
-        raise ValueError(f"-->\tTemperature in {stepName} must be a positive int")
+    ## check for either temperature or temparatureRange in simulation
+    temp, tempRange = check_info_for_args(simulation, stepName, ["temperature", "temperatureRange"], optional=True)
+    ## throw error if both temp and tempRange are specified
+
+
+    if not tempRange:
+        if isinstance(temp, bool) and temp == False:
+            raise KeyError(f"-->\tMust specify either temperature or temperatureRange in {stepName}")
+        else:
+            ## make sure temp is an int
+            if not isinstance(temp, int):
+                raise TypeError(f"-->\tTemperature in {stepName} must be an int")
+            if temp < 0:
+                raise ValueError(f"-->\tTemperature in {stepName} must be a positive int")
+    else:
+        if temp:
+            raise KeyError(f"-->\tCannot specify both temperature and temperatureRange in {stepName}")
+        else:
+            ## make sure tempRange is a List of ints
+            if not isinstance(tempRange, list):
+                raise TypeError(f"-->\tTemperatureRange in {stepName} must be a list of ints")
+            if len(tempRange) == 0:
+                raise ValueError(f"-->\tTemperatureRange in {stepName} must be a list of at least one int")
+            for temp in tempRange:
+                if not isinstance(temp, int):
+                    raise TypeError(f"-->\tTemperatureRange in {stepName} must be a list of ints")
+                if temp < 0:
+                    raise ValueError(f"-->\tTemperatureRange in {stepName} must be a list of positive ints")
+
+        
 
     return simulationType, stepName
 
@@ -520,6 +545,7 @@ def check_info_for_args(info: dict, infoName: str,  argNames: list, optional: bo
     unpackedDicts: list = []
     for  argName in argNames:
         isArg, argValue = check_dict_for_key(info, argName)
+
         ## if a required arg is not in the dict, raise a KeyError
         if not isArg and not optional:
             raise KeyError(f"-->\tArgument {argName} not found in {infoName}")
@@ -544,7 +570,7 @@ def check_dict_for_key(info: dict, key: any) -> Tuple[bool, any]:
     If it is, return "True" and the associated value 
     """
     if key in info:
-        if info[key] == False:
+        if isinstance(info[key], bool) and info[key] == False:
             return True, False
         else:
             return True, info[key]
