@@ -85,10 +85,10 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         # Skip or resume simulation
         if skipResumeSim == "skip":
             stepName: str = sim["stepName"]
-            drLogger.log_info(f"-->\tSkipping {stepName} for run: {protName}", True)
+            drLogger.log_info(f"-->{' '*4}Skipping {stepName} for run: {protName}", True)
             continue
         if skipResumeSim == "resume":
-            drLogger.log_info(f"-->\tResuming {stepName} from checkpoint file for run: {protName}", True)
+            drLogger.log_info(f"-->{' '*4}Resuming {stepName} from checkpoint file for run: {protName}", True)
 
         # Run simulation
         simulationFunction = choose_simulation_function(sim["simulationType"])

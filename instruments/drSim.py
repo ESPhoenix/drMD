@@ -253,7 +253,7 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
 
     protName = config["proteinInfo"]["proteinName"]
 
-    drLogger.log_info(f"-->\tRunning {stepName} Step for: {protName}",True)
+    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName}",True)
 
     sim = process_sim_data(sim)
 
@@ -343,7 +343,7 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
     stepName: str = sim["stepName"]
     protName: str = config["proteinInfo"]["proteinName"]
 
-    drLogger.log_info(f"-->\tRunning {stepName} Step for: {protName}", True)
+    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName}", True)
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
     os.makedirs(simDir, exist_ok=True)

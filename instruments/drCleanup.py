@@ -229,7 +229,7 @@ def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict) -> List[FilePath]:
     
     """
     ## let user know what we are doing
-    drLogger.log_info("-->\tGetting endpoint PDB files", True)
+    drLogger.log_info(f"-->{' '*4}Getting endpoint PDB files", True)
 
     ## unpack pathInfo
     outDir: DirectoryPath = pathInfo["outputDir"]
@@ -259,7 +259,7 @@ def remove_atoms_from_pdbs(
         None
     """
 
-    drLogger.log_info("-->\tRemoving atoms from clustering pdbs...", True)
+    drLogger.log_info(f"-->{' '*4}Removing atoms from clustering pdbs...", True)
 
     ## for each pdb file in input list
     for pdbFile in pdbFiles:

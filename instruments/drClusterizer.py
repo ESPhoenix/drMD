@@ -43,7 +43,7 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
     allClusterPdbs: list[FilePath] = []
     ## Run clustering on each specified directory
     for dirToCluster in dirsToCluster:
-        drLogger.log_info(f"-->\tClustering trajectory for system:\t {p.basename(p.dirname(dirToCluster))} \t and step:\t {p.basename(dirToCluster)}", True)
+        drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:\t {p.basename(p.dirname(dirToCluster))} \t and step:\t {p.basename(dirToCluster)}", True)
         clusterPdbs: List[FilePath] = rmsd_clustering_protocol(dirToCluster, clusterInfo, clusterDir)
         ## add cluster pdbs to list 
         allClusterPdbs.extend(clusterPdbs)
@@ -69,7 +69,7 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
     stepName: str = p.basename(inDir)
     protName: str = p.basename(p.dirname(inDir))
 
-    print(f"-->\tClustering trajectory for system:\t {protName} \t and step:\t {stepName}")
+    print(f"-->{' '*4}Clustering trajectory for system:\t {protName} \t and step:\t {stepName}")
 
     thisClusterDir: DirectoryPath = p.join(clusterDir, protName, stepName)
 

@@ -19,7 +19,7 @@ ligandInfo:
 simulationInfo:
   - stepName: "01_energy_minimisation"
     simulationType: "EM"
-    temp: 300
+    temperature: 300
     maxIterations: 1000
 
 
@@ -27,7 +27,7 @@ simulationInfo:
     simulationType: "NPT"
     duration: "100 ps"
     timestep: "2 fs"
-    temp: 300
+    temperature: 300
     logInterval: "5 ps"
     # restraintInfo:
     # - restraintType: "position"
@@ -41,7 +41,7 @@ simulationInfo:
     simulationType: "NPT"
     duration: "100 ps"
     timestep: "2 fs"
-    temp: 300
+    temperature: 300
     logInterval: "5 ps"
     # restraintInfo:
     # - restraintType: "position"
@@ -55,7 +55,7 @@ simulationInfo:
     simulationType: "NPT"
     duration: "10 ps"
     timestep: "0.5 fs"
-    temp: 300
+    temperature: 300
     logInterval: "1 ps"
 
 
@@ -63,7 +63,7 @@ simulationInfo:
     simulationType: "META"
     duration: "1 ns"
     timestep: "0.5 fs"
-    temp: 300
+    temperature: 300
     logInterval: "5 ps"
     metaDynamicsInfo:
       height: 1

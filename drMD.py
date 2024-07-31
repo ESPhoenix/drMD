@@ -1,15 +1,10 @@
 ## BASIC LIBS
 import os
 from os import path as p
-import pandas as pd
 import numpy as np
 from shutil import move
-## INPUT LIBS
-import yaml
-import argpass
 ## CUSTOM DR MD MODULES
 from pdbUtils import pdbUtils
-from  instruments import drPrep 
 from  instruments import drCleanup 
 from  instruments import drOperator 
 from  instruments import drConfigTriage 
@@ -24,6 +19,7 @@ import multiprocessing as mp
 from tqdm.contrib.concurrent import process_map
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from concurrent.futures.process import BrokenProcessPool
 
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
@@ -166,7 +162,7 @@ def run_parallel(batchConfig: Dict) -> None:
     Returns:
         None
     """
-
+    
     ## read input directory from batchConfig
     pdbDir = batchConfig["pathInfo"]["inputDir"]
     parallelCpus: int = batchConfig["generalInfo"]["parallelCPU"]
@@ -180,9 +176,12 @@ def run_parallel(batchConfig: Dict) -> None:
     ## add a dummy batch to be used for printing logging
     batchedArgsWithPos = [(["dummy"], -1)] + batchedArgsWithPos
 
-    ## run simulations in parallel
-    process_map(per_core_worker, batchedArgsWithPos, 
-                max_workers=parallelCpus)
+    try:
+        ## run simulations in parallel
+        process_map(per_core_worker, batchedArgsWithPos, 
+                    max_workers=parallelCpus)
+    except BrokenProcessPool:
+        print("BrokenProcessPool: Terminating remaining processes")
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
@@ -202,7 +201,7 @@ def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
     ## unpack batchedArgsWithPos into the batch of arguments for 
     batchedArgs, pos = batchedArgsWithPos
 
-    cmap = plt.get_cmap('coolwarm', 32)
+    cmap = plt.get_cmap('plasma', 32)
     colors = [mcolors.rgb2hex(cmap(i)) for i in range(32)]
     if pos == -1:
         with tqdm(total=1, position=0, bar_format='{desc}', 
@@ -215,7 +214,10 @@ def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
                 leave=False) as progress:
             for args in batchedArgs:
                 pdbFile, batch_config = args
-                process_pdb_file(pdbFile, batch_config)
+                try:
+                    process_pdb_file(pdbFile, batch_config)
+                except Exception as e:
+                    print(e)
                 progress.update(1)
             progress.close()  
 

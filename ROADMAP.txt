@@ -10,16 +10,14 @@
 ### config changes
 []  generalInfo -> hardwareInfo???
 []  sim -> simInfo??
-[]  temp -> temperature
-[]  add temperatureRange
+[x]  temp -> temperature
+[x]  add temperatureRange
 
 ## init lists as tuples in own script??
 
 ## drFixer 
 []  re-implement after simutaion steps run (but not during prep as this is slow)
 
-## drOperator/ drPrep
-[]  investigate odd pause before running simulations - is this skip_resume_simulate?
 
 
 
