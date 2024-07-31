@@ -21,11 +21,5 @@
 ## drOperator/ drPrep
 []  investigate odd pause before running simulations - is this skip_resume_simulate?
 
-## find random print
 
 
-## drSim
-[] implement temperature stepping
-
-## drRestraint
-[x] add k values to position restraints
