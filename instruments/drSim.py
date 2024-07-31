@@ -250,8 +250,11 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     """
 
     stepName = sim["stepName"]
+
     protName = config["proteinInfo"]["proteinName"]
+
     drLogger.log_info(f"-->\tRunning {stepName} Step for: {protName}",True)
+
     sim = process_sim_data(sim)
 
     ## create simluation directory
@@ -339,7 +342,8 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
 
     stepName: str = sim["stepName"]
     protName: str = config["proteinInfo"]["proteinName"]
-    drLogger.log_info(f"-->\tRunning {stepName} Step for: {protName}",True)
+
+    drLogger.log_info(f"-->\tRunning {stepName} Step for: {protName}", True)
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
     os.makedirs(simDir, exist_ok=True)
@@ -373,7 +377,7 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
     # drFixer.reset_chains_residues(refPdb, minimisedPdb)
 
     # Save simulation as XML
-    saveXml: str = p.join(simDir, "energy_minimisation.xml")
+    saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
     return saveXml
 

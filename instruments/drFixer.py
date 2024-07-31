@@ -1,11 +1,17 @@
 
+## BASIC LIBS
 import os
 from os import path as p
-from pdbUtils import pdbUtils
 import pandas as pd
+## CUSTOM LIBS
+from pdbUtils import pdbUtils
+## CLEAN CODE
+from typing import List, Dict, Union, Any
+from instruments.drCustomClasses import FilePath, DirectoryPath
+
 
 ##################################################################################################
-def  reset_atom_numbers(pdbFile: str) -> str:
+def reset_atom_numbers(pdbFile: str) -> str:
     """
     Resets the atom numbers in a PDB file.
 

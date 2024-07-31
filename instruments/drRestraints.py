@@ -38,7 +38,7 @@ def restraints_handler(
     """
     ## skip if not loading from a save file
     ## this prevents crashes when running first simulation
-    if not p.isfile(saveFile):
+    if saveFile == None:
         return system
     ## check if there are any restraints specified in simulation config
     if "restraintInfo" in sim:

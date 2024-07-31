@@ -14,7 +14,7 @@ class OverwriteStreamHandler(logging.StreamHandler):
         try:
             msg = self.format(record)
             stream = self.stream
-            stream.write('\r' + msg)
+            stream.write('\r' + msg + " "*(72-len(msg)))
             stream.flush()
         except Exception:
             self.handleError(record)
@@ -55,7 +55,13 @@ def log_info(message, printToTerminal=False, persist=False):
             streamHandler = OverwriteStreamHandler(sys.stdout)
         streamFormatter = logging.Formatter('%(message)s')
         streamHandler.setFormatter(streamFormatter)
-        streamHandler.emit(logging.LogRecord(name='', level=logging.INFO, pathname='', lineno=0, msg=message, args=(), exc_info=None))
+        streamHandler.emit(logging.LogRecord(name='',
+                                              level=logging.INFO,
+                                                pathname='',
+                                                  lineno=0, 
+                                                  msg=message,
+                                                    args=(),
+                                                      exc_info=None))
 
 def close_logging():
     """

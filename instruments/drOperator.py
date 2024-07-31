@@ -60,7 +60,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
     """
     ## set up logging
     logDir = p.join(p.dirname(outDir), "00_drMD_logs")
-    protName = p.dirname(outDir)
+    protName = config["proteinInfo"]["proteinName"]
     drLogger.setup_logging(p.join(logDir,f"{protName}_simulations.log"))
 
     platform = choose_platform(config)
@@ -82,16 +82,13 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
                                                            outDir=outDir)
         
 
-
-        pdbName = p.splitext(p.basename(pdbFile))[0]
         # Skip or resume simulation
         if skipResumeSim == "skip":
             stepName: str = sim["stepName"]
-            drLogger.log_info(f"-->\tSkipping {stepName} for run:\t {pdbName}", True)
+            drLogger.log_info(f"-->\tSkipping {stepName} for run: {protName}", True)
             continue
         if skipResumeSim == "resume":
-            drLogger.log_info(f"-->\tResuming {stepName} from checkpoint file for run:\t {pdbName}", True)
-
+            drLogger.log_info(f"-->\tResuming {stepName} from checkpoint file for run: {protName}", True)
 
         # Run simulation
         simulationFunction = choose_simulation_function(sim["simulationType"])
@@ -145,38 +142,33 @@ def skip_resume_or_simulate(simDir: str, simulations: list, i: int, outDir: str)
     Returns:
         tuple: A tuple containing the action to be taken (simulate, skip or resume) and the path to the save file.
     """
-    # run simulation if simDir doesn't exist
+
+
+    ## if the simDir for this step doesn't exist, find the xml file for the previous step
     if not p.isdir(simDir):
-        # if it's the first simulation, return "simulate"
+        ## if this is the first simulation in the series and the simDir doesn't exist, run the step from scratch
         if i == 0:
-            return "simulate", "foo"
-        ## find previous saveXml file
-        previousSim: dict = simulations[i-1]
-        previousSimDir: str = p.join(outDir, previousSim["stepName"])
-        # look for previous saveXml file
-        for file in os.listdir(previousSimDir):
-            if p.splitext(file)[1] == ".xml":
-                saveXml: str = p.join(previousSimDir,file)
-                return "simulate", saveXml
-    ## look for save.xml file that is written once a sim finishes
-    ## skip over sim if this exists
-    for file in os.listdir(simDir):
-        if p.splitext(file)[1] == ".xml":
-            saveXml: str = p.join(simDir,file)
+            return "simulate", None
+
+        previousSimName = simulations[i-1]["stepName"]
+        previousSimDir = p.join(outDir, previousSimName) if i > 0 else False
+        saveXml = p.join(previousSimDir, f"{previousSimName}.xml") if previousSimDir else False
+        return "simulate", saveXml
+    
+    ## if the simDir already exists:
+    ## 1. look for XML file in simDir, if found *skip* and return saveFile
+    ## 2. look for CHK file in simDir, if found *resume* and return saveFile
+    ## 3. if neither exists, delete the simDir and run the step from scratch
+    else:
+        thisSimName = simulations[i]["stepName"]
+        saveXml = p.join(simDir, f"{thisSimName}.xml")  
+        if p.isfile(saveXml):  
             return "skip", saveXml
-    ## look for checkpoint.chk file that is written during simulation
-    ## resume simulation from this checkpoint file
-    for file in os.listdir(simDir):
-        if p.splitext(file)[1] == ".chk":
-            saveChk: str = p.join(simDir,file)
+        saveChk = p.join(simDir, "checkpoint.chk")
+        if p.isfile(saveChk):
             return "resume", saveChk
-    ## if it's got here, we have an empty simDir
-    ## remove and simulate
-    rmtree(simDir)
-    previousSim: dict = simulations[i-1]
-    previousSimDir: str = p.join(outDir, previousSim["stepName"])
-    # look for previous saveXml file
-    for file in os.listdir(previousSimDir):
-        if p.splitext(file)[1] == ".xml":
-            saveXml: str = p.join(previousSimDir,file)
-            return "simulate", saveXml
+        else:
+            rmtree(simDir)
+            return "simulate", None
+
+

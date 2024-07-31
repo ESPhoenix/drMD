@@ -149,3 +149,64 @@ OS/2 CodePage ranges pruned: [0]
 glyf pruned
 GDEF pruned
 name pruned
+-->	Running 011_energy_minimisation Step for: A
+-->	Running 021_NVT Step for: A
+Ignored `box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)` at 75:13, unknown property.
+maxp pruned
+cmap pruned
+fpgm dropped
+prep dropped
+cvt  dropped
+kern dropped
+post pruned
+GPOS dropped
+GSUB dropped
+glyf pruned
+Added gid0 to subset
+Closing glyph list over 'glyf': 13 glyphs before
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Closed glyph list over 'glyf': 13 glyphs after
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Retaining 13 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+FFTM NOT subset; don't know how to subset
+GDEF subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+name pruned
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
+-->	Running 022_NpT Step for: A
+-->	Skipping 011_energy_minimisation for run:	 A_solvated
+-->	Skipping 021_NVT for run:	 A_solvated
