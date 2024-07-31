@@ -53,7 +53,7 @@ def run_metadynamics(prmtop: app.Topology,
     XML file.
     """
     stepName = sim["stepName"]
-    print(f"-->\tRunning MetaDynamics Step:\t{stepName}")
+    print(f"-->{' '*4}Running MetaDynamics Step:\t{stepName}")
     ## make a simulation directory
     simDir: str = p.join(outDir, stepName)
     os.makedirs(simDir, exist_ok=True)

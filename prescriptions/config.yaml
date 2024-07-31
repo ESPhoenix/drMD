@@ -13,14 +13,14 @@ generalInfo:
 simulationInfo:
   - stepName: "01_energy_minimisation"
     simulationType: "EM"
-    temp: 300
+    temperature: 300
     maxIterations: 1000
 ########################################################################
   - stepName: "02_NVT_pre-equilibraition"
     simulationType: "NVT"
     duration: "100 ps"
     timestep: "2 fs"
-    temp: 300
+    temperature: 300
     logInterval: "10 ps"
     restraintInfo:
     - restraintType: "position"
@@ -39,7 +39,7 @@ simulationInfo:
     simulationType: "NpT"
     duration: "300 ps"
     timestep: "2 fs"
-    temp: 1400
+    temperature: 1400
     logInterval: "10 ps"
     # restraintInfo:
     # - restraintType: "position"
@@ -57,14 +57,14 @@ simulationInfo:
 #     simulationType: "NpT"
 #     duration: "10 ps"
 #     timestep: "0.5 fs"
-#     temp: 300
+#     temperature: 300
 #     logInterval: "1 ps"
 ########################################################################
   # - stepName: "05_RMSD_Metadynamics_Dummy"
   #   simulationType: "Meta"
   #   duration: "1 ns"
   #   timestep: "2 fs"
-  #   temp: 600
+  #   temperature: 600
   #   logInterval: "5 ps"
   #   metaDynamicsInfo:
   #     height: 2

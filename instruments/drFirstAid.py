@@ -70,7 +70,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                     ## in this case, some firstAid steps have been run
                     if retries > 0:
                         ## let user know whats going on
-                        print(f"-->\tSuccess after {retries} tries.")
+                        print(f"-->{' '*4}Success after {retries} tries.")
                         ## merge partial reports and trajectories
                         merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
                     ## return the saveFile (XML) of the simulation to be used by subsequent simulations
@@ -85,7 +85,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                     if retries == 1:
                         drSplash.print_performing_first_aid()
 
-                    print(f"-->\tAttempting simulation firstAid, try {retries} of {max_retries}")
+                    print(f"-->{' '*4}Attempting simulation firstAid, try {retries} of {max_retries}")
                     ## find simulation output directory
                     runOutDir: Union[PathLike, str] = kwargs["outDir"]
                     simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
@@ -114,7 +114,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                     reset_keyword_arguments(kwargs, runOutDir, currentNsteps)
             ## If we have got here, the firstAid has failed
             ## let user know and merge output reporters and trajectories
-            print("-->\tMax retries reached. Stopping.")
+            print("-->{' '*4}Max retries reached. Stopping.")
             exit(1)
         return wrapper
     return decorator
@@ -260,7 +260,7 @@ def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, 
     Returns:
         None
     """
-    print("-->\tMerging partial outputs...")
+    print("-->{' '*4}Merging partial outputs...")
     ## merge vitals reports
     vitalsDf = merge_partial_reports(simDir, "vitals_report", removePartials=True)
     vitalsDf = fix_merged_vitals(vitalsDf, simInfo)

@@ -45,7 +45,7 @@ def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
 
     # Iterate through all PDB files in the directory
     for file in os.listdir(pdbDir):
-        if not file.endswith(".pdb"):
+        if not file.endswith(f".pdb"):
             continue
         pdbFile: FilePath = p.join(pdbDir, file)
         # Check for common problems in the PDB file
@@ -89,43 +89,43 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
     Args:
         commonPdbProblems (Dict[str, bool]): A dictionary containing the common problems found in the PDB files.
     """
-    logging.info("\n\n")
+    logging.info(f"\n\n")
     if any(commonPdbProblems.values()):
-        logging.info("-->\tThe following common problems were found in the PDB files:")
+        logging.info(f"-->{' '*4}The following common problems were found in the PDB files:")
         if commonPdbProblems["isMultipleConformers"]:
-            logging.info("\n  * Multiple conformers found for sidechains of residues *")
-            logging.info("\t> This often occurs in X-ray structures when electron density is found for multiple conformers")
-            logging.info("\t> You can fix this in Pymol")
+            logging.info(f"\n  * Multiple conformers found for sidechains of residues *")
+            logging.info(f"\t> This often occurs in X-ray structures when electron density is found for multiple conformers")
+            logging.info(f"\t> You can fix this in Pymol")
 
         if commonPdbProblems["isBrokenChains"]:
-            logging.info("\n  * Problems with gaps in the protein's backbone *")
-            logging.info("\t> This often occurs with loops in X-ray structures")
-            logging.info("\t> If you know the sequence of the protein, you can fix this in RF-Diffusion")
+            logging.info(f"\n  * Problems with gaps in the protein's backbone *")
+            logging.info(f"\t> This often occurs with loops in X-ray structures")
+            logging.info(f"\t> If you know the sequence of the protein, you can fix this in RF-Diffusion")
 
         if commonPdbProblems["isMissingSidechains"]:
-            logging.info("\n  * Some Residues are missing sidechain atoms *")
-            logging.info("\t> This often occurs in X-ray structures in areas of low electron density")
-            logging.info("\t> If you know the sequence of the protein, you can fix this in Scwrl4")
+            logging.info(f"\n  * Some Residues are missing sidechain atoms *")
+            logging.info(f"\t> This often occurs in X-ray structures in areas of low electron density")
+            logging.info(f"\t> If you know the sequence of the protein, you can fix this in Scwrl4")
 
         if commonPdbProblems["isNonCanonicalAminoAcids"]:
-            logging.info("\n  * non-canonical amino acids have been identified *")
-            logging.info("\t> This will cause parameterisation of your system to fail")
-            logging.info("\t> You can create your own parameters for non-canonical amino acids")
-            logging.info("\t> and supply them in the inputs directory")
+            logging.info(f"\n  * non-canonical amino acids have been identified *")
+            logging.info(f"\t> This will cause parameterisation of your system to fail")
+            logging.info(f"\t> You can create your own parameters for non-canonical amino acids")
+            logging.info(f"\t> and supply them in the inputs directory")
 
         if commonPdbProblems["isOrganimetallicLigands"]: 
-            logging.info("\n  * Organimetallic ligands have been identified *")
-            logging.info("\t> This will cause parameterisation of your system to fail")
-            logging.info("\t> You can create your own parameters for organometallic ligands")
-            logging.info("\t> and supply them in the inputs directory")
+            logging.info(f"\n  * Organimetallic ligands have been identified *")
+            logging.info(f"\t> This will cause parameterisation of your system to fail")
+            logging.info(f"\t> You can create your own parameters for organometallic ligands")
+            logging.info(f"\t> and supply them in the inputs directory")
     else:
-        logging.info("-->\tNo common problems found in the PDB files.")
+        logging.info(f"-->{' '*4}No common problems found in the PDB files.")
 
     if any(commonPdbProblems.values()):
         drSplash.print_pdb_error()
-        drLogger.log_info("\n\n")
-        drLogger.log_info("-->\tProblems with the PDB files will cause parameterisation to fail", True, True)
-        drLogger.log_info("-->\tConsult the following log file for more details:", True, True)
+        drLogger.log_info(f"\n\n")
+        drLogger.log_info(f"-->{' '*4}Problems with the PDB files will cause parameterisation to fail", True, True)
+        drLogger.log_info(f"-->{' '*4}Consult the following log file for more details:", True, True)
         drLogger.log_info(f"\t{pdbTriageLog}", True, True)
         exit(1)
 
@@ -152,7 +152,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
         Dict[str,bool]: A dictionary containing the common problems found in the PDB file.
     """
     pdbName: str = p.basename(pdbFile)
-    logging.info(f"\n-->\tChecking PDB file {pdbName} for common problems...")
+    logging.info(f"\n-->{' '*4}Checking PDB file {pdbName} for common problems...")
     
     ## load pdb file as a dataframe
     pdbDf: pd.DataFrame = pdbUtils.pdb2df(pdbFile)
@@ -203,7 +203,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
     }
 
     if not any(problemsDict.values()):
-        logging.info("  * No common problems found in the PDB file *")
+        logging.info(f"  * No common problems found in the PDB file *")
 
     return problemsDict
 
@@ -229,8 +229,8 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optiona
     organoMetallicResidues: Dict = {}
 
     # Loop through chains and residues in the pdb dataframe
-    for chainId, chainDf in pdbDf.groupby("CHAIN_ID"):
-        for resId, resDf in chainDf.groupby("RES_ID"):
+    for chainId, chainDf in pdbDf.groupby(f"CHAIN_ID"):
+        for resId, resDf in chainDf.groupby(f"RES_ID"):
             resName: str = resDf["RES_NAME"].iloc[0]
 
             # Skip if amino acid residue
@@ -239,7 +239,7 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optiona
             try: 
                 resElements: Set[str] = set(resDf["ELEMENT"])
             except:
-                logging.info("No elements column found in pdb dataframe")
+                logging.info(f"No elements column found in pdb dataframe")
                 return False,  None
             
             # If there are non-organic atoms, add the residue ID and atom count to the dictionary
@@ -272,8 +272,8 @@ def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: Directory
     # Dictionary to store residue IDs and messages
     nonCanonicalAminoAcids: Dict = {}
     # Loop through chains and residues in the pdb dataframe
-    for chainId, chainDf in pdbDf.groupby("CHAIN_ID"):
-        for resId, resDf in chainDf.groupby("RES_ID"):
+    for chainId, chainDf in pdbDf.groupby(f"CHAIN_ID"):
+        for resId, resDf in chainDf.groupby(f"RES_ID"):
             resName: str = resDf["RES_NAME"].iloc[0]
             # Skip if cannonical amio acid residue, water,
             if resName in aminoAcidResNames or resName == "HOH":
@@ -317,14 +317,14 @@ def check_for_missing_sidechains(pdbDf: pd.DataFrame) -> tuple[bool, Optional[Di
     ## initialise an empty dict to store missing sidechains
     missingSidechains: Dict = {}
     ## loop through chains and residues
-    for chainId, chainDf in protDf.groupby("CHAIN_ID"):
-        for resId, resDf in chainDf.groupby("RES_ID"):
+    for chainId, chainDf in protDf.groupby(f"CHAIN_ID"):
+        for resId, resDf in chainDf.groupby(f"RES_ID"):
             ## get residue name of this residue
             resName: str = resDf["RES_NAME"].iloc[0]
             ## get atom names of this residue
             resAtomNames: List[str] = resDf["ATOM_NAME"].tolist()
             ## exclude hydrogen atoms
-            heavyAtomNames: List[str] = [atom for atom in resAtomNames if not atom.startswith("H")]
+            heavyAtomNames: List[str] = [atom for atom in resAtomNames if not atom.startswith(f"H")]
             ## ecxlude backbone atoms
             sideChainAtoms: List[str] = list(set([atom for atom in heavyAtomNames if atom not in backboneAtoms ]))
             ## check if number of heavy sidechain atoms matches expected value
@@ -352,7 +352,7 @@ def check_for_broken_chains(pdbDf: pd.DataFrame) -> tuple[bool, Optional[Dict[st
     ## initialise an empty dict to store broken chains
     brokenChains: Dict = {}
     ## loop through chains
-    for chainId, chainDf in protDf.groupby("CHAIN_ID"):
+    for chainId, chainDf in protDf.groupby(f"CHAIN_ID"):
         ## get residue IDs
         resIds = chainDf["RES_ID"].unique().tolist()
         
@@ -420,8 +420,8 @@ def check_for_multiple_conformers(pdbDf: pd.DataFrame) -> tuple[bool, Optional[D
     multipleConformers: Dict = {}
     
     # Loop through chains and residues in the pdb dataframe
-    for chainId, chainDf in pdbDf.groupby("CHAIN_ID"):
-        for resId, resDf in chainDf.groupby("RES_ID"):
+    for chainId, chainDf in pdbDf.groupby(f"CHAIN_ID"):
+        for resId, resDf in chainDf.groupby(f"RES_ID"):
             # Get residue name of this residue
             resName: str = resDf["RES_NAME"].tolist()[0]
             
