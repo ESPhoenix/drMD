@@ -224,6 +224,7 @@ def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app
     # Return the modified simulation object
     return simulation
 ###########################################################################################
+@drLogger.monitor_progress_decorator()
 @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=10)
 @drCheckup.check_up_handler()
 def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
@@ -253,7 +254,7 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
 
     protName = config["proteinInfo"]["proteinName"]
 
-    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName}",True)
+    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName} {' '*10}",True)
 
     sim = process_sim_data(sim)
 
@@ -343,7 +344,7 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
     stepName: str = sim["stepName"]
     protName: str = config["proteinInfo"]["proteinName"]
 
-    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName}", True)
+    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName} {' '*10}", True)
     ## create simluation directory
     simDir: str = p.join(outDir, sim["stepName"])
     os.makedirs(simDir, exist_ok=True)
@@ -380,5 +381,4 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
     return saveXml
-
 

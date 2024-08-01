@@ -1,0 +1,52 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+generalInfo:
+  parallelCPU: 6
+  platform: "CUDA"
+  subprocessCpus: 1
+########################################################################
+
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temperature: 300
+    maxIterations: 1000
+    
+  - stepName: "02_NVT_pre-equilibraition"
+    simulationType: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 1000 
+      selection:
+        keyword: "protein"
+
+    - restraintType: "position"
+      selection: 
+        keyword: "ligands"  
+      parameters:
+        k: 1000
+################################################
+
+postSimulationInfo:
+  endPointInfo:
+    stepNames: ["01_energy_minimisation"]
+    removeAtoms: 
+    - selection:
+        keyword: "ions"
+    - selection:
+        keyword: "ligands"
+    collate: True
+  directoryCleanUpInfo:
+    removeAllSimulationDirs: True
+    # stepsToRemove: ["00_prep"]
+
+
