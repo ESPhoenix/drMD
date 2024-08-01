@@ -51,7 +51,7 @@ The next few sections will detail the correct formatting of the config.yaml file
 The pathInfo entry in the config file is a dictionary containing two parameters:
 - inputDir:     This is the absoloute path towards a directory containing PDB files that will be used as starting points for your simulations.
             
-  > [!TIP]
+  > [!NOTE]
   > **To Perform Replicate** simulations, simply create copies of your starting PDB files in the inputDir, with each copy
   >named with a unique number. For example, your inputDir could contain my_protein_1.pdb, my_protein_2.pdb, etc.
 
@@ -144,11 +144,11 @@ Each simulation dictionary contains the following parameters:
 - simulationType: This is the type of simulation that will be run. Accepted arguments are:
 
     - "EM":         This will run a steepest-decent Energy Minimisation step. 
-    > [!TIP]
+    > 💡 **TIP:**
     > We reccomended that you run one of these steps before any other simulation steps
     - "NVT":        This will run an NVT (constant volume) molecular dynamics simulation
     - "NPT":        This will run an NPT (constant pressure) molecular dynamics simulation
-    > [!TIP]
+    > 💡 **TIP:**
     > For the majority of protein simulations, the NPT ensemble is used for production MD simulations, while the NVT ensemble is oonly used in equilibration steps
     - "META":       This will run a Metadynamics simulation
 
