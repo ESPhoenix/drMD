@@ -19,115 +19,87 @@ simulationInfo:
     restraintInfo:
     - restraintType: "position"
       parameters:
-        k: 500
+        k: 209000
       selection:
-        keyword: "protein"
+        keyword: "all"
+
+  ##
+  - stepName: "012_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
     - restraintType: "position"
       parameters:
-        k: 500
+        k: 179740
       selection:
-        keyword: "ligands"
-  # ##
-  # - stepName: "012_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
-  #   restraintInfo:
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 430
-  #     selection:
-  #       keyword: "protein"
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 430
-  #     selection:
-  #       keyword: "ligands"
-  # ##
-  # - stepName: "013_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
-  #   restraintInfo:
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 360
-  #     selection:
-  #       keyword: "protein"
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 360
-  #     selection:
-  #       keyword: "ligands"
-  # ##
-  # - stepName: "014_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
-  #   restraintInfo:
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 290
-  #     selection:
-  #       keyword: "protein"
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 290
-  #     selection:
-  #       keyword: "ligands"
-  # ##
-  # - stepName: "015_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
-  #   restraintInfo:
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 220
-  #     selection:
-  #       keyword: "protein"
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 220
-  #     selection:
-  #       keyword: "ligands"
-  # ##
-  # - stepName: "015_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
-  #   restraintInfo:
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 150
-  #     selection:
-  #       keyword: "protein"
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 150
-  #     selection:
-  #       keyword: "ligands"
-  # ##
-  # - stepName: "016_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
-  #   restraintInfo:
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 80
-  #     selection:
-  #       keyword: "protein"
-  #   - restraintType: "position"
-  #     parameters:
-  #       k: 80
-  #     selection:
-  #       keyword: "ligands"
-  # ##
-  # - stepName: "017_energy_minimisation"
-  #   simulationType: "EM"
-  #   temperature: 0
-  #   maxIterations: 10000
+        keyword: "all"
+
+  ##
+  - stepName: "013_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150480
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "014_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 121220
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "015_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 91960
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "015_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 62700
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "016_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 33440
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "017_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
 ########################################################################
 ## EQUILIBRATION STEPS
   - stepName: "021_NVT"

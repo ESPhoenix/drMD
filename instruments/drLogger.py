@@ -2,9 +2,13 @@
 import logging
 import sys
 import time
-
+import pandas as pd
+from functools import wraps
+import threading
+import os
+from os import path as p
 ## CLEAN CODE
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union, Any, Tuple
 
 from instruments.drCustomClasses import FilePath, DirectoryPath
 
@@ -81,6 +85,48 @@ def close_logging():
         for handler in logger.handlers[:]:
             logger.removeHandler(handler)
             handler.close()
+
+
+def read_simulation_progress(progressReporterCsv: FilePath) -> Tuple[str, str]:
+    try:
+        progressDf: pd.DataFrame = pd.read_csv(progressReporterCsv)
+        progressPercent: str = str(progressDf['#"Progress (%)"'].iloc[-1])
+        timeRemaining: str = str(progressDf["Time Remaining"].iloc[-1])
+        return progressPercent, timeRemaining
+    except (FileNotFoundError, pd.errors.EmptyDataError) as e:
+        return "N/A", "N/A"
+    
+
+def monitor_progress_decorator(checkInterval = 5):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            startTime = time.time()
+            monitoring = threading.Event()
+
+            def monitor_progress():
+                stepName = kwargs["sim"]["stepName"]
+                protName = kwargs["config"]["proteinInfo"]["proteinName"]
+                outDir =  kwargs["outDir"]
+                simDir = p.join(outDir,stepName)
+                progressReporterCsv = p.join(simDir,"progress_report.csv")
+                while not monitoring.is_set():
+                    progressPercent, timeRemaining = read_simulation_progress(progressReporterCsv)
+                    log_info(f"-->{' '*4}Running {stepName} Step for: {protName} | Progress: {progressPercent} | Time Remaining: {timeRemaining} {' '*10}",True)
+                    time.sleep(checkInterval)
+            monitorThread = threading.Thread(target=monitor_progress)
+            monitorThread.start()
+            result = func(*args, **kwargs)
+            monitoring.set()
+            monitorThread.join()
+            return result
+        return wrapper
+    return decorator
+          
+    
+
+
+
 
 if __name__ == '__main__':
     logFile = 'exampleLogFile.log'
