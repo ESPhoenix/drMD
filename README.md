@@ -51,17 +51,17 @@ The next few sections will detail the correct formatting of the config.yaml file
 The **pathInfo** entry in the config file is a dictionary containing two parameters:
 - **inputDir**:    *(DirectoryPath)* This is the absoloute path towards a directory containing PDB files that will be used as starting points for your simulations.
             
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > **To Perform Replicate** simulations, simply create copies of your starting PDB files in the inputDir, with each copy
   > named with a unique number. For example, your inputDir could contain my_protein_1.pdb, my_protein_2.pdb, etc.
 
 
 - **outputDir**:  *(DirectoryPath)*  This is the absoloute path towards a directory that you want your drMD outputs to be written to.
 
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > The outputDir will be created if it does not already exist at the point of running drMD
 
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > Within outputDir, a directory will be created for each PDB file contained in inputDir, in this document, thesesubdirectories will be refered to as **runDirs**
 
 Example pathInfo:
@@ -76,13 +76,13 @@ This config entry tells drMD about your computer hardware and how you want to us
 The **hardwareInfo** entry in the config file is a dictionary containing three parameters:
 - **platform**: *(str)* This is the platform that will be used to run simulations in OpenMM. If you have access to GPU acceleration using CUDA, we reccomend this option. If you don't but have access through OpenCL, this is a close second.  
 
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > Accepted arguments for **platform** are *"CUDA"*, *"OpenCL"*, and *"CPU"*
 
 - **paralellCPU**:      This is the number (int) of simulations that will be run in paralell
 - **subprocessCpus**:  This is the number (int) of cpu cores that will be allocated to each simulation. It is recommended to set this to 1. 
 
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > The total CPU usage will be parallelCPU * subprocessCpus, so make sure you have enough CPus when you set these parameters
 
 Example hardwareInfo:
@@ -99,7 +99,7 @@ These small molecules will not have parameters in the AMBER forcefield, drMD wil
 To do this, you will need to tell drMD some things about each ligand you whish tp simulate.
 
 
-> medical_symbol:
+> :medical_symbol::medical_symbol::medical_symbol:
 > The **ligandInfo** entry is *optional*. drMD will automatically detect ligands in your PDB files. It will also detect
 > parameter files in your input directory
 
@@ -110,10 +110,10 @@ To do this, you will need to tell drMD some things about each ligand you whish t
 - **protons**:      This is a boolean (TRUE/FALSE) to tell drMD whether you have protons on your ligand. 
                 If set to FALSE, drMD will run an automated protonation protocol to add protons to your ligand
 
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > The automatic protonation protocol only works reliably for simple organic ligands.
 
-  > medical_symbol:
+  > :medical_symbol::medical_symbol::medical_symbol:
   > For more complex ligands, we recommended that you manually add protons in your input PDB file prior to running drMD
 
 - **charge**:       This is the charge of the ligand (int)
@@ -153,11 +153,11 @@ Each simulation dictionary contains the following parameters:
 - **simulationType**: This is the type of simulation that will be run. Accepted arguments are:
 
     - **"EM"**:         This will run a steepest-decent Energy Minimisation step. 
-    > medical_symbol:
+    > :medical_symbol::medical_symbol::medical_symbol:
     > We reccomended that you run one of these steps before any other simulation steps
     - **"NVT"**:        This will run an NVT (constant volume) molecular dynamics simulation
     - **"NPT"**:        This will run an NPT (constant pressure) molecular dynamics simulation
-    > medical_symbol:
+    > :medical_symbol::medical_symbol::medical_symbol:
     > For the majority of protein simulations, the NPT ensemble is used for production MD simulations, while the NVT ensemble is oonly used in equilibration steps
     - **"META"**:       This will run a Metadynamics simulation
 
@@ -230,7 +230,7 @@ Additional entries in the parameters dictionary depend on the type of restraints
 All restraints require the selection parameter. This tells drMD what atoms to apply the restraint to
     - **selection**:    This is a dictionary containing information on the selection of atoms that the restraints will be applied to.
 
-> medical_symbol:
+> :medical_symbol::medical_symbol::medical_symbol:
 >The selection method is shared between multiple different inputs in the drMD config file. This is described in more detail in the next section
 
 
@@ -296,7 +296,7 @@ Each dictionary in the list must contain the following parameters:
 
 > WARNING: PLEASE DON'T CALL ANY OF YOUR RESIDUE NAMES "ALL" AS THIS WILL CAUSE PROBLEMS
 
-> medical_symbol:
+> :medical_symbol::medical_symbol::medical_symbol:
 > This selection method is used to match atoms using columns of your PDB files. To work out how to identify what inputs you need to select your atoms of interest, simply open your input PDB file in PyMOL and use labels to identify the relavent **CHAIN_ID**, **RES_NAME**, **RES_ID**, and **ATOM_NAME** values
 
 Example customSelection syntax, (this is probably more complex than you will need, but shows off what you can do):
@@ -339,13 +339,13 @@ Within each dictionary in **biases** you must provide the following parameters:
 - **selection**:  *(dict)*  This is a dictionary containing information on the selection of atoms that the biasVariable will be applied to.
               The selection syntax is identical to that used for the restraints. (described above)
 
-> medical_symbol:
+> :medical_symbol::medical_symbol::medical_symbol:
 > Depending on the type of bias variable, different numbers of atoms must be selected:
 > - Distance bias variables require two atoms to be selected
 > - Angle bias variables require three atoms to be selected
 > - Torsion bias variables require four atoms to be selected
 
-> medical_symbol:
+> :medical_symbol::medical_symbol::medical_symbol:
 > You will also need to specify at least one biasVariable for the simulation to sample.
 > You can specify as many biasVariables as you wish, with one dictionary per biasVariable
 
@@ -393,6 +393,6 @@ Molecular Dyamics simulations can generate very large output files that can beco
   - **nClusters**: This is the number (int) of clusters PDB files that will be generated
   - **clusterBy**: This is a list of selections of atoms (described above) to cluster on. 
 
-> medical_symbol:
+> :medical_symbol::medical_symbol::medical_symbol:
 > By selecting only the parts of our system that you are interested in with the clusterBy parameter, you can generated cluster
 > PDB files where these atoms are most separated by RMSD.
