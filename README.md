@@ -1,4 +1,4 @@
-# drMD
+# :medical_symbol: drMD :medical_symbol:
 Automated workflow for running molecular dynamics simulations with Amber and Openmm
 # Installation
 1. Clone this repository
