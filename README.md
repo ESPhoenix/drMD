@@ -51,7 +51,7 @@ The next few sections will detail the correct formatting of the config.yaml file
 The pathInfo entry in the config file is a dictionary containing two parameters:
 - inputDir:     This is the absoloute path towards a directory containing PDB files that will be used as starting points for your simulations.
             
-  > [!NOTE]
+  > :medical_symbol:
   > **To Perform Replicate** simulations, simply create copies of your starting PDB files in the inputDir, with each copy
   >named with a unique number. For example, your inputDir could contain my_protein_1.pdb, my_protein_2.pdb, etc.
 
