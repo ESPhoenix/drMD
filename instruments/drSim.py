@@ -225,7 +225,7 @@ def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app
     return simulation
 ###########################################################################################
 @drLogger.monitor_progress_decorator()
-@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=10)
+@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=2)
 @drCheckup.check_up_handler()
 def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
                            inpcrd: app.AmberInpcrdFile,
@@ -288,7 +288,6 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     with open(nptPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
     drFixer.reset_chains_residues(refPdb, nptPdb)
-
 
     # save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")

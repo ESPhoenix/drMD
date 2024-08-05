@@ -68,6 +68,56 @@ def print_performing_first_aid() -> None:
 ⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
           """
           +resetTextColor)
+    
+
+def print_first_aid_failed(errorOpenMM) -> None:
+    """
+    Prints the first aid failed message.
+
+    Returns:    
+        None
+    """ 
+    redText = "\033[31m"
+    yellowText = "\033[33m"
+
+    resetTextColor = "\033[0m"
+
+    print(redText+
+          f"""
+⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
+
+            ███████ ██ ██████  ███████ ████████      █████  ██ ██████  
+            ██      ██ ██   ██ ██         ██        ██   ██ ██ ██   ██ 
+            █████   ██ ██████  ███████    ██        ███████ ██ ██   ██ 
+            ██      ██ ██   ██      ██    ██        ██   ██ ██ ██   ██ 
+            ██      ██ ██   ██ ███████    ██        ██   ██ ██ ██████  
+                                                                    
+                                                                    
+                ███████  █████  ██ ██      ███████ ██████              
+                ██      ██   ██ ██ ██      ██      ██   ██             
+                █████   ███████ ██ ██      █████   ██   ██             
+                ██      ██   ██ ██ ██      ██      ██   ██             
+                ██      ██   ██ ██ ███████ ███████ ██████
+
+        drMD failed to rescue your simulation.
+        The following error was returned by OpenMM:
+
+        {yellowText}{errorOpenMM}{redText}
+
+        This is likely due to unphysically high energies in your simulation.
+    
+        Try some of the following:
+        -> reduce the timestep of your simulation
+        -> reduce the temperature of your simulation
+        -> if you are using any restraints, reduce their force constants
+
+⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
+                                                          
+"""
++resetTextColor)
+    
+
+
 ###########################################################################################
 def print_config_error(error: Optional[str] = None) -> None:
     """

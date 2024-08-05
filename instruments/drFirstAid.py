@@ -3,6 +3,8 @@ import os
 from os import path as p
 from functools import wraps
 import pandas as pd
+import sys
+import threading
 ## openMM libraries
 import openmm
 from openmm import app
@@ -12,6 +14,7 @@ import mdtraj as md
 ## drMD libraries
 from instruments import drSim
 from instruments import drSplash
+from instruments import drLogger
 ## clean code
 from typing import Tuple, Union, Dict, List, Any
 from os import PathLike
@@ -70,54 +73,64 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                     ## in this case, some firstAid steps have been run
                     if retries > 0:
                         ## let user know whats going on
-                        print(f"-->{' '*4}Success after {retries} tries.")
+                        drLogger.log_info(f"-->{' '*4}Success after {retries} tries.", True)
                         ## merge partial reports and trajectories
+                        runOutDir: Union[PathLike, str] = kwargs["outDir"]
+                        simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
                         merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
                     ## return the saveFile (XML) of the simulation to be used by subsequent simulations
                     return saveFile
                 ## if our simulation crashes due to a numeriacal error or an OpenMM exception
+                ## run firstAid protocol to try and recover
                 except (OpenMMException, ValueError) as e:
+                    errorOpenMM = e
+                    saveFile, retries = run_first_aid_protocol(retries, max_retries, *args, **kwargs)
 
-            ############### RUN TRIAGE ###############
-                    ## step retries counter
-                    retries += 1
-                    ## let user know whats going on
-                    if retries == 1:
-                        drSplash.print_performing_first_aid()
-
-                    print(f"-->{' '*4}Attempting simulation firstAid, try {retries} of {max_retries}")
-                    ## find simulation output directory
-                    runOutDir: Union[PathLike, str] = kwargs["outDir"]
-                    simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
-                    ## look for checkpoint file of exploded simulation
-                    ## if none found, simulatoin has exploded on first step, try simulation again
-                    try:
-                        firstAidDir, explodedCheckpoint = pre_firstAid_processing(simDir, retries)
-                    except FileNotFoundError as e:
-                        ## if no checkpoint file is found, simulation has exploded on first step
-                        ## we use continue here to do another round of the while loop
-                        ## this will result in the simulation being restarted using the same input geometry
-                        ## the retries counter has still been incremented, so this will not cause an infinite loop
-                        print(e)
-                        continue
-                        # kwargs["firstAidTries"] = retries
-                        # saveFile: Union[PathLike, str] = run_firstAid_npt_simulation(*args, **kwargs)
-
-                    ## get current timestep of simulation
-                    currentNsteps: int = get_nsteps_at_crash(explodedCheckpoint, kwargs["prmtop"])
-                    ## prepare arguments for firstAid simulation
-                    kwargs: Dict = prepare_arguments_for_firstAid(kwargs, firstAidDir, explodedCheckpoint, retries)
-                    ## run firstAid simulation using modified keyword arguments
-                    saveFile: Union[PathLike, str] = run_firstAid_energy_minimisation(*args, **kwargs)
-
-                    ## reset keyword arguments so simulation can be resumed
-                    reset_keyword_arguments(kwargs, runOutDir, currentNsteps)
-            ## If we have got here, the firstAid has failed
-            ## let user know and merge output reporters and trajectories
-            print("-->{' '*4}Max retries reached. Stopping.")
-            exit(1)
+            else:
+                ## If we have got here, the firstAid has failed
+                ## let user know and merge output reporters and trajectories
+                drLogger.log_info(f"-->{' '*4}Max retries reached. Stopping.", True, True)
+                drSplash.print_first_aid_failed(errorOpenMM)
+                exit(1)
         return wrapper
     return decorator
+
+def  run_first_aid_protocol(retries: int, max_retries: int, *args, **kwargs):
+    retries += 1
+    ## let user know whats going on
+    if retries == 1:
+        drSplash.print_performing_first_aid()
+
+    drLogger.log_info(f"-->{' '*4}Attempting simulation firstAid, try {retries} of {max_retries}", True)
+    ## find simulation output directory
+    runOutDir: Union[PathLike, str] = kwargs["outDir"]
+    simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
+    ## look for checkpoint file of exploded simulation
+    ## if none found, simulatoin has exploded on first step, try simulation again
+    try:
+        firstAidDir, explodedCheckpoint = pre_firstAid_processing(simDir, retries)
+    except FileNotFoundError as ErrorFileNotFound:
+        ## if no checkpoint file is found, simulation has exploded on first step
+        ## we use continue here to do another round of the while loop
+        ## this will result in the simulation being restarted using the same input geometry
+        ## the retries counter has still been incremented, so this will not cause an infinite loop
+        drLogger.log_info(ErrorFileNotFound, True)
+        return None, retries
+    
+        # kwargs["firstAidTries"] = retries
+        # saveFile: Union[PathLike, str] = run_firstAid_npt_simulation(*args, **kwargs)
+
+    ## get current timestep of simulation
+    currentNsteps: int = get_nsteps_at_crash(explodedCheckpoint, kwargs["prmtop"])
+    ## prepare arguments for firstAid simulation
+    kwargs: Dict = prepare_arguments_for_firstAid(kwargs, firstAidDir, explodedCheckpoint, retries)
+    ## run firstAid simulation using modified keyword arguments
+    saveFile: Union[PathLike, str] = run_firstAid_energy_minimisation(*args, **kwargs)
+    ## reset keyword arguments so simulation can be resumed
+    reset_keyword_arguments(kwargs, runOutDir, currentNsteps)
+
+    return saveFile, retries
+
 #######################################################################
 def get_nsteps_at_crash(explodedCheckpoint: Union[PathLike, str], prmtop: app.AmberPrmtopFile) -> int:
     """
@@ -209,7 +222,7 @@ def pre_firstAid_processing(simDir: Union[PathLike, str],
     ## look for checkpoint file of exploded simulation
     explodedCheckpoint = p.join(simDir, "checkpoint.chk")
     if not p.isfile(explodedCheckpoint):
-        raise FileNotFoundError(f"->\tCheckpoint file not found at {explodedCheckpoint}")
+        raise FileNotFoundError(f"-->{' '*4}Checkpoint file not found at {explodedCheckpoint}")
     
     ## make a firstAid directory - this will be where each firstAid step is performed
     firstAidDir = p.join(simDir, "firstAid")
@@ -260,7 +273,7 @@ def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, 
     Returns:
         None
     """
-    print("-->{' '*4}Merging partial outputs...")
+    drLogger.log_info("-->{' '*4}Merging partial outputs...", True)
     ## merge vitals reports
     vitalsDf = merge_partial_reports(simDir, "vitals_report", removePartials=True)
     vitalsDf = fix_merged_vitals(vitalsDf, simInfo)

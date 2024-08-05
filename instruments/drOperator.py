@@ -76,10 +76,14 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         simDir: str = p.join(outDir,sim["stepName"])
 
         # Decide whether to skip, resume, or start a new simulation
-        skipResumeSim, saveFile = skip_resume_or_simulate(simDir=simDir,
+        skipResumeSim, foundSaveFile = skip_resume_or_simulate(simDir=simDir,
                                                            simulations = simulations,
                                                            i = i, 
                                                            outDir=outDir)
+        
+        ## if we found a save file, use it, otherwise keep the one we had from last time
+        if foundSaveFile != None:
+            saveFile = foundSaveFile
         
 
         # Skip or resume simulation
@@ -93,7 +97,14 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         # Run simulation
         simulationFunction = choose_simulation_function(sim["simulationType"])
 
-        saveFile = simulationFunction(prmtop = prmtop, inpcrd = inpcrd, sim = sim, saveFile = saveFile, outDir = outDir, platform = platform, refPdb = pdbFile, config = config)
+        saveFile = simulationFunction(prmtop = prmtop,
+                                       inpcrd = inpcrd,
+                                         sim = sim,
+                                           saveFile = saveFile,
+                                             outDir = outDir,
+                                               platform = platform,
+                                                 refPdb = pdbFile,
+                                                   config = config)
 
 
 

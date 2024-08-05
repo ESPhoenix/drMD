@@ -22,3 +22,26 @@
 
 ## drCleanUp
 [] remove collate from endpointInfo, this will always be on
+
+
+
+## skip_resume_simulate
+[] fix simDir exists, but no checkpoint found exception
+
+## drFirstAid
+[x] add logging 
+[x] add splash to first aid failed condition
+[] add exception handling to reading 
+[x] fix carries on after max retries reached
+[] alternate between EM and MD to fix problem
+[] if no checkpoint exists at all, run an EM from previous?
+
+
+## Extra features
+[] pH for protonation
+[] more metaDynamics parameters
+[] maxRetries as a config parameters
+[] different box geometies
+
+## drLogger
+[] do clean code
