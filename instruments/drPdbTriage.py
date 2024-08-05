@@ -95,7 +95,8 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
         if commonPdbProblems["isMultipleConformers"]:
             logging.info(f"\n  * Multiple conformers found for sidechains of residues *")
             logging.info(f"\t> This often occurs in X-ray structures when electron density is found for multiple conformers")
-            logging.info(f"\t> You can fix this in Pymol")
+            logging.info(f"\t> You can fix this in Pymol with the following command:")
+            logging.info(f"\t> remove not (alt '' or alt A)")
 
         if commonPdbProblems["isBrokenChains"]:
             logging.info(f"\n  * Problems with gaps in the protein's backbone *")

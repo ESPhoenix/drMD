@@ -49,6 +49,13 @@ def check_vitals(simDir: Dict, vitalsFiles: Dict[str, FilePath]) -> None:
     vitalsDf = pd.read_csv(vitalsFiles["vitals"])
     progressDf = pd.read_csv(vitalsFiles["progress"])
 
+    ## skip this if the reporters are not present, or are less than 5 entries long
+    if len(vitalsDf) < 5:
+        return
+    
+    if len(progressDf) < 5:
+        return
+    
     ## use mdtraj to calculate RMSD for non water and ions, get that data into a dataframe
     rmsdDf = calculate_rmsd(trajectoryDcd = vitalsFiles["trajectory"], pdbFile = vitalsFiles["pdb"])
 

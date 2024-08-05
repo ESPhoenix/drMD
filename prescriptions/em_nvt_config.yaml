@@ -1,6 +1,6 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
@@ -15,7 +15,7 @@ simulationInfo:
     simulationType: "EM"
     temperature: 300
     maxIterations: 1000
-    
+
   - stepName: "02_NVT_pre-equilibraition"
     simulationType: "NVT"
     duration: "100 ps"

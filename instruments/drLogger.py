@@ -5,7 +5,7 @@ import time
 import pandas as pd
 from functools import wraps
 import threading
-import os
+import shutil
 from os import path as p
 ## CLEAN CODE
 from typing import List, Dict, Union, Any, Tuple
@@ -16,9 +16,11 @@ from instruments.drCustomClasses import FilePath, DirectoryPath
 class OverwriteStreamHandler(logging.StreamHandler):
     def emit(self, record):
         try:
+
+            terminalWidth = shutil.get_terminal_size().columns
             msg = self.format(record)
             stream = self.stream
-            stream.write('\r' + msg + " "*(72-len(msg)))
+            stream.write('\r' + msg + " "*(terminalWidth-len(msg)))
             stream.flush()
         except Exception:
             self.handleError(record)
@@ -97,7 +99,7 @@ def read_simulation_progress(progressReporterCsv: FilePath) -> Tuple[str, str]:
         return "N/A", "N/A"
     
 
-def monitor_progress_decorator(checkInterval = 5):
+def monitor_progress_decorator(checkInterval=20):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -107,21 +109,34 @@ def monitor_progress_decorator(checkInterval = 5):
             def monitor_progress():
                 stepName = kwargs["sim"]["stepName"]
                 protName = kwargs["config"]["proteinInfo"]["proteinName"]
-                outDir =  kwargs["outDir"]
-                simDir = p.join(outDir,stepName)
-                progressReporterCsv = p.join(simDir,"progress_report.csv")
+                outDir = kwargs["outDir"]
+                simDir = p.join(outDir, stepName)
+                progressReporterCsv = p.join(simDir, "progress_report.csv")
                 while not monitoring.is_set():
-                    progressPercent, timeRemaining = read_simulation_progress(progressReporterCsv)
-                    log_info(f"-->{' '*4}Running {stepName} Step for: {protName} | Progress: {progressPercent} | Time Remaining: {timeRemaining} {' '*10}",True)
+                    progressPercent, timeRemaining = read_simulation_progress(
+                        progressReporterCsv)
+                    log_info(f"-->{' '*4}Running {stepName} Step for: "
+                             f"{protName} | Progress: {progressPercent} | "
+                             f"Time Remaining: {timeRemaining} {' '*10}", True)
                     time.sleep(checkInterval)
+
             monitorThread = threading.Thread(target=monitor_progress)
             monitorThread.start()
-            result = func(*args, **kwargs)
+            try:
+                result = func(*args, **kwargs)
+            except SystemExit as e:
+                if e.code == 1:
+                    monitoring.set()
+                    monitorThread.join()
+                    exit(1)
+                else:
+                    raise
             monitoring.set()
             monitorThread.join()
             return result
         return wrapper
     return decorator
+
           
     
 

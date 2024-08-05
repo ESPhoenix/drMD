@@ -1,7 +1,7 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
-  outputDir: "/home/esp/scriptDevelopment/drMD/03_output"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/PET_proj"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
 generalInfo:
@@ -102,7 +102,7 @@ simulationInfo:
     maxIterations: 10000
 ########################################################################
 ## EQUILIBRATION STEPS
-  - stepName: "021_NVT"
+  - stepName: "021_NVT_warmup"
     simulationType: "NVT"
     duration: "20 ps"
     timestep: "2 fs"
@@ -111,11 +111,11 @@ simulationInfo:
     restraintInfo:
     - restraintType: "position"
       parameters:
-        k: 150
+        k: 600000
       selection:
         keyword: "ligands"
   ##
-  - stepName: "022_NpT"
+  - stepName: "022_NpT_warmup"
     simulationType: "NPT"
     duration: "9 ns"
     timestep: "2 fs"
@@ -127,4 +127,25 @@ simulationInfo:
         k: 150
       selection:
         keyword: "ligands"
+
+  ##
+  - stepName: "022_NpT_equilibration"
+    simulationType: "NPT"
+    duration: "5 ns"
+    timestep: "2 fs"
+    temperature: 300
+    logInterval: "100 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150
+      selection:
+        keyword: "ligands"
 ########################################################################
+## PRODUCTION MD
+  - stepName: "031_production_md"
+    simulationType: "NPT"
+    duration: "50 ns"
+    timestep: "2 fs"
+    temperature: 300
+    logInterval: "100 ps"
