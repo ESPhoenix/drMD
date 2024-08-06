@@ -1,17 +1,11 @@
 #### README updates
-[]  redo installation instructions
+[x]  redo installation instructions
 []  work out what needs changing
 
-
-##drFirstAid
-[]  skip zero length DCD and CSV files when concat at the end 
-[]  splash screen for max retries reached
 
 ### config changes
 []  generalInfo -> hardwareInfo???
 []  sim -> simInfo??
-[x]  temp -> temperature
-[x]  add temperatureRange
 
 ## init lists as tuples in own script??
 
@@ -25,14 +19,7 @@
 
 
 
-## skip_resume_simulate
-[] fix simDir exists, but no checkpoint found exception
-
 ## drFirstAid
-[x] add logging 
-[x] add splash to first aid failed condition
-[] add exception handling to reading 
-[x] fix carries on after max retries reached
 [] alternate between EM and MD to fix problem
 [] if no checkpoint exists at all, run an EM from previous?
 
@@ -45,3 +32,6 @@
 
 ## drLogger
 [] do clean code
+
+## drPrep
+[] more logging when running antechamber/ parmchk

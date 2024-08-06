@@ -111,7 +111,7 @@ simulationInfo:
     restraintInfo:
     - restraintType: "position"
       parameters:
-        k: 600000
+        k: 150
       selection:
         keyword: "ligands"
   ##
