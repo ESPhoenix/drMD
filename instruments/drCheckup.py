@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from functools import wraps
 import textwrap
-
+from shutil import move
 ## PLOTTING LIBS
 import matplotlib.pyplot as plt
 import matplotlib
@@ -84,6 +84,16 @@ def check_vitals(simDir: Dict, vitalsFiles: Dict[str, FilePath]) -> None:
 
     ## create report PDF using all the plots created above
     create_vitals_pdf(simDir)
+
+
+    tidy_up(simDir)
+######################################################################
+def tidy_up(simDir):
+    tidyDir = p.join(simDir, "00_reporters_and_plots")
+    os.makedirs(tidyDir, exist_ok=True)
+    for file in os.listdir(simDir):
+        if p.splitext(file)[1] in [".csv", ".png"]:
+            move(p.join(simDir, file), p.join(tidyDir, file))
 ######################################################################
 def create_vitals_pdf(simDir):
     instrumentsDir = p.dirname(__file__)
@@ -253,7 +263,7 @@ def extract_time_data(vitalsDf, progressDf):
 ######################################################################
 def plot_time_data(timeDf, outDir):
     # Convert cm to inches
-    width_inch = 8.97 / 2.54
+    width_inch = 8.94 / 2.54
     height_inch = 6.09 / 2.54
     
     fig, ax = plt.subplots(figsize=(width_inch, height_inch))
@@ -279,10 +289,12 @@ def plot_time_data(timeDf, outDir):
         cell.set_edgecolor(brightGreen)
         cell.set_facecolor('#1a1a1a')
         cell.get_text().set_color(brightGreen)
+    plt.margins(0.01, 0.01)
 
     # Save the plot as a PNG image with reduced border
     savePng = p.join(outDir, "time_info.png")
-    plt.savefig(savePng, bbox_inches="tight", pad_inches=0.05, facecolor='#1a1a1a')
+    # Adjust layout to remove extra space around the table
+    plt.savefig(savePng, bbox_inches="tight", pad_inches=0.01, facecolor='#1a1a1a')
     plt.close()
     return savePng
 
@@ -412,7 +424,7 @@ def calculate_rmsd(trajectoryDcd, pdbFile):
 if __name__ == "__main__":
 
 
-    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/A/02_NVT_pre-equilibraition"
+    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/6eqe_1/021_NVT_warmup"
     for file in os.listdir(simDir):
         if p.splitext(file)[1] in [".pdf", ".png"]:
             os.remove(p.join(simDir, file))
@@ -422,7 +434,7 @@ if __name__ == "__main__":
     vitalsCsv = p.join(simDir,"vitals_report.csv")
     progressCsv = p.join(simDir,"progress_report.csv")
     trajectoryDcd = p.join(simDir,"trajectory.dcd")
-    pdbFile = p.join(simDir,"A.pdb")
+    pdbFile = p.join(simDir,"6eqe_1.pdb")
 
     vitals = {"vitals": vitalsCsv, "progress": progressCsv, "trajectory": trajectoryDcd, "pdb": pdbFile}
     check_vitals(simDir, vitals)
