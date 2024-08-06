@@ -41,8 +41,14 @@ def drMD_protocol(configYaml: str) -> None:
     # Prepare the protocol
     solvatedPdb, inputCoords, amberParams = drPrep.prep_protocol(config)
 
+
+
     # Run the simulation
-    run_simulation(config, outDir, inputCoords, amberParams, solvatedPdb)
+    run_simulation(config = config,
+                    outDir = outDir,
+                      inputCoords = inputCoords,
+                        amberParams = amberParams,
+                          pdbFile = solvatedPdb)
 ###########################################################################################
 def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str, pdbFile: str) -> None:
     """
@@ -66,6 +72,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
     platform = choose_platform(config)
 
     # Load Amber files and create system
+    print(amberParams)
     prmtop: app.Topology = app.AmberPrmtopFile(amberParams)
     inpcrd: app.InpcrdFile = app.AmberInpcrdFile(inputCoords)
 
@@ -75,16 +82,15 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         sim: dict = simulations[i]
         simDir: str = p.join(outDir,sim["stepName"])
 
+        saveFile = None
         # Decide whether to skip, resume, or start a new simulation
         skipResumeSim, foundSaveFile = skip_resume_or_simulate(simDir=simDir,
                                                            simulations = simulations,
                                                            i = i, 
                                                            outDir=outDir)
-        
-        ## if we found a save file, use it, otherwise keep the one we had from last time
-        if foundSaveFile != None:
+
+        if not foundSaveFile == None:
             saveFile = foundSaveFile
-        
 
         # Skip or resume simulation
         if skipResumeSim == "skip":

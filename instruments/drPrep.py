@@ -83,6 +83,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         
     drLogger.log_info(f"-->{' '*4}Prep steps complete for {protName}!")
     drLogger.close_logging()
+
     return solvatedPdb, inputCoords, amberParams
 #####################################################################################
 def no_ligands_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) -> Tuple[FilePath, FilePath, FilePath]:
@@ -158,7 +159,7 @@ def choose_to_skip_prep(config: dict, prepDir: DirectoryPath, protName: str) -> 
 
     ## return to drOperator if files already have been made
     if p.isfile(amberParams) and p.isfile(inputCoords) and p.isfile(pdbFile):
-        return True, (amberParams, inputCoords, pdbFile)
+        return True, (pdbFile, inputCoords, amberParams)
     else:
         return False, None
 #####################################################################################
