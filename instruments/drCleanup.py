@@ -104,9 +104,7 @@ def endpoint_handler(batchConfig: Dict) -> None:
         removeAtomsSelections = [sele["selection"] for sele in endpointInfo["removeAtoms"]]
         remove_atoms_from_pdbs(endpointPdbs, removeAtomsSelections)
     ## collect endpoint PDB files and put them in one directory per step
-    if "collate" in endpointInfo:
-        if endpointInfo["collate"]:
-            collate_pdbs(endpointPdbs, pathInfo)
+    collate_pdbs(endpointPdbs, pathInfo)
 ######################################################################################################
 def directory_cleanup_handler(batchConfig: dict) -> None:
     """
