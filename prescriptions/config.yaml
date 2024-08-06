@@ -120,4 +120,3 @@ postSimulationInfo:
         keyword: "ions"
     - selection:
         keyword: "ligands"
-    collate: True

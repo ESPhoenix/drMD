@@ -102,8 +102,8 @@ def check_endpointInfo(endPointInfo: dict) -> None:
     if not isinstance(endPointInfo, dict):
         raise TypeError(f"-->{' '*4}endPointInfo must be a dict")
     ## ensure that stepNames is present in endPointInfo
-    mandatoryArgs = ["stepNames", "collate"]
-    stepNames, collate = check_info_for_args(endPointInfo, "endPointInfo", mandatoryArgs, optional=False)
+    mandatoryArgs = ["stepNames"]
+    stepNames = check_info_for_args(endPointInfo, "endPointInfo", mandatoryArgs, optional=False)
     if not isinstance(stepNames, list):
         raise TypeError(f"-->{' '*4}stepNames must be a list")
     ## ensure that stepNames is a list of strings
@@ -124,9 +124,6 @@ def check_endpointInfo(endPointInfo: dict) -> None:
         for removeAtomsSelection in removeAtomsSelections:
             check_selection(removeAtomsSelection["selection"], "removeAtoms")
 
-    ## ensure collate is a bool
-    if not isinstance(collate, bool):
-        raise TypeError(f"-->{' '*4}collate must be a bool")
     ## log that endPointInfo is correct
     drLogger.log_info(f"-->{' '*4}endPointInfo is correct...")
 #####################################################################################
