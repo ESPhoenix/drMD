@@ -63,7 +63,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
     skipPrep, prepFiles = choose_to_skip_prep(config=config, prepDir=prepDir, protName=protName)
     if skipPrep:
-        drLogger.log_info(f"-->{' '*4}Prep steps already complete for {protName}!")
+        drLogger.log_info(f"-->{' '*4}Prep steps already complete for {protName}!",True)
         return prepFiles
 
 
@@ -81,7 +81,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
                                                                             prepDir=prepDir)
 
         
-    drLogger.log_info(f"-->{' '*4}Prep steps complete for {protName}!")
+    drLogger.log_info(f"-->{' '*4}Prep steps complete for {protName}!",True)
     drLogger.close_logging()
 
     return solvatedPdb, inputCoords, amberParams
@@ -169,7 +169,7 @@ def set_up_logging(outDir, protName):
     os.makedirs(logDir, exist_ok=True)
     prepLog: FilePath = p.join(logDir,f"{protName}_prep.log")
     drLogger.setup_logging(prepLog)
-    drLogger.log_info(f"-->{' '*4}Running Prep protocol for {protName}...\n\n")
+    drLogger.log_info(f"-->{' '*4}Running Prep protocol for {protName}...\n\n",True)
 #####################################################################################
 def find_ligand_charge(ligDf: pd.DataFrame,
                         ligName: str,
@@ -455,22 +455,22 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
         ## get ligand name
         ligandName: str = ligand["ligandName"]
         ## write to log
-        drLogger.log_info(f"-->{' '*4}Preparing ligand {ligandName}...\n\n")
+        drLogger.log_info(f"-->{' '*4}Preparing ligand {ligandName}...\n\n",True)
         # find files and directories
         ligPrepDir: DirectoryPath = p.join(outDir,"00_prep",ligandName)
         os.chdir(ligPrepDir)
         
         # Protonate the ligand
-        drLogger.log_info(f"{' '*4}--> Protonating ligand {ligandName}...\n\n")
+        drLogger.log_info(f"{' '*4}--> Protonating ligand {ligandName}...\n\n",True)
         ligPdb, ligandPdbs = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
 
         # Create mol2 file
-        drLogger.log_info(f"{' '*4}--> Calculating partial charges for ligand {ligandName}...\n\n")
+        drLogger.log_info(f"{' '*4}--> Calculating partial charges for ligand {ligandName}...\n\n",True)
         ligMol2, ligFileDict = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
                                           ligPrepDir,ligPdb,ligFileDict)
         
         # Create frcmod file
-        drLogger.log_info(f"{' '*4}--> Creating parameter files for ligand {ligandName}...\n\n")
+        drLogger.log_info(f"{' '*4}--> Creating parameter files for ligand {ligandName}...\n\n",True)
         ligFileDict = ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
                                     ligPrepDir,ligMol2,ligFileDict)
 
