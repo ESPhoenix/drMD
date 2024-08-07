@@ -69,7 +69,7 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
     stepName: str = p.basename(inDir)
     protName: str = p.basename(p.dirname(inDir))
 
-    print(f"-->{' '*4}Clustering trajectory for system:\t {protName} \t and step:\t {stepName}")
+    drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:\t {protName} \t and step:\t {stepName}")
 
     thisClusterDir: DirectoryPath = p.join(clusterDir, protName, stepName)
 
