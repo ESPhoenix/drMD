@@ -4,11 +4,9 @@ pandas
 mdtraj
 numpy
 matplotlib
-pillow
-fpdf
-lxml
+weasyprint
 scipy
-adjustText
 tqdm
 pdbutils
 scikit-learn
+propka
