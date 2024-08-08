@@ -143,9 +143,19 @@ simulationInfo:
         keyword: "ligands"
 ########################################################################
 ## PRODUCTION MD
-  - stepName: "031_production_md"
-    simulationType: "NPT"
+  - stepName: "031_production_metadynamics"
+    simulationType: "META"
     duration: "50 ns"
     timestep: "2 fs"
     temperature: 300
     logInterval: "100 ps"
+    metaDynamicsInfo:
+      height: 5
+      biasFactor: 10
+      biases:
+      - biasVar: "RMSD"
+        selection:
+          keyword: "custom"
+          customSelection:
+          - {CHAIN_ID: "A", RES_NAME: "all", RES_ID: [204,205,206,207,208,209,210], ATOM_NAME: ["N", "CA", "C", "O"]}
+

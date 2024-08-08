@@ -4,7 +4,7 @@ pathInfo:
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
-generalInfo:
+hardwareInfo:
   parallelCPU: 6
   platform: "CUDA"
   subprocessCpus: 1

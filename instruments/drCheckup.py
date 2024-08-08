@@ -21,10 +21,16 @@ import mdtraj as md
 ## CLEAN CODE
 from typing import Union, Dict, Tuple
 from os import PathLike
+from openmm import app
+## drMD LIBS
 try:
     from instruments.drCustomClasses import FilePath, DirectoryPath
+    from instruments import drLogger
+    from instruments import drFirstAid
 except:
     from drCustomClasses import FilePath, DirectoryPath
+    import drLogger
+    import drFirstAid
 
 
 ######################################################################
@@ -44,7 +50,7 @@ def check_vitals(simDir: Dict, vitalsFiles: Dict[str, FilePath]) -> None:
         simDir (Dict): The directory of the simulation
         vitalsFiles (Dict[str, FilePath]): A dictionary of the vitals files
     """
-
+    drLogger.log_info(f"-->{' '*4}Checking vitals...")
     ## read OpenMM reporters into dataframes
     vitalsDf = pd.read_csv(vitalsFiles["vitals"])
     progressDf = pd.read_csv(vitalsFiles["progress"])
@@ -112,7 +118,7 @@ def create_vitals_pdf(simDir):
         base_url = simDir # Set the base URL to the current working directory
         HTML(string=rendered_html, base_url=base_url).write_pdf(outPdf, stylesheets=[CSS(string='@page { margin: 0; }')])
     except Exception as e:
-        print(f"Error generating PDF: {e}")
+        drLogger.log_info(f"-->{' '*4}Error generating vitals report: {e}")
 ######################################################################
 def check_up_handler():
     def decorator(simulationFunction):
@@ -120,7 +126,7 @@ def check_up_handler():
         def wrapper(*args, **kwargs):
             saveFile: Union[PathLike, str] = simulationFunction(*args, **kwargs)
 
-            vitalsFiles, simDir = find_vitals_files(kwargs["sim"], kwargs["outDir"])
+            vitalsFiles, simDir = find_vitals_files(kwargs["sim"], kwargs["outDir"], kwargs["prmtop"])
 
             check_vitals(simDir = simDir,
                           vitalsFiles = vitalsFiles)
@@ -129,8 +135,18 @@ def check_up_handler():
         return wrapper
     return decorator
 ######################################################################
-def find_vitals_files(simInfo: Dict, outDir: Union[PathLike, str]):
+def find_vitals_files(simInfo: Dict,
+                       outDir: Union[PathLike, str],
+                       prmtop: app.AmberPrmtopFile):
     simDir: Union[PathLike, str] = p.join(outDir, simInfo["stepName"])
+
+
+    ## check to see if multiple partial trajectories exist
+    trajectoryDcds = [p.join(simDir, file) for file in os.listdir(simDir) if file.endswith(".dcd")]
+
+    if len(trajectoryDcds) > 1:
+        drFirstAid.merge_partial_outputs(simDir = simDir, prmtop = prmtop, simInfo = simInfo)
+
 
     vitalsReport: Union[PathLike, str] = p.join(simDir, "vitals_report.csv")
     if not p.isfile(vitalsReport):
@@ -424,7 +440,7 @@ def calculate_rmsd(trajectoryDcd, pdbFile):
 if __name__ == "__main__":
 
 
-    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/6eqe_1/021_NVT_warmup"
+    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/A/02_NVT_pre-equilibraition"
     for file in os.listdir(simDir):
         if p.splitext(file)[1] in [".pdf", ".png"]:
             os.remove(p.join(simDir, file))

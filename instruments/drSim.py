@@ -6,15 +6,26 @@ import openmm.app as app
 import openmm as openmm
 import  simtk.unit  as unit
 ## CUSTOM LIBS
-from  instruments import drRestraints
-from  instruments import drCheckup 
-from  instruments import drClusterizer
-from  instruments import drFixer
-from  instruments import drFirstAid
-from  instruments import drLogger
+try:
+    from  instruments import drRestraints
+    from  instruments import drCheckup 
+    from  instruments import drClusterizer
+    from  instruments import drFixer
+    from  instruments import drFirstAid
+    from  instruments import drLogger
+except:
+    import drRestraints
+    import drCheckup
+    import drClusterizer
+    import drFixer
+    import drFirstAid
+    import drLogger
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
-from instruments.drCustomClasses import FilePath, DirectoryPath
+try:
+    from instruments.drCustomClasses import FilePath, DirectoryPath
+except:
+    from drCustomClasses import FilePath, DirectoryPath
 ###########################################################################################
 def initialise_simulation(prmtop: app.AmberPrmtopFile,
                            inpcrd: app.AmberInpcrdFile,
@@ -22,7 +33,7 @@ def initialise_simulation(prmtop: app.AmberPrmtopFile,
                                saveFile: FilePath,
                                  refPdb: FilePath,
                                    platform: str,
-                                     generalInfo: Dict) -> openmm.System:
+                                     hardwareInfo: Dict) -> openmm.System:
     """
     Create an openmm.System from a prmtop.
 
@@ -263,8 +274,8 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     os.makedirs(simDir, exist_ok=True)
 
     ## initialise a new system from parameters
-    generalInfo = config["generalInfo"]
-    simulation, integrator = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
+    hardwareInfo = config["hardwareInfo"]
+    simulation, integrator = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, hardwareInfo)
 
     # set up intergrator and system
     # load state from previous simulation (or continue from checkpoint)
@@ -349,8 +360,8 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
     os.makedirs(simDir, exist_ok=True)
 
     ## initialise a new system from parameters
-    generalInfo: Dict = config["generalInfo"]
-    simulation, _ = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, generalInfo)
+    hardwareInfo: Dict = config["hardwareInfo"]
+    simulation, _ = initialise_simulation(prmtop, inpcrd, sim, saveFile, refPdb, platform, hardwareInfo)
 
     ## if needed, convert temperature to kelvin
     if isinstance(sim["temperature"], int):
@@ -374,7 +385,7 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
                                      state.getPositions(),
                                      output)
     
-    # drFixer.reset_chains_residues(refPdb, minimisedPdb)
+    drFixer.reset_chains_residues(refPdb, minimisedPdb)
 
     # Save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")

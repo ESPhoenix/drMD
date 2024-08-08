@@ -8,12 +8,18 @@ import openmm as openmm
 import simtk.unit as unit
 from openmm import app
 ## CUSTOM drMD LIBS
-import instruments.drSelector as drSelector
+try:
+    from instruments  import drSelector
+except:
+    import drSelector
 ## CUSTOM MODULES
 from pdbUtils import pdbUtils
 ## CLEAN CODE
 from typing import  Dict, List
-from instruments.drCustomClasses import FilePath
+try:
+    from instruments.drCustomClasses import FilePath
+except:
+    from drCustomClasses import FilePath
 ###########################################################################################
 def restraints_handler(
         system: openmm.System,

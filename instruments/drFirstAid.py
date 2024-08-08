@@ -12,9 +12,14 @@ from openmm import OpenMMException
 import  simtk.unit  as unit
 import mdtraj as md
 ## drMD libraries
-from instruments import drSim
-from instruments import drSplash
-from instruments import drLogger
+try:
+    from instruments import drSim
+    from instruments import drSplash
+    from instruments import drLogger
+except:
+    import drSim
+    import drSplash
+    import drLogger
 ## clean code
 from typing import Tuple, Union, Dict, List, Any
 from os import PathLike
@@ -313,6 +318,8 @@ def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, remove
         removePartials (bool, optional): Whether to remove partial reports. Defaults to False.  
     """
 
+    print(matchString)
+
 
     ## rename the last report to be made
     lastReport = p.join(simDir, f"{matchString}.csv")
@@ -336,6 +343,7 @@ def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, remove
     for report in reports:
         dfsToConcat.append(pd.read_csv(report))
 
+    print(dfsToConcat)
     ## concatonate | write back to csv
     ## remove partial reports to tidy up 
     [os.remove(report) for report in reports if removePartials]

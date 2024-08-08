@@ -322,11 +322,11 @@ Once you have selected your **simulationType**, you will need to include an addi
 
 Within the **metaDynamicsInfo** dictionary, you must provide the following parameters:
 
-  - **height**:               This is the height (int) parameter used in the Metadynamics simulation
+  - **height**:               *(int)* This is the height  parameter used in the Metadynamics simulation
 
-  - **biasFactor**:           This is the bias factor (int) parameter used in the Metadynamics simulation
+  - **biasFactor**:           *(int)* This is the bias factor  parameter used in the Metadynamics simulation
 
-  - **biases**:               This is a list of dictionaries containing information about each biasVariable.
+  - **biases**:               *(list[dict])* This is a list of dictionaries containing information about each biasVariable.
 
 
 

@@ -4,14 +4,10 @@
 
 
 ### config changes
-[]  generalInfo -> hardwareInfo???
-[]  sim -> simInfo??
+[x]  generalInfo -> hardwareInfo???
+[]  sim -> simInfo??  [doesnt actually have a name]
 
 ## init lists as tuples in own script??
-
-## drFixer 
-[]  re-implement after simutaion steps run (but not during prep as this is slow)
-
 
 
 ## drCleanUp
@@ -27,11 +23,14 @@
 ## Extra features
 [] pH for protonation
 [] more metaDynamics parameters
-[] maxRetries as a config parameters
+[] maxRetries for firstAid as a config parameter
 [] different box geometies
+[] heavy protons and fast intergrators
+
 
 ## drLogger
 [] do clean code
 
-## drPrep
-[] more logging when running antechamber/ parmchk
+## drCheckup
+[] close all figs
+

@@ -5,13 +5,19 @@ import glob
 import numpy as np
 import os
 from os import path as p
-from instruments import drSelector
-from instruments import drLogger
+try:
+    from instruments import drSelector
+    from instruments import drLogger
+except:
+    import drSelector
+    import drLogger
 ## CLEAN CODE
-from instruments.drCustomClasses import FilePath, DirectoryPath
+try:
+    from instruments.drCustomClasses import FilePath, DirectoryPath
+except:
+    from drCustomClasses import FilePath, DirectoryPath
 from typing import Dict, Union, Any, List
 from os import PathLike
-from instruments.drCustomClasses import FilePath, DirectoryPath
 
 #######################################################################
 def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]: 
