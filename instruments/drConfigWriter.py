@@ -36,7 +36,7 @@ def make_per_protein_config(
         batchConfig (dict): Batch configuration dictionary
 
     Returns:
-        tuple[dict, Optional[dict], dict]: A tuple containing proteinInfo, ligandInfo, and generalInfo
+        tuple[dict, Optional[dict], dict]: A tuple containing proteinInfo, ligandInfo, and hardwareInfo
     """    
     # Skip if not a PDB file
     fileData: List[str] = p.splitext(pdbFile)
@@ -53,8 +53,8 @@ def make_per_protein_config(
     os.makedirs(runDir, exist_ok=True)
 
 
-    ## copy generalInfo from batchConfig to new per run config
-    generalInfo = batchConfig["generalInfo"]
+    ## copy hardwareInfo from batchConfig to new per run config
+    hardwareInfo = batchConfig["hardwareInfo"]
     ## copy simInfo from batchConfig to new per run config
     simInfo = batchConfig["simulationInfo"]
     ## load pdb file into DataFrame
@@ -76,7 +76,7 @@ def make_per_protein_config(
 
     runConfig: Dict[Dict] = {
         "pathInfo": pathInfo,
-        "generalInfo": generalInfo,
+        "hardwareInfo": hardwareInfo,
         "proteinInfo": proteinInfo,
         "simulationInfo": simInfo
     }
@@ -105,7 +105,7 @@ def make_proteinInfo(
         batchConfig (dict): Batch configuration dictionary
 
     Returns:
-        tuple[dict, Optional[dict], dict]: A tuple containing proteinInfo, ligandInfo, and generalInfo
+        tuple[dict, Optional[dict], dict]: A tuple containing proteinInfo, ligandInfo, and hardwareInfo
     """
     
     ## GET PROTEIN AND ION ATOMS IN INPUT GEOMETRY

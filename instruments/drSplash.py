@@ -1,5 +1,5 @@
 from typing import Optional
-
+from subprocess import run
 
 ###########################################################################################
 
@@ -10,7 +10,7 @@ def print_drMD_logo() -> None:
     Returns:
         None
     """
-
+    run(["clear"])
     tealColor = "\033[38;5;37m" 
     resetTextColor = "\033[0m"
     print(tealColor+

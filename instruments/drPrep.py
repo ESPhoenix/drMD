@@ -92,7 +92,7 @@ def no_ligands_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath
     ## MERGE PROTEIN PDBS
     outName: str = config["pathInfo"]["outputName"]
     ## MAKE AMBER PARAMETER FILES WITH TLEAP
-    drLogger.log_info(f"-->{' '*4}Solvating, Charge Balencing and Creating parameters for {protName}...\n\n")
+    drLogger.log_info(f"-->{' '*4}Solvating, Charge Balencing and Creating parameters for {protName}...")
     inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                     pdbFile= protPdb,
                                                     outName= outName)
@@ -169,7 +169,7 @@ def set_up_logging(outDir, protName):
     os.makedirs(logDir, exist_ok=True)
     prepLog: FilePath = p.join(logDir,f"{protName}_prep.log")
     drLogger.setup_logging(prepLog)
-    drLogger.log_info(f"-->{' '*4}Running Prep protocol for {protName}...\n\n",True)
+    drLogger.log_info(f"-->{' '*4}Running Prep protocol for {protName}...",True)
 #####################################################################################
 def find_ligand_charge(ligDf: pd.DataFrame,
                         ligName: str,
@@ -455,22 +455,22 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
         ## get ligand name
         ligandName: str = ligand["ligandName"]
         ## write to log
-        drLogger.log_info(f"-->{' '*4}Preparing ligand {ligandName}...\n\n",True)
+        drLogger.log_info(f"-->{' '*4}Preparing ligand {ligandName}...",True)
         # find files and directories
         ligPrepDir: DirectoryPath = p.join(outDir,"00_prep",ligandName)
         os.chdir(ligPrepDir)
         
         # Protonate the ligand
-        drLogger.log_info(f"{' '*4}--> Protonating ligand {ligandName}...\n\n",True)
+        drLogger.log_info(f"{' '*4}--> Protonating ligand {ligandName}...",True)
         ligPdb, ligandPdbs = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
 
         # Create mol2 file
-        drLogger.log_info(f"{' '*4}--> Calculating partial charges for ligand {ligandName}...\n\n",True)
+        drLogger.log_info(f"{' '*4}--> Calculating partial charges for ligand {ligandName}...",True)
         ligMol2, ligFileDict = ligand_mol2(ligand,inputDir,ligandName,ligParamDir,
                                           ligPrepDir,ligPdb,ligFileDict)
         
         # Create frcmod file
-        drLogger.log_info(f"{' '*4}--> Creating parameter files for ligand {ligandName}...\n\n",True)
+        drLogger.log_info(f"{' '*4}--> Creating parameter files for ligand {ligandName}...",True)
         ligFileDict = ligand_toppar(ligand,inputDir,ligandName,ligParamDir,
                                     ligPrepDir,ligMol2,ligFileDict)
 

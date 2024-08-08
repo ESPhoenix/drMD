@@ -52,7 +52,7 @@ def read_and_validate_config() -> Tuple[dict, FilePath]:
     ## check each major section in config file
     ## throw errors with a nice splash screen if something goes wrong
     for function in [check_pathInfo,
-                      check_generalInfo,
+                      check_hardwareInfo,
                         check_ligandInfo,
                           check_simulationInfo,
                           check_postSimulationInfo]:
@@ -187,19 +187,19 @@ def check_pathInfo(config: dict) -> None:
     drLogger.log_info(f"-->{' '*4}pathInfo is correct...")
 
 #########################################################################
-def check_generalInfo(config: dict) -> None:
+def check_hardwareInfo(config: dict) -> None:
     """
-    Checks generalInfo in config
+    Checks hardwareInfo in config
     Makes sure that CPU allocations are properly formatted
     Makes sure that the "Platform" specified is an allowed value 
     """
     ## log this check
-    drLogger.log_info(f"-->{' '*4}Checking generalInfo...")
-    ## check if generalInfo in config
-    generalInfo, = check_info_for_args(config, "config", ["generalInfo"], optional= False)
-    ## check for required args in generalInfo
-    parallelCPU, platform, subprocessCpus = check_info_for_args(generalInfo, "generalInfo", ["parallelCPU", "platform", "subprocessCpus"], optional= False)
-    ## check that generalInfo cpu arguments are int values and are positive
+    drLogger.log_info(f"-->{' '*4}Checking hardwareInfo...")
+    ## check if hardwareInfo in config
+    hardwareInfo, = check_info_for_args(config, "config", ["hardwareInfo"], optional= False)
+    ## check for required args in hardwareInfo
+    parallelCPU, platform, subprocessCpus = check_info_for_args(hardwareInfo, "hardwareInfo", ["parallelCPU", "platform", "subprocessCpus"], optional= False)
+    ## check that hardwareInfo cpu arguments are int values and are positive
     for argValue, argName in zip([parallelCPU, subprocessCpus], ["parallelCPU", "subprocessCpus"]):
         if not isinstance(argValue, int):
             raise TypeError(f"-->{' '*4}The config argument {argName} = {argValue} is not a an int type.")
@@ -211,8 +211,8 @@ def check_generalInfo(config: dict) -> None:
     ## ensure that compatable platform has been chosen 
     if not platform in ["CUDA", "OpenCL", "CPU"]:
         raise ValueError(f"-->{' '*4}Platform must be CUDA, OpenCL, or CPU")
-    ## log that generalInfo is correct
-    drLogger.log_info(f"-->{' '*4}generalInfo is correct...")
+    ## log that hardwareInfo is correct
+    drLogger.log_info(f"-->{' '*4}hardwareInfo is correct...")
 #########################################################################
 def check_ligandInfo(config: dict) -> None:
     """
@@ -445,8 +445,15 @@ def check_selection(selection: dict, stepName: str) -> None:
 
 #########################################################################
 def check_metadynamics_options(simulation: dict, stepName: str) -> None:
+    drLogger.log_info(f"-->{' '*4}Checking metaDynamicsInfo for {stepName}...")
+
+    metaDynamicsInfo,  = check_info_for_args(simulation, stepName, ["metaDynamicsInfo"], optional=False)
+
+    if not isinstance(metaDynamicsInfo, dict):
+        raise TypeError(f"-->{' '*4}MetaDynamicsInfo must be a dict")
+    
     manditoryArgs = ["height", "biasFactor", "biases"]
-    height, biasFactor, biases = check_info_for_args(simulation, stepName, manditoryArgs, optional=False)
+    height, biasFactor, biases = check_info_for_args(metaDynamicsInfo, stepName, manditoryArgs, optional=False)
     if not isinstance(height, (int, float)):
         raise TypeError(f"-->{' '*4}MetaDynamics height must be a number")
     if not isinstance(biasFactor, (int, float)):
@@ -462,7 +469,7 @@ def check_metadynamics_options(simulation: dict, stepName: str) -> None:
         if not biasVar.lower() in ["rmsd", "torsion", "distance", "angle"]:
             raise ValueError(f"-->{' '*4}MetaDynamics biasVar must be one of the following:\n-->{' '*4}RMSD, TORSION, DISTANCE, ANGLE")
         check_selection(selection, stepName)
-
+    drLogger.log_info(f"-->{' '*4}MetaDynamicsInfo is correct...")
 
 #########################################################################
 def check_nvt_npt_options(simulation: dict, stepName: str) -> None:

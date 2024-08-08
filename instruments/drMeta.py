@@ -14,13 +14,16 @@ from instruments import drCheckup
 from instruments import drClusterizer
 from instruments import drSelector
 from instruments import drFirstAid
+from instruments import drLogger
 ## generic pdb <-> df utils
 from pdbUtils import pdbUtils
 ########################################################################################################
 ##TODO: allow for custom parameters to be passed from config file ---> bias force generation and metadynamics construction
 
 ########################################################################################################
-@drFirstAid.firstAid_handler(drFirstAid.run_energy_minimisation_then_npt, max_retries=10)
+@drLogger.monitor_progress_decorator()
+@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=2)
+@drCheckup.check_up_handler()
 def run_metadynamics(prmtop: app.Topology,
                       inpcrd: any,
                         sim: dict,
@@ -53,7 +56,7 @@ def run_metadynamics(prmtop: app.Topology,
     XML file.
     """
     stepName = sim["stepName"]
-    print(f"-->{' '*4}Running MetaDynamics Step:\t{stepName}")
+    drLogger.log_info(f"-->{' '*4}Running MetaDynamics Step: {stepName}",True)
     ## make a simulation directory
     simDir: str = p.join(outDir, stepName)
     os.makedirs(simDir, exist_ok=True)
@@ -74,7 +77,7 @@ def run_metadynamics(prmtop: app.Topology,
     # Deal with restraints (clear all lurking restraints and constants)
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
     # Add a Monte Carlo Barostat to maintain constant pressure
-    barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, sim["temp"])  # Set pressure and temperature
+    barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, sim["temperature"])  # Set pressure and temperature
     system.addForce(barostat)
     # Read metaDynamicsInfo from sim config
     metaDynamicsInfo: dict = sim["metaDynamicsInfo"]
@@ -102,14 +105,14 @@ def run_metadynamics(prmtop: app.Topology,
     # Create metadynamics object and add bias variables as forces to the system
     meta: metadynamics.Metadynamics = metadynamics.Metadynamics(system=system,
                                      variables=biasVariables,
-                                     temperature=sim["temp"],
+                                     temperature=sim["temperature"],
                                      biasFactor=metaDynamicsInfo["biasFactor"],
                                      height=metaDynamicsInfo["height"],
                                      frequency=50,
                                      saveFrequency=50,
                                      biasDir=simDir)
     # Set up integrator
-    integrator: openmm.LangevinMiddleIntegrator = openmm.LangevinMiddleIntegrator(sim["temp"], 1/unit.picosecond, sim["timestep"])
+    integrator: openmm.LangevinMiddleIntegrator = openmm.LangevinMiddleIntegrator(sim["temperature"], 1/unit.picosecond, sim["timestep"])
     # Create new simulation
     simulation: app.Simulation = app.simulation.Simulation(prmtop.topology, system, integrator, platform)
     # Load state from previous simulation (or continue from checkpoint)
@@ -117,26 +120,19 @@ def run_metadynamics(prmtop: app.Topology,
     # Set up reporters
     totalSteps: int = simulation.currentStep + sim["nSteps"]
     reportInterval: int = sim["logInterval"]
-    reporters: dict = drSim.init_reporters(simDir=simDir,
+    simulation: app.Simulation = drSim.init_reporters(simDir=simDir,
                                      nSteps=totalSteps,
-                                     reportInterval=reportInterval)
-    for rep in reporters:
-        simulation.reporters.append(reporters[rep][0])
+                                     reportInterval=reportInterval,
+                                       simulation=simulation)
     # Run metadynamics simulation
     meta.step(simulation, sim["nSteps"])
     # Save simulation as XML
-    saveXml: str = p.join(simDir, "Meta_step.xml")
+    saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
     # Save result as pdb
     state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
-    with open(p.join(simDir, "Meta_final_geom.pdb"), 'w') as output:
+    with open(p.join(simDir, f"{stepName}.pdb"), 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-    # Run drCheckup to assess simulation health
-    drCheckup.check_vitals(simDir, reporters["vitals"][1], reporters["progress"][1])
-
-    # Run trajectory clustering
-    if "clusterTrajectory" in sim:
-        drClusterizer.rmsd_clustering_protocol(simDir, sim["clusterTrajectory"])
 
     # Return checkpoint file for continuing simulation
     return saveXml

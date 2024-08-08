@@ -4,7 +4,7 @@ pathInfo:
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
-generalInfo:
+hardwareInfo:
   parallelCPU: 6
   platform: "CUDA"
   subprocessCpus: 1
@@ -18,17 +18,16 @@ simulationInfo:
 
   - stepName: "02_NVT_pre-equilibraition"
     simulationType: "NVT"
-    duration: "100 ps"
+    duration: "50 ps"
     timestep: "2 fs"
     temperature: 300
-    logInterval: "10 ps"
+    logInterval: "5 ps"
     restraintInfo:
     - restraintType: "position"
       parameters:
         k: 1000 
       selection:
         keyword: "protein"
-
     - restraintType: "position"
       selection: 
         keyword: "ligands"  
@@ -36,17 +35,5 @@ simulationInfo:
         k: 1000
 ################################################
 
-postSimulationInfo:
-  endPointInfo:
-    stepNames: ["01_energy_minimisation"]
-    removeAtoms: 
-    - selection:
-        keyword: "ions"
-    - selection:
-        keyword: "ligands"
-    collate: True
-  directoryCleanUpInfo:
-    removeAllSimulationDirs: True
-    # stepsToRemove: ["00_prep"]
 
 

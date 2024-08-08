@@ -12,14 +12,16 @@ from instruments import drSim
 from instruments import drMeta
 from instruments import drConfigTriage
 from instruments import drLogger
+from instruments import drFirstAid
 ## BASIC PDB <-> DF UTILS
 from pdbUtils import pdbUtils
 
 ## clean code
 from typing import Tuple, List, Dict, Union, Any, Optional, Callable
 from os import PathLike
+from instruments.drCustomClasses import FilePath, DirectoryPath
 #####################################################################################
-def drMD_protocol(configYaml: str) -> None:
+def drMD_protocol(configYaml: FilePath) -> None:
     """
     Run the drMD protocol for a given configuration file.
 
@@ -72,7 +74,6 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
     platform = choose_platform(config)
 
     # Load Amber files and create system
-    print(amberParams)
     prmtop: app.Topology = app.AmberPrmtopFile(amberParams)
     inpcrd: app.InpcrdFile = app.AmberInpcrdFile(inputCoords)
 
@@ -99,6 +100,7 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
             continue
         if skipResumeSim == "resume":
             drLogger.log_info(f"-->{' '*4}Resuming {stepName} from checkpoint file for run: {protName}", True)
+            rename_out_files(simDir)    
 
         # Run simulation
         simulationFunction = choose_simulation_function(sim["simulationType"])
@@ -113,10 +115,10 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
                                                    config = config)
 
 
-
+###########################################################################################
 def choose_platform(config: Dict) -> openmm.Platform:
     # Set up platform
-    usePlatform: str = config["generalInfo"]["platform"]
+    usePlatform: str = config["hardwareInfo"]["platform"]
     if usePlatform == "CUDA":
         platform=openmm.Platform.getPlatformByName("CUDA")
     elif usePlatform == "OpenCL":
@@ -125,8 +127,23 @@ def choose_platform(config: Dict) -> openmm.Platform:
         platform=openmm.Platform.getPlatformByName("CPU")
 
     return platform
+###########################################################################################
+def rename_out_files(simDir: DirectoryPath) -> None:
+    progressReportCsv = p.join(simDir, "progress_report.csv")
+    vitalsReportCsv = p.join(simDir, "vitals_report.csv")
+    trajectoryDcd = p.join(simDir, "trajectory.dcd")
 
+    allTrajectoryDcds = [p.join(simDir, file) for file in os.listdir(simDir) if file.endswith(".dcd")]
+    resumeNumber = len(allTrajectoryDcds)
 
+    if p.isfile(progressReportCsv):
+        os.rename(progressReportCsv, p.join(simDir, f"progress_report_partial_{str(resumeNumber)}.csv"))
+    if p.isfile(vitalsReportCsv):
+        os.rename(vitalsReportCsv, p.join(simDir, f"vitals_report_partial_{str(resumeNumber)}.csv"))
+    if p.isfile(trajectoryDcd):
+        os.rename(trajectoryDcd, p.join(simDir, f"trajectory_partial_{str(resumeNumber)}.dcd"))
+    
+###########################################################################################
 def choose_simulation_function(simulationType: str) -> Callable:
     """
     Choose the appropriate simulation function based on the simulation type.

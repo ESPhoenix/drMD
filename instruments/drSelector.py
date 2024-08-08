@@ -6,7 +6,11 @@ import numpy as np
 from pdbUtils import pdbUtils
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
-from instruments.drCustomClasses import FilePath, DirectoryPath
+try:
+    from instruments.drCustomClasses import FilePath, DirectoryPath
+except:
+    from drCustomClasses import FilePath, DirectoryPath
+
 #######################################################################
 def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
     """
@@ -66,13 +70,16 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
             selectionConditions: list  = []
             ## for each selection key...
             for selctionKey in ["CHAIN_ID", "RES_NAME", "RES_ID", "ATOM_NAME"]:
+                ## "all" inputs create no condition
+                if selection[selctionKey] == "all":
+                    continue
                 ## use list inputs to create a .isin() condition
                 if isinstance(selection[selctionKey], list):
-                    selectionConditions.append(pdbDf[selctionKey].isin(range(selection[selctionKey])))
+                    selectionConditions.append(pdbDf[selctionKey].isin(selection[selctionKey]))
                 ## use single input to create a == condition
-                elif selection[selctionKey] != "all":
+                elif isinstance(selection[selctionKey], (str,int)):
                     selectionConditions.append(pdbDf[selctionKey] == selection[selctionKey])
-                ## "all" inputs create no condition
+                    
             selectionConditionsCombined = np.logical_and.reduce(selectionConditions)
             selectionDf = pdbDf[selectionConditionsCombined]
             ## add to atomIndexes list

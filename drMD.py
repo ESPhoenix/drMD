@@ -47,8 +47,8 @@ def main() -> None:
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]
     yamlDir: DirectoryPath = p.join(outDir,"00_configs")
     pdbDir: DirectoryPath = batchConfig["pathInfo"]["inputDir"]
-    parallelCPU: int = batchConfig["generalInfo"]["parallelCPU"]
-    subprocessCpus: int = batchConfig["generalInfo"]["subprocessCpus"]
+    parallelCPU: int = batchConfig["hardwareInfo"]["parallelCPU"]
+    subprocessCpus: int = batchConfig["hardwareInfo"]["subprocessCpus"]
 
     ## create logDir if it doesn't exist
     logDir: DirectoryPath = p.join(outDir, "00_drMD_logs")
@@ -165,7 +165,7 @@ def run_parallel(batchConfig: Dict) -> None:
     
     ## read input directory from batchConfig
     pdbDir = batchConfig["pathInfo"]["inputDir"]
-    parallelCpus: int = batchConfig["generalInfo"]["parallelCPU"]
+    parallelCpus: int = batchConfig["hardwareInfo"]["parallelCPU"]
 
     # Get list of PDB files in the directory
     pdbFiles: list[str] = [p.join(pdbDir, pdbFile) for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]

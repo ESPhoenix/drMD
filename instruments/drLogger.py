@@ -9,9 +9,10 @@ import shutil
 from os import path as p
 ## CLEAN CODE
 from typing import List, Dict, Union, Any, Tuple
-
-from instruments.drCustomClasses import FilePath, DirectoryPath
-
+try:
+    from instruments.drCustomClasses import FilePath, DirectoryPath
+except:
+    from drCustomClasses import FilePath, DirectoryPath
 
 class OverwriteStreamHandler(logging.StreamHandler):
     def emit(self, record):
@@ -94,9 +95,10 @@ def read_simulation_progress(progressReporterCsv: FilePath) -> Tuple[str, str]:
         progressDf: pd.DataFrame = pd.read_csv(progressReporterCsv)
         progressPercent: str = str(progressDf['#"Progress (%)"'].iloc[-1])
         timeRemaining: str = str(progressDf["Time Remaining"].iloc[-1])
-        return progressPercent, timeRemaining
+        averageSpeed: str = str(round(progressDf["Speed (ns/day)"].mean()))
+        return progressPercent, timeRemaining, averageSpeed
     except (FileNotFoundError, pd.errors.EmptyDataError) as e:
-        return "N/A", "N/A"
+        return "N/A", "N/A", "N/A"
     
 
 def monitor_progress_decorator(checkInterval=20):
@@ -113,11 +115,12 @@ def monitor_progress_decorator(checkInterval=20):
                 simDir = p.join(outDir, stepName)
                 progressReporterCsv = p.join(simDir, "progress_report.csv")
                 while not monitoring.is_set():
-                    progressPercent, timeRemaining = read_simulation_progress(
+                    progressPercent, timeRemaining, averageSpeed = read_simulation_progress(
                         progressReporterCsv)
                     log_info(f"-->{' '*4}Running {stepName} Step for: "
                              f"{protName} | Progress: {progressPercent} | "
-                             f"Time Remaining: {timeRemaining} {' '*10}", True)
+                             f"Time Remaining: {timeRemaining} | "
+                             f"Average Speed: {averageSpeed} ns/day ", True)
                     time.sleep(checkInterval)
 
             monitorThread = threading.Thread(target=monitor_progress)
