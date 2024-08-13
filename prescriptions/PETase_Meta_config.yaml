@@ -148,7 +148,7 @@ simulationInfo:
     duration: "50 ns"
     timestep: "2 fs"
     temperature: 300
-    logInterval: "100 ps"
+    logInterval: "10 ps"
     metaDynamicsInfo:
       height: 5
       biasFactor: 10

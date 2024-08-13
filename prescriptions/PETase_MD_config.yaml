@@ -4,6 +4,21 @@ pathInfo:
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: "cubic"
+  heavyProtons: True
+
+
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: "protein"
+  - selection:
+      keyword: "ligands"
+
+
 hardwareInfo:
   parallelCPU: 1
   platform: "CUDA"

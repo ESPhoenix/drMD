@@ -1,25 +1,26 @@
 ## BASIC LIBS
 import os
 from os import path as p
+import numpy as np
 ## OPEN MM LIBS
 import openmm.app as app
 import openmm as openmm
 import  simtk.unit  as unit
+
+import mdtraj 
+import warnings
+from mdtraj.utils.validation import TypeCastPerformanceWarning
+warnings.filterwarnings("ignore", category=TypeCastPerformanceWarning)
+
 ## CUSTOM LIBS
-try:
-    from  instruments import drRestraints
-    from  instruments import drCheckup 
-    from  instruments import drClusterizer
-    from  instruments import drFixer
-    from  instruments import drFirstAid
-    from  instruments import drLogger
-except:
-    import drRestraints
-    import drCheckup
-    import drClusterizer
-    import drFixer
-    import drFirstAid
-    import drLogger
+from  instruments import drRestraints
+from  instruments import drCheckup 
+from  instruments import drClusterizer
+from  instruments import drFixer
+from  instruments import drFirstAid
+from  instruments import drLogger
+from  instruments import drSelector
+
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
 try:
@@ -151,9 +152,16 @@ def process_sim_data(sim: Dict) -> Dict:
     sim["processed"] = True
     return sim
 ###########################################################################################
-def init_reporters(simDir: str, nSteps: int, reportInterval: int, simulation: app.Simulation) -> app.Simulation:
+def init_reporters(simDir: str,
+                    nSteps: int,
+                      reportInterval: int,
+                        simulation: app.Simulation,
+                          dcdAtomSelections: List[Dict],
+                            refPdb: FilePath) -> app.Simulation:
     """
     Initializes and returns a dictionary of reporters for a simulation.
+    Uses OpenMM StateDataReporter for temperature, volume and density and energies
+    Uses mdtraj DCDReporter for trajectories (this enables atom selection to lower file sizes)
 
     Args:
         simDir (str): The directory where the simulation files will be saved.
@@ -184,14 +192,23 @@ def init_reporters(simDir: str, nSteps: int, reportInterval: int, simulation: ap
                                             reportInterval = reportInterval)
     ## dcdFile is the trajectory of the simulation
     dcdFile: str = p.join(simDir, "trajectory.dcd")
-    dcdTrajectoryReporter: app.DCDReporter = app.DCDReporter(file = dcdFile, reportInterval = reportInterval, append = False)
+    ## get an subset of atoms that will have their trajectory saved
+    dcdAtomSelection = []
+    for selection in dcdAtomSelections:
+        dcdAtomSelection.extend(drSelector.get_atom_indexes(selection["selection"], refPdb))
+    # convert to numpy array
+    dcdAtomSelection = np.array(dcdAtomSelection)
+    ## create a mdtraj trajectory reporter
+    dcdTrajectoryReporter: mdtraj.reporters.DCDReporter = mdtraj.reporters.DCDReporter(dcdFile,
+                                                              reportInterval,
+                                                              dcdAtomSelection)
     ## chkFile works as a checkpoint so that the simulation can be resumed if something goes wrong
     chkFile: str = p.join(simDir, "checkpoint.chk")
     chkReporter: app.CheckpointReporter = app.CheckpointReporter(file = chkFile, reportInterval = reportInterval, writeState = False)
     reporters: dict = {"vitals":[vitalsStateReporter,vitalsCsv],
-                "progress": [progressStateReporter,progressCsv],
-                 "trajectory": [dcdTrajectoryReporter, dcdFile],
-                 "checkpoint": [chkReporter, chkFile]}
+                        "progress": [progressStateReporter,progressCsv],
+                        "trajectory": [dcdTrajectoryReporter, dcdFile],
+                        "checkpoint": [chkReporter, chkFile]}
     for rep in reporters:
         simulation.reporters.append(reporters[rep][0])
 
@@ -236,7 +253,7 @@ def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app
     return simulation
 ###########################################################################################
 @drLogger.monitor_progress_decorator()
-@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=2)
+# @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=2)
 @drCheckup.check_up_handler()
 def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
                            inpcrd: app.AmberInpcrdFile,
@@ -265,7 +282,7 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
 
     protName = config["proteinInfo"]["proteinName"]
 
-    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName} {' '*10}",True)
+    drLogger.log_info(f"-->{' '*4}Running {stepName} Step for: {protName}",True)
 
     sim = process_sim_data(sim)
 
@@ -283,10 +300,16 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     # set up reporters
     totalSteps: int = simulation.currentStep + sim["nSteps"]
     reportInterval: int = sim["logInterval"]
+
+
+
     simulation: app.Simulation = init_reporters(simDir=simDir,
                                 nSteps=totalSteps,
                                 reportInterval=reportInterval,
-                                simulation=simulation)
+                                simulation=simulation,
+                                dcdAtomSelections= config["loggingInfo"]["trajectorySelections"],
+                                refPdb=refPdb
+                                )
 
     # run NVT / NPT simulation
     simulation: app.Simulation = step_simulation(simulation, integrator, sim)
