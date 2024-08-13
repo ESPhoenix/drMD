@@ -6,10 +6,12 @@ import numpy as np
 from functools import wraps
 import textwrap
 from shutil import move
+
 ## PLOTTING LIBS
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Agg")
+
 
 ## PDF LIBS
 from jinja2 import Environment, FileSystemLoader
@@ -19,7 +21,7 @@ from weasyprint import HTML, CSS
 import mdtraj as md
 
 ## CLEAN CODE
-from typing import Union, Dict, Tuple
+from typing import Union, Dict, Tuple, List
 from os import PathLike
 from openmm import app
 ## drMD LIBS
@@ -27,14 +29,22 @@ try:
     from instruments.drCustomClasses import FilePath, DirectoryPath
     from instruments import drLogger
     from instruments import drFirstAid
+    from instruments import drSelector
 except:
     from drCustomClasses import FilePath, DirectoryPath
     import drLogger
     import drFirstAid
+    import drSelector
+
+
+from pdbUtils import pdbUtils
 
 
 ######################################################################
-def check_vitals(simDir: Dict, vitalsFiles: Dict[str, FilePath]) -> None:
+def check_vitals(simDir: DirectoryPath,
+                  vitalsFiles: Dict[str, FilePath],
+                    trajectorySelections: List[Dict],
+                     refPdb: FilePath) -> None:
     """
     Looks at the following properties of the simulation:
         - RMSD
@@ -47,13 +57,13 @@ def check_vitals(simDir: Dict, vitalsFiles: Dict[str, FilePath]) -> None:
     Plots these data and creates a report PDF
 
     Args:
-        simDir (Dict): The directory of the simulation
+        simDir (DirectoryPath): The directory of the simulation
         vitalsFiles (Dict[str, FilePath]): A dictionary of the vitals files
     """
     drLogger.log_info(f"-->{' '*4}Checking vitals...")
     ## read OpenMM reporters into dataframes
-    vitalsDf = pd.read_csv(vitalsFiles["vitals"])
-    progressDf = pd.read_csv(vitalsFiles["progress"])
+    vitalsDf: pd.DataFrame = pd.read_csv(vitalsFiles["vitals"])
+    progressDf: pd.DataFrame = pd.read_csv(vitalsFiles["progress"])
 
     ## skip this if the reporters are not present, or are less than 5 entries long
     if len(vitalsDf) < 5:
@@ -63,47 +73,66 @@ def check_vitals(simDir: Dict, vitalsFiles: Dict[str, FilePath]) -> None:
         return
     
     ## use mdtraj to calculate RMSD for non water and ions, get that data into a dataframe
-    rmsdDf = calculate_rmsd(trajectoryDcd = vitalsFiles["trajectory"], pdbFile = vitalsFiles["pdb"])
+    rmsdDf: pd.DataFrame = calculate_rmsd(trajectoryDcd = vitalsFiles["trajectory"],
+                                           pdbFile = refPdb,
+                                           trajectorySelections = trajectorySelections,
+                                           outDir=simDir)
 
     ## plot RMSD as a function of time
-    rmsdPng = plot_rmsd(rmsdDf, simDir, ["RMSD"], "RMSD")
+    rmsdPng: FilePath = plot_rmsd(rmsdDf, simDir, ["RMSD"], "RMSD")
 
     ## get time data, plot a table
-    timeDf = extract_time_data(vitalsDf, progressDf)
-    timePng = plot_time_data(timeDf, simDir)
+    timeDf: pd.DataFrame = extract_time_data(vitalsDf, progressDf)
+    timePng: FilePath = plot_time_data(timeDf, simDir)
     
     ## plot energy as a function of time 
-    energyList = ["Potential Energy (kJ/mole)","Kinetic Energy (kJ/mole)","Total Energy (kJ/mole)"]
-    energyPlot = plot_vitals(vitalsDf, simDir, energyList, "Energies")
+    energyList: list = ["Potential Energy (kJ/mole)","Kinetic Energy (kJ/mole)","Total Energy (kJ/mole)"]
+    energyPlot: FilePath = plot_vitals(vitalsDf, simDir, energyList, "Energies")
     ## plot properties as a function of time 
-    propertiesList = ["Temperature (K)", "Box Volume (nm^3)", "Density (g/mL)"]
-    propertiesPlot = plot_vitals(vitalsDf, simDir, propertiesList, "Properties")
+    propertiesList: list = ["Temperature (K)", "Box Volume (nm^3)", "Density (g/mL)"]
+    propertiesPlot: FilePath = plot_vitals(vitalsDf, simDir, propertiesList, "Properties")
 
     ## combine all feature names
-    allFeaturesList = energyList + propertiesList + ["RMSD"]
+    allFeaturesList: list = energyList + propertiesList + ["RMSD"]
     ## combine all features into one dataframe
-    allFeaturesDf = pd.concat([vitalsDf,rmsdDf],axis=1)
+    allFeaturesDf: pd.DataFrame = pd.concat([vitalsDf,rmsdDf],axis=1)
     ## check convergance for all features
-    converganceDf  = check_convergance(allFeaturesDf,allFeaturesList,simDir,"Convergance Checks")
+    converganceDf: pd.DataFrame  = check_convergance(allFeaturesDf,allFeaturesList)
     ## plot convergance booleans as a table
-    convergancePng = plot_converged(simDir, converganceDf)
-
+    convergancePng: FilePath = plot_converged(simDir, converganceDf)
     ## create report PDF using all the plots created above
     create_vitals_pdf(simDir)
-
-
+    ## tidy up reporters to avoid clutter
     tidy_up(simDir)
 ######################################################################
-def tidy_up(simDir):
+def tidy_up(simDir: DirectoryPath):
+    """
+    Tidies up the reporters in the simulation directory
+
+    Args:
+        simDir (DirectoryPath): The directory of the simulation
+    """
+    ## make a new directory to tidy up reporters and png files
     tidyDir = p.join(simDir, "00_reporters_and_plots")
     os.makedirs(tidyDir, exist_ok=True)
+    ## move all reporters and png files to the new directory
     for file in os.listdir(simDir):
         if p.splitext(file)[1] in [".csv", ".png"]:
             move(p.join(simDir, file), p.join(tidyDir, file))
+
+    plt.close("all")
 ######################################################################
-def create_vitals_pdf(simDir):
-    instrumentsDir = p.dirname(__file__)
-    env = Environment(loader=FileSystemLoader(instrumentsDir))
+def create_vitals_pdf(simDir: DirectoryPath):
+    """
+    Uses Jinja2 to create a vitals report PDF from 
+    the PNG files generated in this script
+
+    Args:   
+        simDir (DirectoryPath): The directory of the simulation
+    """
+    ## get the instruments directory path
+    instrumentsDir: DirectoryPath = p.dirname(__file__)
+    env: Environment = Environment(loader=FileSystemLoader(instrumentsDir))
     template = env.get_template("vitals_template.html")
     
     # Render the template with any context variables you need
@@ -113,7 +142,7 @@ def create_vitals_pdf(simDir):
     rendered_html = template.render(context)
     
     # Generate the PDF with error handling
-    outPdf = p.join(simDir, "vitals_report.pdf")
+    outPdf: FilePath = p.join(simDir, "vitals_report.pdf")
     try:
         base_url = simDir # Set the base URL to the current working directory
         HTML(string=rendered_html, base_url=base_url).write_pdf(outPdf, stylesheets=[CSS(string='@page { margin: 0; }')])
@@ -124,82 +153,121 @@ def check_up_handler():
     def decorator(simulationFunction):
         @wraps(simulationFunction)
         def wrapper(*args, **kwargs):
-            saveFile: Union[PathLike, str] = simulationFunction(*args, **kwargs)
+            saveFile: FilePath = simulationFunction(*args, **kwargs)
 
             vitalsFiles, simDir = find_vitals_files(kwargs["sim"], kwargs["outDir"], kwargs["prmtop"])
 
             check_vitals(simDir = simDir,
-                          vitalsFiles = vitalsFiles)
+                         vitalsFiles = vitalsFiles,
+                          trajectorySelections= kwargs["config"]["loggingInfo"]["trajectorySelections"],
+                          refPdb = kwargs["refPdb"],)
 
             return saveFile
         return wrapper
     return decorator
 ######################################################################
 def find_vitals_files(simInfo: Dict,
-                       outDir: Union[PathLike, str],
-                       prmtop: app.AmberPrmtopFile):
-    simDir: Union[PathLike, str] = p.join(outDir, simInfo["stepName"])
-
+                       outDir: DirectoryPath,
+                       prmtop: app.AmberPrmtopFile) -> Tuple[Dict[str, FilePath], DirectoryPath]:
+    
+    ## get the simulation directory
+    simDir: DirectoryPath= p.join(outDir, simInfo["stepName"])
 
     ## check to see if multiple partial trajectories exist
-    trajectoryDcds = [p.join(simDir, file) for file in os.listdir(simDir) if file.endswith(".dcd")]
-
+    trajectoryDcds: list = [p.join(simDir, file) for file in os.listdir(simDir) if file.endswith(".dcd")]
+    ## if more than one trajectory is found, merge partial outputs before running the health check
     if len(trajectoryDcds) > 1:
         drFirstAid.merge_partial_outputs(simDir = simDir, prmtop = prmtop, simInfo = simInfo)
 
-
-    vitalsReport: Union[PathLike, str] = p.join(simDir, "vitals_report.csv")
+    ## find vitals reporter file
+    vitalsReport: FilePath = p.join(simDir, "vitals_report.csv")
     if not p.isfile(vitalsReport):
         raise FileNotFoundError(f"->\tReporter file not found at {vitalsReport}")
-
+    ## find progress reporter file
     progressReport: Union[PathLike, str] = p.join(simDir, "progress_report.csv")
     if not p.isfile(progressReport):
         raise FileNotFoundError(f"->\tReporter file not found at {progressReport}")
-
-
+    ## find trajectory file
     trajectoryDcd: Union[PathLike, str] = p.join(simDir, "trajectory.dcd")
     if not p.isfile(trajectoryDcd):
         raise FileNotFoundError(f"->\Trajectory file not found at {trajectoryDcd}")
     
-
-    trajectoryDcd: Union[PathLike, str] = p.join(simDir, "trajectory.dcd")
-    if not p.isfile(trajectoryDcd):
-        raise FileNotFoundError(f"->\Trajectory file not found at {trajectoryDcd}")
-    
+    ## find the pdb file
     pdbFile = False
     for file in os.listdir(simDir):
         if file.endswith(".pdb"):
             pdbFile = p.join(simDir, file)
-
     if not pdbFile:
         raise FileNotFoundError(f"->\tPDB file not found at {simDir}")
     
-
+    ## collect files into a dictionary
     vitalsFiles = {"vitals": vitalsReport, "progress": progressReport, "trajectory": trajectoryDcd, "pdb": pdbFile}
     
     return vitalsFiles, simDir
 
+######################################################################
+def cusum_test(series: pd.Series, threshold: float=0.05):
+    """
+    Performs the Cumulative Sum Test
+
+    Args:
+        series (pd.Series): The series to test
+        threshold (float, optional): The threshold for the test. Defaults to 0.05.
+    """
+    ## remove any inf and -inf values
+    seriesClean = series.replace([np.inf, -np.inf], np.nan).dropna()
+    ## check to see if series is long enough to perform the test
+    if len(seriesClean) < 2:
+        return False
+    ## perform the test
+    cumSumSeries = np.cumsum(seriesClean - seriesClean.mean())
+
+    return np.max(np.abs(cumSumSeries)) < threshold
 
 ######################################################################
-def check_convergance(df, columns, simDir, tag, windowSize = 5):
+def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> pd.DataFrame:
+    """
+    Checks for convergence in the dataframe
+
+    Args:
+        df (pd.DataFrame): The dataframe to check
+        columns (list): The columns to check
+        windowSize (int, optional): The window size for the rolling average. Defaults to 5.
+
+    Returns:
+        pd.DataFrame: The dataframe with the convergence status
+    """
+    ## create a dictionary to store the results
     convergedDict = {}
+    ## loop through the columns in our dataframe
     for column in columns:
+        ## skip if column length is 1 (we can't do any checks on that!)
         if len(column) == 1:
             continue
-        dataRange = df[column].max() - df[column].min()
-        converganceTolerance = dataRange * 0.05 
+        ## get the rolling average
         runningAverage = df[column].rolling(window=windowSize).mean()
-        lastTwoAverages = runningAverage.tail(2).values
-        isConverged = np.abs(lastTwoAverages[0] - lastTwoAverages[1]) < converganceTolerance
+        ## check for convergence using cumsum test
+        isConverged = cusum_test(runningAverage)
+
+        ## update the dictionary
         entryLabel = column.split("(")[0].split()[0]
         convergedDict.update({entryLabel:isConverged})
-
+    ## convert results to dataframe
     convergedData = [(key, value) for key, value in convergedDict.items()]
     convergedDf = pd.DataFrame(convergedData, columns=["Property", "Converged"])    
 
     return convergedDf
 ######################################################################
-def plot_converged(simDir, convergedDf):
+def plot_converged(simDir: DirectoryPath, convergedDf: pd.DataFrame) -> FilePath:
+    """
+    Plots a table of ticks and crosses for each feature we have tested for convergance
+
+    Args:
+        simDir (DirectoryPath): The simulation directory
+        convergedDf (pd.DataFrame): The dataframe with the convergence status
+    """
+
+    ## create the plot
     fig, ax = plt.subplots(figsize=(2, 2))
     ax.axis('off')
     table = ax.table(cellText=convergedDf.values, colLabels=convergedDf.columns, loc='center',
@@ -247,51 +315,76 @@ def plot_converged(simDir, convergedDf):
 
 
 ######################################################################
-def convert_seconds(seconds):
+def convert_seconds(seconds: int) -> str:
+    """
+    Converts seconds as an int to HH:MM:SS format
+
+    Args:
+        seconds (int): The number of seconds
+    """
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     return "{:02}:{:02}:{:02}".format(int(hours), int(minutes), int(seconds))
 
 ######################################################################
-def extract_time_data(vitalsDf, progressDf):
+def extract_time_data(vitalsDf: pd.DataFrame, progressDf: pd.DataFrame) -> pd.DataFrame:
+    """
+    Reads vitals and progress data to extract key time-related data
+    
+    Args:
+        vitalsDf (pd.DataFrame): The vitals dataframe
+        progressDf (pd.DataFrame): The progress dataframe
+
+    Returns:
+        timeDf (pd.DataFrame): The time dataframe
+    """
+
     # get elapsed time
-    timeElapsed = progressDf["Elapsed Time (s)"].tail(1).values[0]
-    timeElapsed = convert_seconds(timeElapsed)
+    timeElapsed: int = progressDf["Elapsed Time (s)"].tail(1).values[0]
+    timeElapsed: str = convert_seconds(timeElapsed)
     # get average speed
-    averageSpeed = str(round(progressDf["Speed (ns/day)"].mean(),2))
+    averageSpeed: str = str(round(progressDf["Speed (ns/day)"].mean(),2))
     # get nSteps
-    nSteps = str(vitalsDf["#\"Step\""].tail(1).values[0])
+    nSteps: str = str(vitalsDf["#\"Step\""].tail(1).values[0])
     # get simulation duration
-    duration = str(round(vitalsDf["Time (ps)"].tail(1).values[0],2))
+    duration: str = str(round(vitalsDf["Time (ps)"].tail(1).values[0],2))
 
     # create a DataFrame
-    df = pd.DataFrame({'Elapsed Time (HH:MM:SS)': [timeElapsed],
-        'Average Speed (ns/day)': [averageSpeed],
-        'Total Steps': [nSteps],
-        'Simulation Duration (ps)': [duration]})
+    timeDf = pd.DataFrame({'Elapsed Time (HH:MM:SS)': [timeElapsed],
+                            'Average Speed (ns/day)': [averageSpeed],
+                            'Total Steps': [nSteps],
+                            'Simulation Duration (ps)': [duration]})
 
-    df = df.transpose()
-    df.columns = ['Value']  # rename the column
-    df.reset_index(level=0, inplace=True)  # reset the index
+    timeDf: pd.DataFrame = timeDf.transpose()
+    timeDf.columns = ['Value']  # rename the column
+    timeDf.reset_index(level=0, inplace=True)  # reset the index
 
-    return df
+    return timeDf
 
 ######################################################################
-def plot_time_data(timeDf, outDir):
-    # Convert cm to inches
-    width_inch = 8.94 / 2.54
-    height_inch = 6.09 / 2.54
+def plot_time_data(timeDf: pd.DataFrame, outDir: FilePath):
+    """
+    Plots time data into a table
     
-    fig, ax = plt.subplots(figsize=(width_inch, height_inch))
+    Args:
+        timeDf (pd.DataFrame): The time dataframe
+        outDir (FilePath): The output directory
+    """
+
+    ## set up plot size and convert cm to inches
+    widthInch: float = 8.94 / 2.54
+    heightInch: float = 6.09 / 2.54
+    ## set up plot
+    fig, ax = plt.subplots(figsize=(widthInch, heightInch))
     fig.patch.set_facecolor('#1a1a1a')  # Much darker grey
-    brightGreen = '#00FF00'  # Brighter green
+    brightGreen: str = '#00FF00'  # Brighter green
     ax.axis('off')
     
     # Wrap text in each cell to ensure it fits within the cell
-    wrapped_text = timeDf.map(lambda x: '\n'.join(textwrap.wrap(str(x), width=15)))
+    wrappedText: str = timeDf.map(lambda x: '\n'.join(textwrap.wrap(str(x), width=15)))
 
     # Create the table without column labels
-    table = ax.table(cellText=wrapped_text.values, cellLoc='center', loc='center', colLabels=None)
+    table = ax.table(cellText=wrappedText.values, cellLoc='center', loc='center', colLabels=None)
     table.auto_set_font_size(False)
     table.set_fontsize(12)
     table.scale(1.2, 1.2)
@@ -308,24 +401,37 @@ def plot_time_data(timeDf, outDir):
     plt.margins(0.01, 0.01)
 
     # Save the plot as a PNG image with reduced border
-    savePng = p.join(outDir, "time_info.png")
+    savePng: FilePath = p.join(outDir, "time_info.png")
     # Adjust layout to remove extra space around the table
     plt.savefig(savePng, bbox_inches="tight", pad_inches=0.01, facecolor='#1a1a1a')
     plt.close()
+
     return savePng
 
 
 ######################################################################
 
-def plot_vitals(vitalsDf, outDir, yData, tag):
+def plot_vitals(vitalsDf: pd.DataFrame,
+                 outDir: FilePath,
+                   yData:pd.Series,
+                     tag: str) -> None:
+    """
+    Plots vitals energy or properties into a 1x3 subplot of line graphs
+    
+    Args:
+        vitalsDf (pd.DataFrame): The vitals dataframe
+        outDir (FilePath): The output directory
+        yData (pd.Series): The y data
+        tag (str): The tag
+    """
     # Convert cm to inches
-    width_inch = 29.7 / 2.54
-    height_inch = 10 / 2.54
+    widthInch: float = 29.7 / 2.54
+    heightInch: float = 10 / 2.54
     
     # Set up the figure and axis
-    fig, axes = plt.subplots(nrows=1, ncols=len(yData), figsize=(width_inch, height_inch), constrained_layout=True)
+    fig, axes = plt.subplots(nrows=1, ncols=len(yData), figsize=(widthInch, heightInch), constrained_layout=True)
     fig.patch.set_facecolor('#1a1a1a')  # Much darker grey
-    brightGreen = '#00FF00'  # Brighter green
+    brightGreen: str = '#00FF00'  # Brighter green
     fig.suptitle(f'Simulation {tag} vs Time', fontsize=12, y=1.05, color=brightGreen)  # Adjust y to move the title up
     
     # Ensure axes is iterable even if there's only one plot
@@ -364,20 +470,35 @@ def plot_vitals(vitalsDf, outDir, yData, tag):
 
 ######################################################################
 
-def plot_rmsd(vitalsDf, outDir, yData, tag):
+def plot_rmsd(rmsdDf: pd.DataFrame,
+               outDir: DirectoryPath,
+                 yData: pd.Series,
+                   tag: str) -> FilePath:
+    """
+    Plots rmsd trace as a line graph
+
+    Args:
+        rmsdDf (pd.DataFrame): The rmsd dataframe
+        outDir (DirectoryPath): The output directory
+        yData (pd.Series): The y data
+        tag (str): The tag
+
+    Returns:
+        FilePath: The path to the plot  
+    """
+
     # Set up the figure and axis
     fig, ax = plt.subplots(figsize=(3.54, 3.54))
     fig.patch.set_facecolor('#1a1a1a')  # Much darker grey
-    brightGreen = '#00FF00'  # Brighter green
-    brightRed = '#FF0000'  # Brighter red
+    brightGreen: str = '#00FF00'  # Brighter green
+    brightRed: str = '#FF0000'  # Brighter red
     fig.suptitle(f'Simulation {tag} vs Time', fontsize=12, y=0.98, color=brightGreen)
     
-    lineColor = brightRed
     ax.set_facecolor('#1a1a1a')  # Much darker grey
     ax.set_xlabel('Frame', fontsize=10, color=brightGreen)
     ax.set_ylabel(yData[0], color=brightGreen, fontsize=10, labelpad=15)
-    ax.plot(vitalsDf['Frame'], vitalsDf[yData[0]], label=yData[0],
-            linestyle='-', color=lineColor, linewidth=1)
+    ax.plot(rmsdDf['Frame'], rmsdDf[yData[0]], label=yData[0],
+            linestyle='-', color=brightRed, linewidth=1)
     ax.tick_params(axis='y', labelcolor=brightGreen, labelsize=8)
     ax.tick_params(axis='x', labelcolor=brightGreen, labelsize=8)
     for label in ax.get_xticklabels():
@@ -401,10 +522,10 @@ def plot_rmsd(vitalsDf, outDir, yData, tag):
     # save
     savePng = p.join(outDir, f"Vitals_{tag}.png")
     plt.savefig(savePng, bbox_inches="tight", facecolor='#1a1a1a')
-    fig.clf()
+    plt.close()
     return savePng
 ######################################################################
-def calculate_rmsd(trajectoryDcd, pdbFile):
+def calculate_rmsd(trajectoryDcd: FilePath, pdbFile: FilePath, trajectorySelections: List[Dict], outDir: DirectoryPath) -> pd.DataFrame:
     """
     Calculate RMSD of a trajectory against its first frame, excluding water and ions.
 
@@ -416,9 +537,20 @@ def calculate_rmsd(trajectoryDcd, pdbFile):
     Returns:
     pd.DataFrame: DataFrame containing frame indices and corresponding RMSD values.
     """
-    # Load the trajectory with the topology file
-    traj = md.load(trajectoryDcd, top=pdbFile)
 
+    dcdAtomSelection: List = []
+    for selection in trajectorySelections:
+        dcdAtomSelection.extend(drSelector.get_atom_indexes(selection["selection"], pdbFile))
+
+
+    pdbDf = pdbUtils.pdb2df(pdbFile)
+    dcdDf = pdbDf.iloc[dcdAtomSelection]
+
+    subsetPdb = p.join(outDir, "trajectory.pdb")
+    pdbUtils.df2pdb(dcdDf, subsetPdb)
+
+    # Load the trajectory with the topology file
+    traj = md.load(trajectoryDcd, top=subsetPdb)
     # Select atoms that are not water or ions
     non_water_ions = traj.topology.select('not (resname HOH or resname WAT or resname NA or resname CL)')
 
@@ -433,7 +565,7 @@ def calculate_rmsd(trajectoryDcd, pdbFile):
 
     # Create a DataFrame
     rmsdDf = pd.DataFrame({'Frame': range(len(rmsdValues)), 'RMSD': rmsdValues})
-
+    ## clean up temporary pdb file
     return rmsdDf
 
 ######################################################################

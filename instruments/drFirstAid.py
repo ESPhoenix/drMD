@@ -278,7 +278,7 @@ def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, 
     Returns:
         None
     """
-    drLogger.log_info("-->{' '*4}Merging partial outputs...", True)
+    drLogger.log_info(f"-->{' '*4}Merging partial outputs...", True)
     ## merge vitals reports
     vitalsDf = merge_partial_reports(simDir, "vitals_report", removePartials=True)
     vitalsDf = fix_merged_vitals(vitalsDf, simInfo)
@@ -291,13 +291,13 @@ def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, 
 def fix_merged_vitals(vitalsDf: pd.DataFrame, simInfo: Dict) -> pd.DataFrame:
 
     ## read stuff from simInfo
-    logInterval_ps: int = simInfo["logInterval"]
+    logInterval_ps: int = round(simInfo["logInterval"])
     timeStep: openmm.Quantity = simInfo["timestep"]
     duration: openmm.Quantity = simInfo["duration"]
 
     ## convert to ints 
-    duration_ps: int = duration.value_in_unit(unit.picoseconds)
-    timeStep_ps: int = timeStep.value_in_unit(unit.picoseconds)
+    duration_ps: int = round(duration.value_in_unit(unit.picoseconds))
+    timeStep_ps: int = round(timeStep.value_in_unit(unit.picoseconds))
     timeRange_ps = range(logInterval_ps, duration_ps + logInterval_ps, logInterval_ps)
 
     stepsPerLog = int(logInterval_ps / timeStep_ps)
@@ -317,8 +317,6 @@ def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, remove
         matchString (str): The string to match
         removePartials (bool, optional): Whether to remove partial reports. Defaults to False.  
     """
-
-    print(matchString)
 
 
     ## rename the last report to be made
@@ -343,7 +341,6 @@ def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, remove
     for report in reports:
         dfsToConcat.append(pd.read_csv(report))
 
-    print(dfsToConcat)
     ## concatonate | write back to csv
     ## remove partial reports to tidy up 
     [os.remove(report) for report in reports if removePartials]

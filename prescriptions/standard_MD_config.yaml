@@ -8,6 +8,19 @@ hardwareInfo:
   parallelCPU: 1
   platform: "CUDA"
   subprocessCpus: 1
+########################################################################
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: "cubic"
+  heavyProtons: True
+
+########################################################################
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: "protein"
+
 
 ########################################################################
 simulationInfo:

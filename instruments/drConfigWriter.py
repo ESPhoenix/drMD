@@ -53,10 +53,9 @@ def make_per_protein_config(
     os.makedirs(runDir, exist_ok=True)
 
 
-    ## copy hardwareInfo from batchConfig to new per run config
-    hardwareInfo = batchConfig["hardwareInfo"]
-    ## copy simInfo from batchConfig to new per run config
-    simInfo = batchConfig["simulationInfo"]
+
+    #
+
     ## load pdb file into DataFrame
     pdbDf = pdbUtils.pdb2df(pdbFile)
     ## generate infomation on the protein portion of the pdb file
@@ -76,9 +75,12 @@ def make_per_protein_config(
 
     runConfig: Dict[Dict] = {
         "pathInfo": pathInfo,
-        "hardwareInfo": hardwareInfo,
+        "hardwareInfo": batchConfig["hardwareInfo"],
         "proteinInfo": proteinInfo,
-        "simulationInfo": simInfo
+        "simulationInfo": batchConfig["simulationInfo"],
+        "miscInfo": batchConfig["miscInfo"],
+        "loggingInfo": batchConfig["loggingInfo"]
+
     }
 
     if bool(ligandInfo):

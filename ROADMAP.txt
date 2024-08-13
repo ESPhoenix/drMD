@@ -32,5 +32,10 @@
 [] do clean code
 
 ## drCheckup
-[] close all figs
+[?] close all figs
+[] re-do convergance check, needs a pre-set per-measurement tol
+    - did the last 1 ns (or last 10% of simulation if simulation is less than 1 ns)
+    - differ more than {tol} for a significant amount of time?
 
+[] for rmsd checkup, ensure that big files dont overload memory
+[] if this fails, continue with everything
