@@ -157,11 +157,13 @@ def check_up_handler():
 
             vitalsFiles, simDir = find_vitals_files(kwargs["sim"], kwargs["outDir"], kwargs["prmtop"])
 
-            check_vitals(simDir = simDir,
-                         vitalsFiles = vitalsFiles,
-                          trajectorySelections= kwargs["config"]["loggingInfo"]["trajectorySelections"],
-                          refPdb = kwargs["refPdb"],)
-
+            try:
+                check_vitals(simDir = simDir,
+                            vitalsFiles = vitalsFiles,
+                            trajectorySelections= kwargs["config"]["loggingInfo"]["trajectorySelections"],
+                                refPdb = kwargs["refPdb"])
+            except Exception as e:
+                drLogger.log_info(f"-->{' '*4}Error running checkup: {e}", True)
             return saveFile
         return wrapper
     return decorator

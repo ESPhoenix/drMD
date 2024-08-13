@@ -531,7 +531,31 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
         # Copy the input PDB file to the output directory
         copy(config["pathInfo"]["inputPdb"], protPdb)
 
-    return protPdb
+
+    ## use pdb2pqr to protonate the protein at a specific pH
+    pH: int = str(float(config["miscInfo"]["pH"]))
+    protPqr = p.join(protPrepDir, "PROT.pqr")
+    pdb2pqrCommand: str = ["pdb2pqr",
+                       "--ff", "AMBER",
+                         "--ffout", "AMBER",
+                         "--titration-state-method", "propka",
+                          "--keep-chain",
+                           "--with-ph", str(float(pH)),
+                             protPdb, protPqr]
+    
+    run_with_log(pdb2pqrCommand)
+    ## fix the betafactor and occupancy cols to zero
+    protPqr = pdbUtils.pdb2df(protPqr)
+    protPqr["OCCUPANCY"] = 0
+    protPqr["BETAFACTOR"] = 0
+    ## add the element column using the first letter of the ATOM_NAME 
+    # (breaks for two-letter element symbols like "Cl", should be ok for proteins)
+    protPqr["ELEMENT"] = protPqr["ATOM_NAME"].str[0]
+    ## write to pdb file
+    protonatedPdb: FilePath = p.join(protPrepDir, "PROT_protonated.pdb")
+
+    pdbUtils.df2pdb(protPqr, protonatedPdb)
+    return protonatedPdb
 
 
 #####################################################################################
@@ -624,11 +648,13 @@ def run_with_log(
         None
     """
     ## split command into list
-    commandList = command.split()
+    if isinstance(command, str):
+        command = command.split()
+
 
     # Execute the command and capture its output
     result: subprocess.CompletedProcess[str] = subprocess.run(
-        commandList,
+        command,
         capture_output=True,
         check=True,
         text=True, 

@@ -7,12 +7,12 @@
 [x]  generalInfo -> hardwareInfo???
 []  sim -> simInfo??  [doesnt actually have a name]
 
+## configTriage
+[] loggingInfo
+[] trajectoryAtoms
+
+
 ## init lists as tuples in own script??
-
-
-## drCleanUp
-[] remove collate from endpointInfo, this will always be on
-
 
 
 ## drFirstAid
@@ -27,7 +27,6 @@
 [] different box geometies
 [] heavy protons and fast intergrators
 
-
 ## drLogger
 [] do clean code
 
@@ -39,3 +38,7 @@
 
 [] for rmsd checkup, ensure that big files dont overload memory
 [] if this fails, continue with everything
+
+
+## drSim
+[x] options for what we put in reporters
