@@ -12,14 +12,19 @@ from openmm import OpenMMException
 import  simtk.unit  as unit
 import mdtraj as md
 ## drMD libraries
-try:
-    from instruments import drSim
-    from instruments import drSplash
-    from instruments import drLogger
-except:
-    import drSim
-    import drSplash
-    import drLogger
+
+# Get the parent directory of the current script
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Add the parent directory to the sys.path
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+from instruments import drSim
+from instruments import drSplash
+from instruments import drLogger
+from instruments import drSplicer
+
 ## clean code
 from typing import Tuple, Union, Dict, List, Any
 from os import PathLike
@@ -82,7 +87,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                         ## merge partial reports and trajectories
                         runOutDir: Union[PathLike, str] = kwargs["outDir"]
                         simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
-                        merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
+                        drSplicer.merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
                     ## return the saveFile (XML) of the simulation to be used by subsequent simulations
                     return saveFile
                 ## if our simulation crashes due to a numeriacal error or an OpenMM exception
@@ -267,135 +272,7 @@ def rename_output_files(outDir: Union[PathLike, str], retries: int) -> None:
             os.rename(p.join(outDir, file),
                        p.join(outDir,f"{p.splitext(file)[0]}_partial_{str(retries)}{p.splitext(file)[1]}"))
 #######################################################################
-def merge_partial_outputs(simDir: Union[PathLike, str], prmtop: Union[PathLike, str], simInfo: Dict) -> None:
-    """
-    After firstAid protocols have been run, we need to merge the partial reports and trajectories
 
-    Args:
-        simDir (Union[PathLike, str]): The path to the simulation directory
-        pdbFile (Union[PathLike, str]): The path to the pdb file
-
-    Returns:
-        None
-    """
-    drLogger.log_info(f"-->{' '*4}Merging partial outputs...", True)
-    ## merge vitals reports
-    vitalsDf = merge_partial_reports(simDir, "vitals_report", removePartials=True)
-    vitalsDf = fix_merged_vitals(vitalsDf, simInfo)
-    vitalsDf.to_csv(p.join(simDir, "vitals_report.csv"))
-    ## merge progress reports
-    merge_partial_reports(simDir, "progress_report", removePartials=True)
-    ## merge trajectories
-    merge_partial_trajectories(simDir, prmtop, removePartials=True)
-#######################################################################
-def fix_merged_vitals(vitalsDf: pd.DataFrame, simInfo: Dict) -> pd.DataFrame:
-
-    ## read stuff from simInfo
-    logInterval_ps: int = round(simInfo["logInterval"])
-    timeStep: openmm.Quantity = simInfo["timestep"]
-    duration: openmm.Quantity = simInfo["duration"]
-
-    ## convert to ints 
-    duration_ps: int = round(duration.value_in_unit(unit.picoseconds))
-    timeStep_ps: int = round(timeStep.value_in_unit(unit.picoseconds))
-    timeRange_ps = range(logInterval_ps, duration_ps + logInterval_ps, logInterval_ps)
-
-    stepsPerLog = int(logInterval_ps / timeStep_ps)
-
-    stepsRange = [val * stepsPerLog for val in timeRange_ps]    
-
-    vitalsDf['Time (ps)'] = timeRange_ps
-    vitalsDf['#"Step"'] = stepsRange
-    return vitalsDf
-#######################################################################
-def merge_partial_reports(simDir: Union[PathLike, str], matchString: str, removePartials: bool = False) -> None:
-    """
-    Merges partial reports into a single report
-
-    Args:
-        simDir (Union[PathLike, str]): The path to the simulation directory
-        matchString (str): The string to match
-        removePartials (bool, optional): Whether to remove partial reports. Defaults to False.  
-    """
-
-
-    ## rename the last report to be made
-    lastReport = p.join(simDir, f"{matchString}.csv")
-    if p.isfile(lastReport):
-        os.rename(lastReport, p.join(simDir, f"{matchString}_partial_99.csv"))
-
-
-    ## collect all partial reports into a list exept for last one written
-    reports = []
-    for file in os.listdir(simDir):
-        if ("partial" in file) and (file.startswith(matchString)) and (p.splitext(file)[1] == ".csv") and (p.getsize(p.join(simDir, file)) > 0):
-            reports.append(p.join(simDir, file))
-
-
-    ## sort the list so that reports are in chronological order
-    reports = sorted(reports)
-
-
-    ## merge reports
-    dfsToConcat = []
-    for report in reports:
-        dfsToConcat.append(pd.read_csv(report))
-
-    ## concatonate | write back to csv
-    ## remove partial reports to tidy up 
-    [os.remove(report) for report in reports if removePartials]
-    ## concat dataframes and write to file
-    df = pd.concat(dfsToConcat, ignore_index=True)
-
-    return df
-
-
-
-#######################################################################
-def merge_dcd_files(dcdFiles: list[Union[PathLike, str]],
-                    pdbFile: Union[PathLike, str],
-                    outputDcd: Union[PathLike, str]) -> Union[PathLike, str]:
-    
-    traj = md.load_dcd(dcdFiles[0], top = pdbFile)
-    for file in dcdFiles[1:]:
-        newTraj = md.load_dcd(file, top = pdbFile)
-        traj = traj + newTraj
-    traj.save_dcd(outputDcd)
-#######################################################################
-def merge_partial_trajectories(simDir, pdbFile, removePartials: bool = False) -> None:
-    """
-    Merges partial trajectories into a single trajectory
-
-    Args:
-        simDir (Union[PathLike, str]): The path to the simulation directory
-        pdbFile (Union[PathLike, str]): The path to the pdb file
-        removePartials (bool, optional): Whether to remove partial trajectories. Defaults to False.  
-    """
-    ## rename last trajectory to be made
-    lastTrajectory = p.join(simDir, "trajectory.dcd")
-    if p.isfile(lastTrajectory):
-        os.rename(lastTrajectory, p.join(simDir, "trajectory_partial_99.dcd"))
-
-    ## collect all partial trajectories into a list exept for last one written
-    ## collect all partial reports into a list exept for last one written
-    trajectories = []
-    for file in os.listdir(simDir):
-        if ("partial" in file) and (file.startswith("trajectory")) and (p.splitext(file)[1] == ".dcd"):
-            trajectories.append(p.join(simDir, file))
-
-    ## sort the list so that trajectories are in chronological order
-    trajectories = sorted(trajectories)
-
-
-    ## merge trajectories
-    merge_dcd_files(trajectories, pdbFile,  lastTrajectory)
-
-    ## delete partial trajectories
-    if removePartials:
-        for trajectory in trajectories:
-            if p.basename(trajectory) == "trajectory.dcd":
-                continue
-            os.remove(trajectory)
 
 
 

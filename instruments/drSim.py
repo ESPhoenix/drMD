@@ -2,6 +2,7 @@
 import os
 from os import path as p
 import numpy as np
+import sys
 ## OPEN MM LIBS
 import openmm.app as app
 import openmm as openmm
@@ -12,10 +13,16 @@ import warnings
 from mdtraj.utils.validation import TypeCastPerformanceWarning
 warnings.filterwarnings("ignore", category=TypeCastPerformanceWarning)
 
+# Get the parent directory of the current script
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Add the parent directory to the sys.path
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
 ## CUSTOM LIBS
 from  instruments import drRestraints
 from  instruments import drCheckup 
-from  instruments import drClusterizer
 from  instruments import drFixer
 from  instruments import drFirstAid
 from  instruments import drLogger
@@ -253,7 +260,7 @@ def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app
     return simulation
 ###########################################################################################
 @drLogger.monitor_progress_decorator()
-# @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=2)
+@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation)
 @drCheckup.check_up_handler()
 def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
                            inpcrd: app.AmberInpcrdFile,

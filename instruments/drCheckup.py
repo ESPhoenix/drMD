@@ -6,39 +6,46 @@ import numpy as np
 from functools import wraps
 import textwrap
 from shutil import move
-
+import sys
 ## PLOTTING LIBS
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Agg")
 
-
 ## PDF LIBS
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML, CSS
 
-## Molecular Dynamics LIBS
+## Molecular Dynamics analysis LIBS
 import mdtraj as md
+import MDAnalysis as mda
+from MDAnalysis.analysis import rms
+
 
 ## CLEAN CODE
 from typing import Union, Dict, Tuple, List
 from os import PathLike
 from openmm import app
 ## drMD LIBS
-try:
-    from instruments.drCustomClasses import FilePath, DirectoryPath
-    from instruments import drLogger
-    from instruments import drFirstAid
-    from instruments import drSelector
-except:
-    from drCustomClasses import FilePath, DirectoryPath
-    import drLogger
-    import drFirstAid
-    import drSelector
+# Get the parent directory of the current script
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
 
+from instruments.drCustomClasses import FilePath, DirectoryPath
+from instruments import drLogger
+from instruments import drSplicer
+from instruments import drSelector
 
+## CUSTOM MODULES
 from pdbUtils import pdbUtils
 
+## disable  warnings
+import logging
+logging.getLogger('weasyprint').setLevel(logging.ERROR)
+import warnings
+# suppress some MDAnalysis warnings when writing PDB files
+warnings.filterwarnings('ignore')
 
 ######################################################################
 def check_vitals(simDir: DirectoryPath,
@@ -72,15 +79,16 @@ def check_vitals(simDir: DirectoryPath,
     if len(progressDf) < 5:
         return
     
+
+    trajectoryPdb = make_trajectory_pdb(trajectorySelections = trajectorySelections,
+                                        pdbFile=refPdb,
+                                        outDir=simDir)
+
     ## use mdtraj to calculate RMSD for non water and ions, get that data into a dataframe
-    rmsdDf: pd.DataFrame = calculate_rmsd(trajectoryDcd = vitalsFiles["trajectory"],
-                                           pdbFile = refPdb,
-                                           trajectorySelections = trajectorySelections,
-                                           outDir=simDir)
-
+    rmsdDf: pd.DataFrame = calculate_rmsd_mda(trajectoryDcd = vitalsFiles["trajectory"],
+                                           trajectoryPdb = trajectoryPdb)
     ## plot RMSD as a function of time
-    rmsdPng: FilePath = plot_rmsd(rmsdDf, simDir, ["RMSD"], "RMSD")
-
+    rmsdPng: FilePath = plot_rmsd(rmsdDf, simDir, "Backbone_RMSD")
     ## get time data, plot a table
     timeDf: pd.DataFrame = extract_time_data(vitalsDf, progressDf)
     timePng: FilePath = plot_time_data(timeDf, simDir)
@@ -93,7 +101,7 @@ def check_vitals(simDir: DirectoryPath,
     propertiesPlot: FilePath = plot_vitals(vitalsDf, simDir, propertiesList, "Properties")
 
     ## combine all feature names
-    allFeaturesList: list = energyList + propertiesList + ["RMSD"]
+    allFeaturesList: list = energyList + propertiesList + ["Backbone RMSD"]
     ## combine all features into one dataframe
     allFeaturesDf: pd.DataFrame = pd.concat([vitalsDf,rmsdDf],axis=1)
     ## check convergance for all features
@@ -102,8 +110,8 @@ def check_vitals(simDir: DirectoryPath,
     convergancePng: FilePath = plot_converged(simDir, converganceDf)
     ## create report PDF using all the plots created above
     create_vitals_pdf(simDir)
-    ## tidy up reporters to avoid clutter
-    tidy_up(simDir)
+    ## tidy up reporters to avoid clutter (hash out when testing)
+    #tidy_up(simDir)
 ######################################################################
 def tidy_up(simDir: DirectoryPath):
     """
@@ -179,7 +187,7 @@ def find_vitals_files(simInfo: Dict,
     trajectoryDcds: list = [p.join(simDir, file) for file in os.listdir(simDir) if file.endswith(".dcd")]
     ## if more than one trajectory is found, merge partial outputs before running the health check
     if len(trajectoryDcds) > 1:
-        drFirstAid.merge_partial_outputs(simDir = simDir, prmtop = prmtop, simInfo = simInfo)
+        drSplicer.merge_partial_outputs(simDir = simDir, prmtop = prmtop, simInfo = simInfo)
 
     ## find vitals reporter file
     vitalsReport: FilePath = p.join(simDir, "vitals_report.csv")
@@ -239,6 +247,20 @@ def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> p
     Returns:
         pd.DataFrame: The dataframe with the convergence status
     """
+
+    # define the conversion tolerances TODO: make these a bit more scientific
+    conversionTolerances = {
+        "Potential Energy (kJ/mole)" : 50, 
+        "Kinetic Energy (kJ/mole)": 50,
+        "Total Energy (kJ/mole)": 50,
+        "Temperature (K)": 1,
+        "Box Volume (nm^3)" : 50,
+        "Density (g/mL)" : 0.1,
+        "Backbone RMSD" : 1                      ## 1 Angstrom
+
+    }
+
+
     ## create a dictionary to store the results
     convergedDict = {}
     ## loop through the columns in our dataframe
@@ -249,7 +271,7 @@ def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> p
         ## get the rolling average
         runningAverage = df[column].rolling(window=windowSize).mean()
         ## check for convergence using cumsum test
-        isConverged = cusum_test(runningAverage)
+        isConverged = cusum_test(runningAverage, threshold=conversionTolerances[column])
 
         ## update the dictionary
         entryLabel = column.split("(")[0].split()[0]
@@ -474,7 +496,6 @@ def plot_vitals(vitalsDf: pd.DataFrame,
 
 def plot_rmsd(rmsdDf: pd.DataFrame,
                outDir: DirectoryPath,
-                 yData: pd.Series,
                    tag: str) -> FilePath:
     """
     Plots rmsd trace as a line graph
@@ -482,7 +503,6 @@ def plot_rmsd(rmsdDf: pd.DataFrame,
     Args:
         rmsdDf (pd.DataFrame): The rmsd dataframe
         outDir (DirectoryPath): The output directory
-        yData (pd.Series): The y data
         tag (str): The tag
 
     Returns:
@@ -497,9 +517,10 @@ def plot_rmsd(rmsdDf: pd.DataFrame,
     fig.suptitle(f'Simulation {tag} vs Time', fontsize=12, y=0.98, color=brightGreen)
     
     ax.set_facecolor('#1a1a1a')  # Much darker grey
-    ax.set_xlabel('Frame', fontsize=10, color=brightGreen)
-    ax.set_ylabel(yData[0], color=brightGreen, fontsize=10, labelpad=15)
-    ax.plot(rmsdDf['Frame'], rmsdDf[yData[0]], label=yData[0],
+    ax.set_xlabel('Timestep (ps)', fontsize=10, color=brightGreen)
+    ax.set_ylabel('Backbone RMSD', color=brightGreen, fontsize=10, labelpad=15)
+
+    ax.plot(rmsdDf['Timestep (ps)'], rmsdDf["Backbone RMSD"],
             linestyle='-', color=brightRed, linewidth=1)
     ax.tick_params(axis='y', labelcolor=brightGreen, labelsize=8)
     ax.tick_params(axis='x', labelcolor=brightGreen, labelsize=8)
@@ -514,10 +535,6 @@ def plot_rmsd(rmsdDf: pd.DataFrame,
     ax.minorticks_on()  # Enable minor ticks
     ax.grid(which='minor', linestyle=':', linewidth=0.5, color=brightGreen)
     
-    # Dynamically place the legend to avoid overlapping with the trace
-    legend = ax.legend(loc='best', fontsize=8, facecolor='#1a1a1a', edgecolor=brightGreen)
-    for text in legend.get_texts():
-        text.set_color(brightGreen)
     
     # Adjust layout to make room for the legend
     plt.tight_layout(rect=[0, 0, 1, 0.95])
@@ -526,6 +543,51 @@ def plot_rmsd(rmsdDf: pd.DataFrame,
     plt.savefig(savePng, bbox_inches="tight", facecolor='#1a1a1a')
     plt.close()
     return savePng
+#########################################################################################################
+def make_trajectory_pdb(trajectorySelections: List[Dict], pdbFile: FilePath, outDir: DirectoryPath) -> None:
+    """
+    Creates a trajectory PDB file based on the provided trajectory selections and PDB file.
+
+    Args:
+        trajectorySelections (List[Dict]): A list of dictionaries containing the trajectory selections.
+        pdbFile (FilePath): The path to the PDB file.
+        outDir (DirectoryPath): The output directory for the trajectory PDB file.
+
+    Returns:
+        None
+    """
+    dcdAtomSelection: List = []
+    for selection in trajectorySelections:
+        dcdAtomSelection.extend(drSelector.get_atom_indexes(selection["selection"], pdbFile))
+
+
+    pdbDf = pdbUtils.pdb2df(pdbFile)
+    dcdDf = pdbDf.iloc[dcdAtomSelection]
+
+    trajectoryPdb = p.join(outDir, "trajectory.pdb")
+    pdbUtils.df2pdb(dcdDf, trajectoryPdb)
+
+    return trajectoryPdb
+#########################################################################################################
+def calculate_rmsd_mda(trajectoryDcd: FilePath, trajectoryPdb: FilePath) -> pd.DataFrame:
+
+    universe = mda.Universe(trajectoryPdb, trajectoryDcd)
+
+    rmsdCalculation = mda.analysis.rms.RMSD(universe, select="backbone")
+
+    rmsdCalculation.run()
+
+
+    rmsdDf = pd.DataFrame(rmsdCalculation.rmsd)
+    rmsdDf.columns = ["Frame Index", "Timestep (ps)", "Backbone RMSD"]
+
+    rmsdDf.drop(columns=["Frame Index"], inplace=True)
+    rmsdDf['Backbone RMSD'] = rmsdDf['Backbone RMSD'].round(2)
+
+    return rmsdDf
+
+
+
 ######################################################################
 def calculate_rmsd(trajectoryDcd: FilePath, pdbFile: FilePath, trajectorySelections: List[Dict], outDir: DirectoryPath) -> pd.DataFrame:
     """
@@ -574,7 +636,10 @@ def calculate_rmsd(trajectoryDcd: FilePath, pdbFile: FilePath, trajectorySelecti
 if __name__ == "__main__":
 
 
-    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/A/02_NVT_pre-equilibraition"
+    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/A0A0D2XFD3_TPA_1/05_Production_MD"
+    refPdb = "/home/esp/scriptDevelopment/drMD/03_outputs/A0A0D2XFD3_TPA_1/00_prep/WHOLE/A0A0D2XFD3_TPA_1_solvated.pdb"
+
+
     for file in os.listdir(simDir):
         if p.splitext(file)[1] in [".pdf", ".png"]:
             os.remove(p.join(simDir, file))
@@ -584,7 +649,10 @@ if __name__ == "__main__":
     vitalsCsv = p.join(simDir,"vitals_report.csv")
     progressCsv = p.join(simDir,"progress_report.csv")
     trajectoryDcd = p.join(simDir,"trajectory.dcd")
-    pdbFile = p.join(simDir,"6eqe_1.pdb")
+    pdbFile = p.join(simDir,"A0A0D2XFD3_TPA_1")
 
     vitals = {"vitals": vitalsCsv, "progress": progressCsv, "trajectory": trajectoryDcd, "pdb": pdbFile}
-    check_vitals(simDir, vitals)
+    check_vitals(simDir,
+                  vitals,
+                    [{"selection":{"keyword": "protein"}}],
+                    refPdb=refPdb)
