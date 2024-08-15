@@ -2,23 +2,13 @@
 [x]  redo installation instructions
 []  work out what needs changing
 
-
-### config changes
-[x]  generalInfo -> hardwareInfo???
-[]  sim -> simInfo??  [doesnt actually have a name]
-
 ## configTriage
 [] loggingInfo
 [] trajectoryAtoms
 
-
-## init lists as tuples in own script??
-
-
 ## drFirstAid
 [] alternate between EM and MD to fix problem
 [] if no checkpoint exists at all, run an EM from previous?
-
 
 ## Extra features
 [x] pH for protonation
@@ -31,12 +21,12 @@
 [] do clean code
 
 ## drCheckup
-[?] close all figs
-[x] re-do convergance check, needs a pre-set per-measurement tol
-    - did the last 1 ns (or last 10% of simulation if simulation is less than 1 ns)
-    - differ more than {tol} for a significant amount of time?
-[] use MDA for RMSD
-[] for rmsd checkup, ensure that big files dont overload memory
 [] if this fails, continue with everything
+[] redo PDF image sizes and locations
 
+## drMethodScribe
+[] MAKE
+
+## drConfigWriter
+[] hardwareInfo: null appearing in automatically generated config files
 
