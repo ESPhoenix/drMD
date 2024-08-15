@@ -1,13 +1,32 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/omegafold_output"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
 hardwareInfo:
-  parallelCPU: 6
+  parallelCPU: 1
   platform: "CUDA"
   subprocessCpus: 1
+
+########################################################################
+
+  hardwareInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+########################################################################
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: "cubic"
+  heavyProtons: True
+
+########################################################################
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: "protein"
 ########################################################################
 
 simulationInfo:
@@ -18,17 +37,17 @@ simulationInfo:
 
 ################################################
 
-postSimulationInfo:
-  endPointInfo:
-    stepNames: ["01_energy_minimisation"]
-    removeAtoms: 
-    - selection:
-        keyword: "ions"
-    - selection:
-        keyword: "ligands"
-    collate: True
-  directoryCleanUpInfo:
-    removeAllSimulationDirs: True
-    # stepsToRemove: ["00_prep"]
+# postSimulationInfo:
+#   endPointInfo:
+#     stepNames: ["01_energy_minimisation"]
+#     removeAtoms: 
+#     - selection:
+#         keyword: "ions"
+#     - selection:
+#         keyword: "ligands"
+#     collate: True
+#   directoryCleanUpInfo:
+#     removeAllSimulationDirs: True
+#     # stepsToRemove: ["00_prep"]
 
 
