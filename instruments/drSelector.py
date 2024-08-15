@@ -91,8 +91,8 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
 def init_name_lists() -> Tuple[List[str], List[str], List[str], List[str]]:
     aminoAcidResNames: List = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
             'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
-                'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR',
-                'VAL']
+                'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
+                  'ASH', 'GLH', 'HIP', 'HIE', 'HID', 'CYX', 'CYM'] ## oddball protonations
     backboneAtomNames: List = ["N","CA","C","O"]
     solventResNames: List = ["HOH", "WAT"]
     ionResNames: List = ["NA", "K", "LI", "RB", "CS", "MG", "CA", "ZN", "CD", "HG", "MN"]

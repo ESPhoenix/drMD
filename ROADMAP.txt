@@ -21,24 +21,22 @@
 
 
 ## Extra features
-[] pH for protonation
+[x] pH for protonation
 [] more metaDynamics parameters
 [] maxRetries for firstAid as a config parameter
 [] different box geometies
-[] heavy protons and fast intergrators
+[???] heavy protons and fast intergrators [NEED TO BENCHMARK WHETHER THIS MAKES IT FASTER]
 
 ## drLogger
 [] do clean code
 
 ## drCheckup
 [?] close all figs
-[] re-do convergance check, needs a pre-set per-measurement tol
+[x] re-do convergance check, needs a pre-set per-measurement tol
     - did the last 1 ns (or last 10% of simulation if simulation is less than 1 ns)
     - differ more than {tol} for a significant amount of time?
-
+[] use MDA for RMSD
 [] for rmsd checkup, ensure that big files dont overload memory
 [] if this fails, continue with everything
 
 
-## drSim
-[x] options for what we put in reporters

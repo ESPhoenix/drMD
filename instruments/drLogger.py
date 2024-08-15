@@ -13,11 +13,15 @@ try:
     from instruments.drCustomClasses import FilePath, DirectoryPath
 except:
     from drCustomClasses import FilePath, DirectoryPath
-
+#################################################################################################
 class OverwriteStreamHandler(logging.StreamHandler):
+    """
+    Class used to for printing logging infomation to the terminal and to a log file.
+    Messages will be overwritten in the terminal every time they are logged.    
+    """
+    ## Used to print to the terminal and write to the log file
     def emit(self, record):
         try:
-
             terminalWidth = shutil.get_terminal_size().columns
             msg = self.format(record)
             stream = self.stream
@@ -25,7 +29,7 @@ class OverwriteStreamHandler(logging.StreamHandler):
             stream.flush()
         except Exception:
             self.handleError(record)
-
+#################################################################################################
 def setup_logging(logFile):
     """
     Set up logging configuration to write to the specified log file.
@@ -34,7 +38,6 @@ def setup_logging(logFile):
     rootLogger = logging.getLogger()
     rootLogger.setLevel(logging.INFO)
     
-
     # Create the file handler
     fileHandler = logging.FileHandler(logFile)
     fileFormatter = logging.Formatter('%(message)s')
@@ -46,7 +49,7 @@ def setup_logging(logFile):
     
     # Add the file handler to the root logger
     rootLogger.addHandler(fileHandler)
-
+#################################################################################################
 def log_info(message, printToTerminal=False, persist=False):
     """
     Log an info message to the log file and optionally print to the terminal.
@@ -69,7 +72,7 @@ def log_info(message, printToTerminal=False, persist=False):
                                                   msg=message,
                                                     args=(),
                                                       exc_info=None))
-
+#################################################################################################
 def close_logging():
     """
     Close and remove all handlers from all loggers.
@@ -89,7 +92,7 @@ def close_logging():
             logger.removeHandler(handler)
             handler.close()
 
-
+#################################################################################################
 def read_simulation_progress(progressReporterCsv: FilePath) -> Tuple[str, str]:
     try:
         progressDf: pd.DataFrame = pd.read_csv(progressReporterCsv)
@@ -100,33 +103,51 @@ def read_simulation_progress(progressReporterCsv: FilePath) -> Tuple[str, str]:
     except (FileNotFoundError, pd.errors.EmptyDataError) as e:
         return "N/A", "N/A", "N/A"
     
-
-def monitor_progress_decorator(checkInterval=20):
+#################################################################################################
+def monitor_progress_decorator(checkInterval: int=3):
+    """
+    Decorator used to monitor the progress of a simulation.
+    Prints key simulation monitoring information to the terminal.
+    
+    Args:
+        checkInterval (int): The number of seconds between each check of the progress
+    """
+    ## set up decorator and wrapper
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            startTime = time.time()
-            monitoring = threading.Event()
 
+            ##  set up monitoring 
+            monitoring = threading.Event()
             def monitor_progress():
-                stepName = kwargs["sim"]["stepName"]
-                protName = kwargs["config"]["proteinInfo"]["proteinName"]
-                outDir = kwargs["outDir"]
-                simDir = p.join(outDir, stepName)
-                progressReporterCsv = p.join(simDir, "progress_report.csv")
+                """
+                Function used to monitor the progress of a simulation.
+                """
+                ## get names, directory paths and progress report file path
+                stepName: str = kwargs["sim"]["stepName"]
+                protName: str = kwargs["config"]["proteinInfo"]["proteinName"]
+                outDir: DirectoryPath = kwargs["outDir"]
+                simDir: DirectoryPath = p.join(outDir, stepName)
+                progressReporterCsv: FilePath = p.join(simDir, "progress_report.csv")
+                ## run logging while simulation is running
                 while not monitoring.is_set():
+                    ## get key simulation monitoring information
                     progressPercent, timeRemaining, averageSpeed = read_simulation_progress(
                         progressReporterCsv)
+                    ## print to terminal and log file
                     log_info(f"-->{' '*4}Running {stepName} Step for: "
                              f"{protName} | Progress: {progressPercent} | "
                              f"Time Remaining: {timeRemaining} | "
                              f"Average Speed: {averageSpeed} ns/day ", True)
+                    ## wait for check interval
                     time.sleep(checkInterval)
-
+            ## set up monitoring thread
             monitorThread = threading.Thread(target=monitor_progress)
             monitorThread.start()
+            ## run simulation
             try:
                 result = func(*args, **kwargs)
+            ## if simulation fails, raise error
             except SystemExit as e:
                 if e.code == 1:
                     monitoring.set()
@@ -139,13 +160,7 @@ def monitor_progress_decorator(checkInterval=20):
             return result
         return wrapper
     return decorator
-
-          
-    
-
-
-
-
+#################################################################################################
 if __name__ == '__main__':
     logFile = 'exampleLogFile.log'
     setup_logging(logFile)

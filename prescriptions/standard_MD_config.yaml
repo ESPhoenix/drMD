@@ -51,7 +51,7 @@ simulationInfo:
   - stepName: "03_NPT_pre-equilibraition"
     simulationType: "NPT"
     duration: "100 ps"
-    timestep: "2 fs"
+    timestep: "4 fs"
     temperature: 300
     logInterval: "10 ps"
     restraintInfo:
@@ -77,7 +77,7 @@ simulationInfo:
 ########################################################################
   - stepName: "05_Production_MD"
     simulationType: "NpT"
-    duration: "50 ns"
+    duration: "500 ps"
     timestep: "2 fs"
     temperature: 400
     logInterval: "50 ps"
