@@ -59,7 +59,7 @@ def cluster_handler(batchConfig: Dict) -> None:
     if not "clusterInfo" in postSimulationInfo:
         return
     ## let user know what's going on
-    drLogger.log_info("-->\tPerforming clustering on MD trajectories...", True, True)
+    drLogger.log_info(f"-->{' '*4}Performing clustering on MD trajectories...", True )
     ## get clusterInfo dict
     clusterInfo: Dict = postSimulationInfo["clusterInfo"]
     ## run clustering

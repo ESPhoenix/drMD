@@ -79,14 +79,14 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
     stepName: str = p.basename(inDir)
     protName: str = p.basename(p.dirname(inDir))
 
-    drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:\t {protName} \t and step:\t {stepName}")
+    drLogger.log_info(f"-->{' '*4}Clustering trajectory for system: {protName} and step: {stepName}", True)
 
     thisClusterDir: DirectoryPath = p.join(clusterDir, protName, stepName)
     os.makedirs(thisClusterDir, exist_ok=True)
 
     ## unpack clusterInfos
     nClusters: int = clusterInfo["nClusters"]
-    clusterSelection: str = clusterInfo["clusterBy"]["selection"]
+    clusterBy: str = clusterInfo["clusterBy"]
 
     ## find trajectory file and matching pdb file
     dcdFile: FilePath = p.join(inDir, "trajectory.dcd")
@@ -99,7 +99,12 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
         return []
 
     # Get the atom indexes for the selected atoms
-    clusterSelectionAtomIndexes: List[int] = drSelector.get_atom_indexes(clusterSelection, pdbFile)
+    clusterSelectionAtomIndexes: List[int] = []
+    for clusterBySelection in clusterBy:
+        clusterSelection = clusterBySelection["selection"]
+        clusterSelectionAtomIndexes.extend(drSelector.get_atom_indexes(clusterSelection, pdbFile))
+
+    exit()
 
     # Load trajectory
     traj: md.Trajectory = md.load(dcdFile, top=pdbFile)

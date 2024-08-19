@@ -148,10 +148,16 @@ def check_clusterInfo(clusterInfo: dict) -> None:
     if  len(stepNames) == 0:
         raise ValueError(f"-->{' '*4}stepNames must not be empty")
     ## ensure that clusterBy is a dict
-    if not isinstance(clusterBy, dict):
-        raise TypeError(f"-->{' '*4}clusterBy must be a string")
-    clusterSelection = check_info_for_args(clusterBy, "clusterBy", ["selection"], optional=False)[0]
-    check_selection(clusterSelection, "clusterBy")
+    if not isinstance(clusterBy, list):
+        raise TypeError(f"-->{' '*4}clusterBy must be a list of selection dictionaries")
+    if len(clusterBy) == 0:
+        raise ValueError(f"-->{' '*4}clusterBy must not be empty")
+    ## ensure each selection in clusterBy is correcly fotmatted
+    for clusterSelection in clusterBy:
+        selection = clusterSelection.get("selection", False)
+        if not selection:
+            raise ValueError(f"-->{' '*4}clusterBy must not be must ahve a selection entry")
+        check_selection(selection, "clusterBy")
     ## ensure collate is a bool
     if not isinstance(collate, bool):
         raise TypeError(f"-->{' '*4}collate must be a bool")
