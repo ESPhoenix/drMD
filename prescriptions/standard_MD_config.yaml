@@ -85,7 +85,7 @@ simulationInfo:
 postSimulationInfo:
   clusterInfo:
     stepNames: ["05_Production_MD"] 
-    nClusters: 25
+    nClusters: 2
     clusterBy:
       selection:
         keyword: "all"

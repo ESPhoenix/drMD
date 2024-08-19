@@ -16,6 +16,10 @@ try:
     from instruments.drCustomClasses import FilePath, DirectoryPath
 except:
     from drCustomClasses import FilePath, DirectoryPath
+
+from pdbUtils import pdbUtils
+
+
 from typing import Dict, Union, Any, List
 from os import PathLike
 
@@ -39,7 +43,7 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
     os.makedirs(clusterDir, exist_ok=True)
 
     ## list of dirs created by drMD that we don't want to cluster
-    notRunDirs: list  = ["00_configs", "01_ligand_parameters", "00_collated_pdbs, 00_clustered_pdbs"]
+    notRunDirs: list  = ["00_configs", "01_ligand_parameters", "00_collated_pdbs", "00_clustered_pdbs", "00_drMD_logs"]
 
     ## create list of dirs to cluster
     runDirs: List[DirectoryPath] = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
@@ -49,7 +53,7 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
     allClusterPdbs: list[FilePath] = []
     ## Run clustering on each specified directory
     for dirToCluster in dirsToCluster:
-        drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:\t {p.basename(p.dirname(dirToCluster))} \t and step:\t {p.basename(dirToCluster)}", True)
+        drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:{p.basename(p.dirname(dirToCluster))} and step:  {p.basename(dirToCluster)}", True)
         clusterPdbs: List[FilePath] = rmsd_clustering_protocol(dirToCluster, clusterInfo, clusterDir)
         ## add cluster pdbs to list 
         allClusterPdbs.extend(clusterPdbs)
@@ -78,14 +82,16 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
     drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:\t {protName} \t and step:\t {stepName}")
 
     thisClusterDir: DirectoryPath = p.join(clusterDir, protName, stepName)
+    os.makedirs(thisClusterDir, exist_ok=True)
 
-    ## unpack clusterInfo
+    ## unpack clusterInfos
     nClusters: int = clusterInfo["nClusters"]
     clusterSelection: str = clusterInfo["clusterBy"]["selection"]
 
-    ## find output files
+    ## find trajectory file and matching pdb file
     dcdFile: FilePath = p.join(inDir, "trajectory.dcd")
-    pdbFile: FilePath = glob.glob(p.join(inDir,"*.pdb"))[0]
+    pdbFile: FilePath = p.join(inDir, "trajectory.pdb")
+
 
     # Check if the trajectory.dcd and output.pdb files exist, return an empty list if not
     if not p.isfile(dcdFile) or not p.isfile(pdbFile):
@@ -169,6 +175,12 @@ def kmeans_clusters_to_pdb(rmsdMatrix: np.ndarray,
         traj[clusterCentroidIndex].save_pdb(clusterPdb)
         ## add the PDB file location to the list
         clusterPdbs.append(clusterPdb)
+
+    ## fix element names (wont work for 2-letter elements)
+    for clusterPdb in clusterPdbs:
+        clusterDf = pdbUtils.pdb2df(clusterPdb)
+        clusterDf["ELEMENT"] = clusterDf["ATOM_NAME"].apply(lambda x: x[0])
+        pdbUtils.df2pdb(clusterDf, clusterPdb)
 
     return clusterPdbs
 
