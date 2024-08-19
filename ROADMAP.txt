@@ -33,4 +33,4 @@
 
 ## drPrep
 [] are we skipping properly?
-[] find disulphides
+[x] find disulphides

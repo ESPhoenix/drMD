@@ -64,7 +64,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
     skipPrep, prepFiles = choose_to_skip_prep(config=config, prepDir=prepDir, protName=protName)
     if skipPrep:
-        drLogger.log_info(f"-->{' '*4}Prep steps already complete for {protName}!",True)
+        drLogger.log_info(f"-->{' '*4}Prep steps already complete for {protName}: Skipping ...",True)
         return prepFiles
 
 
@@ -104,9 +104,6 @@ def no_ligands_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath
     solvatedPdb = drFixer.reset_chains_residues(protPdb,solvatedPdb)
 
     return solvatedPdb, inputCoords, amberParams
-
-
-
 
 #####################################################################################
 def ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) -> Tuple[str, str, str, str]:
@@ -154,15 +151,20 @@ def choose_to_skip_prep(config: dict, prepDir: DirectoryPath, protName: str) -> 
     inputCoords = False
     pdbFile = False
     ## check if prmtop, inpcrd, and pdb files exist in prep dir
-    wholeDir: str = p.join(prepDir,"WHOLE")
-    if p.isdir(p.join(wholeDir)):
-        for file in os.listdir(wholeDir):
+
+    if "ligandInfo" in config:
+        completePrepDir = p.join(prepDir,"WHOLE")
+    else:
+        completePrepDir = p.join(prepDir,"PROT")
+
+    if p.isdir(p.join(completePrepDir)):
+        for file in os.listdir(completePrepDir):
             if p.splitext(file)[1] == ".prmtop":
-                amberParams: FilePath = p.join(wholeDir,file)
+                amberParams: FilePath = p.join(completePrepDir,file)
             elif p.splitext(file)[1] == ".inpcrd":
-                inputCoords: FilePath = p.join(wholeDir,file)
+                inputCoords: FilePath = p.join(completePrepDir,file)
             if p.splitext(file)[1] == ".pdb" and not file == f"{protName}.pdb":
-                pdbFile: FilePath = p.join(wholeDir, file)
+                pdbFile: FilePath = p.join(completePrepDir, file)
 
     ## return to drOperator if files already have been made
     if p.isfile(amberParams) and p.isfile(inputCoords) and p.isfile(pdbFile):
