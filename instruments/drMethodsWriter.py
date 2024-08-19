@@ -199,11 +199,6 @@ def get_approximate_water_count(configDicts, batchConfig):
 
 
     return approximateAverageWaterCount
-
-
-
-
-
     
 
 ##########################################################################################
