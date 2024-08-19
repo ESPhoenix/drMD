@@ -7,6 +7,7 @@ import string
 from shutil import copy
 import logging
 import pandas as pd
+import numpy as np
 ## CUSTOM MODULES
 from pdbUtils import pdbUtils
 ## drMD MODULES
@@ -79,8 +80,11 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
         solvatedPdb, inputCoords, amberParams = no_ligands_prep_protocol(config=config,
                                                                           protName=protName,
                                                                             prepDir=prepDir)
-
         
+
+
+
+    
     drLogger.log_info(f"-->{' '*4}Prep steps complete for {protName}!",True)
     drLogger.close_logging()
 
@@ -95,7 +99,9 @@ def no_ligands_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath
     drLogger.log_info(f"-->{' '*4}Solvating, Charge Balencing and Creating parameters for {protName}...")
     inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                     pdbFile= protPdb,
-                                                    outName= outName)
+                                                outName= outName)
+    
+    solvatedPdb = drFixer.reset_chains_residues(protPdb,solvatedPdb)
 
     return solvatedPdb, inputCoords, amberParams
 
@@ -128,6 +134,7 @@ def ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) ->
                             pdbFile= mergedPdb,
                             outName= outName)
 
+        solvatedPdb = drFixer.reset_chains_residues(inputPdb,solvatedPdb)
         return solvatedPdb, inputCoords, amberParams
 #####################################################################################   
 def choose_to_skip_prep(config: dict, prepDir: DirectoryPath, protName: str) -> Tuple[bool, Optional[Tuple[FilePath, FilePath, FilePath]]]:
@@ -555,7 +562,40 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
     protonatedPdb: FilePath = p.join(protPrepDir, "PROT_protonated.pdb")
 
     pdbUtils.df2pdb(protPqr, protonatedPdb)
+
     return protonatedPdb
+
+#################################################################################
+def detect_disulphides(pdbFile: FilePath) -> List[str]:
+    """
+    Detect disulphides in a PDB file.
+    """
+    pdbDf: pd.DataFrame = pdbUtils.pdb2df(pdbFile)
+    cyxDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"] == "CYX"]
+
+    sgDf: pd.DataFrame = cyxDf[cyxDf["ATOM_NAME"] == "SG"]
+
+
+    sgCoords: np.array = sgDf[["X", "Y", "Z"]].values
+
+
+    distanceMatrixDf = pd.DataFrame(np.sqrt(np.sum((sgCoords[:, np.newaxis, :] - sgCoords[np.newaxis, :, :])**2, axis=-1)),
+                                   index=sgDf["RES_ID"], columns=sgDf["RES_ID"])
+    
+    disulphidesDf = distanceMatrixDf[(distanceMatrixDf < 2.5) & (distanceMatrixDf != 0)]
+
+
+    disulphidePairs = [sorted((index, col)) for index, row in disulphidesDf.iterrows() for col in disulphidesDf.columns if not pd.isna(row[col])]
+
+    uniqueDisulphidePairs = {tuple(pair) for pair in disulphidePairs}
+
+    return uniqueDisulphidePairs
+
+    
+
+
+
+
 
 
 #####################################################################################
@@ -582,6 +622,10 @@ def make_amber_params(
     """
     # Change the working directory to the output directory
     os.chdir(outDir)
+
+
+    ## find dusulphides
+    disulphidePairs: List[Tuple[int, int]] = detect_disulphides(pdbFile)
 
     # Write the TLEAP input file
     tleapInput: str = p.join(outDir, "TLEAP.in")
@@ -610,6 +654,10 @@ def make_amber_params(
         f.write("solvatebox mol TIP3PBOX 10.0\n")
         f.write("addions mol Na+ 0\n")
         f.write("addions mol Cl- 0\n")
+
+        ## make disulphide bonds
+        for disulphidePair in disulphidePairs:
+            f.write(f"bond mol.{disulphidePair[0]}.SG mol.{disulphidePair[1]}.SG\n")
 
         # Save the solvated protein structure and parameter files
         solvatedPdb: str = f"{outName}_solvated.pdb"

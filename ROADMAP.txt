@@ -30,3 +30,7 @@
 ## drConfigWriter
 [] hardwareInfo: null appearing in automatically generated config files
 
+
+## drPrep
+[] are we skipping properly?
+[] find disulphides
