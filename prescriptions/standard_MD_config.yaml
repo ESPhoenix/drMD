@@ -87,7 +87,7 @@ postSimulationInfo:
     stepNames: ["05_Production_MD"] 
     nClusters: 2
     clusterBy:
-      selection:
+    - selection:
         keyword: "all"
     removeAtoms:
     - selection:
