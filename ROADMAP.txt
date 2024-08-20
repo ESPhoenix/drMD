@@ -31,6 +31,5 @@
 [] hardwareInfo: null appearing in automatically generated config files
 
 
-## drPrep
-[x] are we skipping properly?
-[x] find disulphides
+## drPdbTriage
+[] HIS, HIP ect being identified as a UAA

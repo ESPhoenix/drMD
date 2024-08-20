@@ -55,10 +55,10 @@ def main() -> None:
     os.makedirs(logDir, exist_ok=True)
     os.replace(configTriageLog, p.join(logDir,"config_triage.log"))
 
-    ## run pdbTriage to detect commmon problems with pdb files
-    pdbTriageLog = p.join(logDir,"pdb_triage.log")
-    if not p.exists(pdbTriageLog):
-        drPdbTriage.pdb_triage(pdbDir, batchConfig)
+    # ## run pdbTriage to detect commmon problems with pdb files
+    # pdbTriageLog = p.join(logDir,"pdb_triage.log")
+    # if not p.exists(pdbTriageLog):
+    #     drPdbTriage.pdb_triage(pdbDir, batchConfig)
 
     ## set environment variables for OpenMP and OpenMM - this should limit their CPU useage
     manage_cpu_usage_for_subprocesses("ON",subprocessCpus)

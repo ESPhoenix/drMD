@@ -1,20 +1,19 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/"
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/pd_proj"
   outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
   
 ########################################################################
 hardwareInfo:
-  parallelCPU: 1
+  parallelCPU: 5
   platform: "CUDA"
   subprocessCpus: 1
 
 ########################################################################
+nonCannonicalAminoAcidInfo:
+  - residueName: "C8X"
+  - residueName: "PD"
 
-  hardwareInfo:
-  parallelCPU: 1
-  platform: "CUDA"
-  subprocessCpus: 1
 ########################################################################
 miscInfo:
   pH: 7.4
