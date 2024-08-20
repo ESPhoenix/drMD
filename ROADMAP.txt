@@ -4,7 +4,7 @@
 
 ## configTriage
 [] loggingInfo
-[] trajectoryAtoms
+[] trajectoryAtoms -- do we allow for multiple trajectories per simulation (or too complex??)
 
 ## drFirstAid
 [] alternate between EM and MD to fix problem
@@ -33,3 +33,7 @@
 
 ## drPdbTriage
 [] HIS, HIP ect being identified as a UAA
+
+
+## drRestraints
+[] improper restraints

@@ -81,8 +81,8 @@ simulationInfo:
     ##
     - restraintType: "torsion"
       parameters:
-        k: 1000
-        theta0: 180
+        k: 200
+        phi0: 0
       selection:
         keyword: "custom"
         customSelection:
@@ -175,8 +175,8 @@ simulationInfo:
     ##
     - restraintType: "torsion"
       parameters:
-        k: 1000
-        theta0: 180
+        k: 200
+        phi0: 0
       selection:
         keyword: "custom"
         customSelection:
@@ -193,6 +193,7 @@ simulationInfo:
     timestep: 2 fs
     duration: 5 ns
     maxIterations: 1000
+    heavyProtons: False
     restraintInfo:
     ##
     - restraintType: "distance"
@@ -228,8 +229,8 @@ simulationInfo:
     ##
     - restraintType: "torsion"
       parameters:
-        k: 1000
-        theta0: 180
+        k: 50
+        phi0: 0
       selection:
         keyword: "custom"
         customSelection:

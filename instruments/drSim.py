@@ -61,13 +61,21 @@ def initialise_simulation(prmtop: app.AmberPrmtopFile,
     nonbondedMethod: openmm.NonbondedForce = app.PME
     nonbondedCutoff: unit.Quantity = 1 * unit.nanometer
 
-    # Define the restraints.
-    hBondconstraints: openmm.Force = app.HBonds
+
+    heavyProtons = sim.get("heavyProtons", False)
+    if heavyProtons:
+        bondConstraints = app.AllBonds
+        protonMass = 1.00784 * unit.amu
+    else:
+        bondConstraints = app.HBonds
+        protonMass = 1.00784 * unit.amu
+ 
 
     # Create the system.
     system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
                                                 nonbondedCutoff=nonbondedCutoff,
-                                                constraints=hBondconstraints)
+                                                constraints=bondConstraints,
+                                                hydrogenMass=protonMass)
     
     ## use static temperature if specified, or use first value in temperatureRange to start with
     if "temperature" in sim:
@@ -260,7 +268,7 @@ def load_simulation_state(simulation: app.Simulation, saveFile: FilePath) -> app
     return simulation
 ###########################################################################################
 @drLogger.monitor_progress_decorator()
-@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation)
+# @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation)
 @drCheckup.check_up_handler()
 def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
                            inpcrd: app.AmberInpcrdFile,
