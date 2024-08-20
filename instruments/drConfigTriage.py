@@ -314,7 +314,7 @@ def check_simulationInfo(config: dict) -> None:
         ## check for illigal args
         alowedArgsForSimulations = ["stepName", "simulationType", "duration", "maxIterations",
                                      "timestep", "temperature", "temperatureRange", "logInterval", "restraintInfo",
-                                       "metaDynamicsInfo", "clusterTrajectory"]
+                                       "metaDynamicsInfo", "clusterTrajectory", "heavyProtons"]
         check_info_for_illigal_args(simulation, stepName, alowedArgsForSimulations)
 
     ## log that simulationInfo is correct
@@ -398,10 +398,10 @@ def check_restraint_parameters(restraintType: str, parameters: dict) -> None:
         raise ValueError(f"-->{' '*4}k force constants  parameters must be positive for all restraints")
 
     if restraintType.upper() == "TORSION":
-        phi, = check_info_for_args(parameters, "parameters", ["phi"], optional=False)
-        if not isinstance(phi, (int, float)):
+        phi0, = check_info_for_args(parameters, "parameters", ["phi0"], optional=False)
+        if not isinstance(phi0, (int, float)):
             raise TypeError(f"-->\phi0 parameters must be a number for torsion restraints")
-        if phi < -180 or phi > 180:
+        if phi0 < -180 or phi0 > 180:
             raise ValueError(f"-->{' '*4}phi0 parameters must be between -180 and 180 for torsion restraints")
         
     elif restraintType.upper() == "DISTANCE":
@@ -484,6 +484,11 @@ def check_nvt_npt_options(simulation: dict, stepName: str) -> None:
     ## ensure that duration and log interval are correctly formatted
     for timeInputValue, timeInputName in zip([duration, logInterval],["duration", "logInterval"]):
         check_time_input(timeInputValue, timeInputName, stepName)
+
+    heavyProtons, = check_info_for_args(simulation, stepName, ["heavyProtons"], optional=True)
+    if heavyProtons:
+        if not isinstance(heavyProtons, bool):
+            raise TypeError(f"-->{' '*4}heavyProtons in {stepName} must be a boolean")
 
         
 
