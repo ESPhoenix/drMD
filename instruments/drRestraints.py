@@ -10,8 +10,10 @@ from openmm import app
 ## CUSTOM drMD LIBS
 try:
     from instruments  import drSelector
+    from instruments import drLogger
 except:
     import drSelector
+    import drLogger
 ## CUSTOM MODULES
 from pdbUtils import pdbUtils
 ## CLEAN CODE
@@ -42,10 +44,10 @@ def restraints_handler(
     Returns:
         openmm.System: The system with restraints applied.
     """
-    ## skip if not loading from a save file
-    ## this prevents crashes when running first simulation
-    if saveFile == None:
-        return system
+    ## if we are loading from a XML file, we need to clear all restraints
+    if not saveFile == None:
+        if p.splitext(saveFile)[1] == ".xml":
+            clear_all_restraints(saveFile)
     ## check if there are any restraints specified in simulation config
     if "restraintInfo" in sim:
         ## load restraintInfo from simluation config
@@ -77,11 +79,35 @@ def restraints_handler(
         ## just return the checkpoint file as-is
         if p.splitext(saveFile)[1] == ".chk":
             return system
-        ## if we are loading from a XML file, we need to clear all restraints
-        clear_all_restraints(saveFile)
 
+    inspect_restraints(system)
     return system
 
+
+
+
+def inspect_restraints(system):
+    forces = system.getForces()
+
+    # Print detailed information about each force
+    for i, force in enumerate(forces):
+        drLogger.log_info(f"Force {i}: {force.__class__.__name__}")
+        
+        if isinstance(force, openmm.CustomBondForce):
+            for j in range(force.getNumBonds()):
+                particleA, particleB, bondParameters = force.getBondParameters(j)
+
+                drLogger.log_info(f"-->{' '*4}Bond {j}: particles ({particleA}, {particleB}), length {bondParameters[1] * 10} Å, force constant {bondParameters[0]}")
+        
+        elif isinstance(force, openmm.CustomAngleForce):
+            for j in range(force.getNumAngles()):
+                particleA, particleB, particleC, angleParameters = force.getAngleParameters(j)
+                drLogger.log_info(f"Angle {j}: particles ({particleA}, {particleB}, {particleC}), angle {round(angleParameters[1] * 180 /math.pi, 2)} degrees, force constant {angleParameters[0]}")
+        
+        elif isinstance(force, openmm.CustomTorsionForce):
+            for j in range(force.getNumTorsions()):
+                particleA, particleB, particleC, particleD, torsionParameters = force.getTorsionParameters(j)   
+                drLogger.log_info(f"Torsion {j}: particles ({particleA}, {particleB}, {particleC}, {particleD}), angle {round(torsionParameters[1] * 180 /math.pi, 2)} degrees, force constant {torsionParameters[0]}")      
 ###########################################################################################
 def create_position_restraint(
     system: openmm.System,
@@ -141,8 +167,6 @@ def create_distance_restraint(system: openmm.System, selection: list, parameters
     ## add per bond parameters, k for force constant, r0 for desired distance
     distanceRestraint.addPerBondParameter(f"k{str(kNumber)}")
     distanceRestraint.addPerBondParameter("r0")
-    ## add force to system
-    system.addForce(distanceRestraint)
 
     # Get the indices of the two atoms to be restrained
     restraintAtomIndexes: List[int] = drSelector.get_atom_indexes(selection, pdbFile)
@@ -151,10 +175,13 @@ def create_distance_restraint(system: openmm.System, selection: list, parameters
 
     # Get target distance from the parameters dictionary, and convert from angstroms to nanometers
     kForceConstant: float = parameters["k"]
-    targetDistance_nm: float = parameters["r0"] * unit.angstroms * 0.1
+    targetDistance_nm: float = parameters["r0"] * unit.angstroms 
 
     # Add the atom pair and the calculated target distance in nanometers to the bond restraint
     distanceRestraint.addBond(restraintAtomIndexes[0], restraintAtomIndexes[1], [kForceConstant, targetDistance_nm])
+
+    ## add force to system
+    system.addForce(distanceRestraint)
 
     return system
 ###########################################################################################
@@ -190,13 +217,14 @@ def create_angle_restraint(system: openmm.System, selection: list, parameters: D
 
     # Get target angle from the parameters dictionary and convert from degrees to radians
     kForceConstant: float = parameters["k"] * unit.kilojoules_per_mole / unit.radians**2
-    targetAngle_rad: float = parameters["theta0"] * unit.degrees * (math.pi / 180.0)
+    targetAngle_degrees: float = parameters["theta0"] * unit.degrees
+
 
     # Add the atom triplet and the calculated target angle in radians to the angle restraint
     angleRestraint.addAngle(restraintAngleAtoms[0],
                              restraintAngleAtoms[1],
                                restraintAngleAtoms[2],
-                                 [kForceConstant, targetAngle_rad])
+                                 [kForceConstant, targetAngle_degrees])
 
     return system
 ###########################################################################################
@@ -231,12 +259,12 @@ def create_torsion_restraint(system: openmm.System, selection: list, parameters:
     
     ## Get target torsion angle from parameters (in radians)
     kForceConstant: float = parameters.get("k", 1000) * unit.kilojoules_per_mole / unit.radians**2  # Default k value if not specified
-    targetTorsion_rad: float = parameters["phi0"] * math.pi / 180.0
+    targetTorsion_degrees: float = parameters["phi0"] * unit.degrees
     
     ## Add the atom quartet and settings to the torsion restraint
     torsionRestraint.addTorsion(restraintTorsionAtoms[0], restraintTorsionAtoms[1],
                                 restraintTorsionAtoms[2], restraintTorsionAtoms[3],
-                                [kForceConstant, targetTorsion_rad])
+                                [kForceConstant, targetTorsion_degrees])
     
     return system
 

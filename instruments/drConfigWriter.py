@@ -168,6 +168,11 @@ def make_ligandInfo(
             isLigandMol2 = False
             if p.isfile(ligMol2):
                 isLigandMol2 = True
+            ## checl for lib file in input pdb directory
+            ligLib = p.join(pdbDir, f"{ligName}.lib")
+            isLigandMol2 = False
+            if p.isfile(ligLib):
+                isLigandMol2 = True
             # check for frcmod file in input pdb directory
             ligFrcmod = p.join(pdbDir, f"{ligName}.frcmod")
             isLigandFrcmod = False
