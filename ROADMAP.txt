@@ -34,6 +34,8 @@
 ## drPdbTriage
 [] HIS, HIP ect being identified as a UAA
 
+## drSelector
+ligands -> ligand (will make methodsWriter easier!)
 
 ## drRestraints
 [] improper restraints

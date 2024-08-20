@@ -4,19 +4,23 @@ import sys
 import yaml
 from glob import glob
 import numpy as np
+import inflect
 ## drMD LIBS
 # Get the parent directory of the current script
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from typing import Optional, Dict, List, Set
+from typing import Optional, Dict, List, Set, Union
 from instruments.drCustomClasses import FilePath, DirectoryPath
 
 from pdbUtils import pdbUtils
 
 ##########################################################################################
 def main(batchConfigYaml: Dict, configDir: DirectoryPath, outDir: DirectoryPath) -> None:
+    global inflecter
+    inflecter = inflect.engine()
+
     ## find all config files
     configDicts = get_config_dicts(configDir)
     ## read batch config
@@ -37,6 +41,9 @@ def main(batchConfigYaml: Dict, configDir: DirectoryPath, outDir: DirectoryPath)
     write_protein_preparation_methods(configDicts, methodsFile)
     ## write solvation related methods
     write_solvation_charge_balence_methods(batchConfig, configDicts, methodsFile)
+    ## write simulation related methods
+    simulationInfo = configDicts[0]["simulationInfo"]
+    write_simulation_methods(methodsFile, simulationInfo)
 ##########################################################################################
 
 def get_config_dicts(configDir: DirectoryPath) -> List[Dict]:
@@ -157,7 +164,6 @@ def count_waters(pdbFile: FilePath) -> int:
 
 
 def write_solvation_charge_balence_methods(batchConfig, configDicts, methodsFile):
-
     boxGeometry = configDicts[0]["miscInfo"]["boxGeometry"]
     approxWaterCount, counterIonCounts = get_solvation_atom_counts(configDicts, batchConfig)
 
@@ -169,16 +175,14 @@ def write_solvation_charge_balence_methods(batchConfig, configDicts, methodsFile
         methods.write(f"Approximately {approxWaterCount} TIP3P water molecules were added to this box. ")
         ## info on counter ions
         methods.write(f"Sodium and Chloride ions were added to the box to balence the charge of the system.\n")
-        methods.write(f"Exact counts of counter ions are provided below:\n")
-        methods.write("| Protein Name | Sodium Ions | Clo")
+        methods.write(f"A table showing the counts of counter ions are provided below:\n\n")
+        methods.write("|\t Protein Name\t| \tSodium Ions\t| \tChloride Ions\t|\n")
+        methods.write("|\t------------\t| \t------------\t| \t------------\t|\n")
         for protName in counterIonCounts:
-            methods.write(f"{protName}: {counterIonCounts[protName]}\n")
+            methods.write(f"|\t{protName}|{counterIonCounts[protName]['Sodium']}| {counterIonCounts[protName]['Chloride']}|\n")
 
-
-
-
-
-
+        methods.write("\n")
+################################################################################
 def get_solvation_atom_counts(configDicts, batchConfig):
     waterCounts = []
     counterIonCounts = {}
@@ -220,39 +224,156 @@ def count_ions(pdbFile):
     return len(naDf) , len(clDf)
 
 ##########################################################################################
-def format_list(ligandList: List[str]) -> str:
-    if len(ligandList) == 1:
-        return ligandList[0]
+def format_list(inputList: List[str]) -> str:
+    if len(inputList) == 1:
+        return inputList[0]
     else:
-        return ", ".join(ligandList[:-1]) + " and " + ligandList[-1]
+        return ", ".join(inputList[:-1]) + ", and " + inputList[-1]
 ##########################################################################################
 
-
-
-
-
+def get_progression_word(stepIndex: int, maxSteps: int) -> str:
+    if stepIndex == 0:
+        return "Initially,"
+    elif stepIndex == maxSteps - 1:
+        return "Finally,"
+    else:
+        return "Next,"
+##########################################################################################
+def get_simulation_type_text(sim: Dict) -> str:
+    simulationType = sim["simulationType"]
+    if simulationType.upper() == "NPT":
+        return "a simulation was performed using the isothermal-isobaric (NpT) ensemble"
+    elif simulationType.upper() == "NVT":
+        return "a simulation was performed using using the canonical (NVT) ensemble"
+    elif simulationType.upper() == "EM":
+        return "an energy mimimisation step was performed using the steepest descent method"
+    elif simulationType == "META":
+        return "A metadynamics simulation was performed"
     
-    # During this step, any disulphide bonds present in the proteins were created based on the interatomic distances of cysteine gamma sulfur atoms.
-    # """
+##########################################################################################
+def get_restraints_methods_text(sim: Dict) -> str:
+    
+    if not "restraintInfo" in sim:
+        return ""
+    
+    restraintInfo = sim["restraintInfo"]
+    text = ""
+    for restraint in restraintInfo:
+        text += f"{inflecter.a(restraint['restraintType']).capitalize()} restraint"
+        text += f" with a force constant of {restraint['parameters']['k']} {get_force_constant_units(restraint['restraintType'])} "
+        text += f" {get_restraint_target(restraint)} "
+        text += f"was applied to {selection_to_text(restraint['selection'])}. "
+    return text
+
+##########################################################################################
+def get_force_constant_units(restraintType: str) -> str:
+    if restraintType == "position":
+        return "kJ mol<sup>-1</sup> nm<sup>-2</sup>"
+    elif restraintType == "distance":
+        return "kJ mol<sup>-1</sup> nm<sup>-2</sup>"
+    elif restraintType == "angle":
+        return "kJ mol<sup>-1</sup> rad<sup>-2</sup>"
+    elif restraintType == "torsion":
+        return "kJ mol<sup>-1</sup> rad<sup>-2</sup>"
+##########################################################################################
+def selection_to_text(selection: Dict) -> str:
+    keyword = selection["keyword"]
+    if not keyword == "custom":
+        return f"all {keyword} atoms in the system"  
+
+    text = "the following atoms: "
+
+    selectionTexts = []
+    customSelections = selection["customSelection"]
+    for customSelection in customSelections:
+        selectionText = ""
+        ## deal with atoms
+        atomName = customSelection["ATOM_NAME"]
+        if  atomName == "all":
+            selectionText += "all atoms in"
+        else:
+            selectionText += f"atom{identifier_list_to_str(atomName)}"
+
+        ## deal with resId and resName together
+        residueId = customSelection["RES_ID"]
+        residueName = customSelection["RES_NAME"]
+        if not residueId == "all" and not residueName == "all":
+            if isinstance(residueId, str) and isinstance(residueName, str):
+                selectionText += f" in residue {residueName}{residueId}"
+            else:
+                selectionText += f" in residue{identifier_list_to_str(residueId)}{identifier_list_to_str(residueName)}"
+        elif not residueId == "all":
+            selectionText += f" in residue{identifier_list_to_str(residueId)}"
+        elif not residueName == "all":
+            selectionText += f" in residue{identifier_list_to_str(residueName)}"
+        ## deal with chain
+        chainId = customSelection["CHAIN_ID"]
+        if not chainId == "all":
+            selectionText += f" in chain{identifier_list_to_str(chainId)}"
+
+        selectionTexts.append(selectionText)
 
 
-# def write_solvation_charge_balence_methods(config):
-#     f"""
-#     1. Solvation:
-#         - Protein was placed in a solvent box with dimensions {"DIMS"}
-#         - Approximately {approxWaterCount} TIP3P waters were added to this box
+    selectionTexts = format_list(selectionTexts)
+
+    text += selectionTexts
+
+    return text
+
+##########################################################################################
+def  get_restraint_target(restraint):
+    restraintType = restraint["restraintType"]
+
+    if restraintType == "position":
+        return ""
+    elif restraintType == "distance":
+        return f" and an equilibrium distance of {restraint['parameters']['r0']} Å"
+    elif restraintType == "angle":
+        return f" and an equilibrium angle of {restraint['parameters']['theta0']} degrees"    
+    elif restraintType == "torsion":
+        return f" and an equilibrium dihedral angle of {restraint['parameters']['phi0']} degrees"
+
+##########################################################################################
+def identifier_list_to_str(identifier: Union[str, list]) -> str:
+    if isinstance(identifier, str):
+        return " " + identifier
+    else:
+        return f"s {format_list(identifier)}"
+
+##########################################################################################
+def write_per_step_simulation_methods(methodsFile, sim, stepIndex, maxSteps):
+    with open(methodsFile, "a") as methods:
+        ## progression word
+        methods.write(f"{get_progression_word(stepIndex, maxSteps)} ")
+        ## simulation type
+        methods.write(f"{get_simulation_type_text(sim)}.\n")
+        ## deal with EM and maxIterations
+        if sim["simulationType"] == "EM":
+            if sim["maxIterations"] == "-1":
+                methods.write(f"This energy minimisation was performed until it reached convergence.\n")
+            else:
+                methods.write(f"This energy minimisation was performed for {sim['maxIterations']} steps, or until it reached convergence.\n")
+        ## deal with NPT, NVT, META
+        else:
+            methods.write(f"This simulation was performed for {sim['duration']}") 
+            methods.write(f" with a timestep of {sim['timestep']}. ")
+            if "temperature" in sim:
+                methods.write(f" at {sim['temperature']} K") 
+            elif "temperatureRange" in sim:
+                methods.write(f"The temperature of this simulation was incremented through the range")
+                methods.write(f" {format_list([str(temp) + ' K' for temp in sim['temperatureRange']])} in equal sized steps. ")
+
+        ## deal with restraints
+        methods.write(f"{get_restraints_methods_text(sim)}\n")
+    
+        methods.write("\n\n")
+def  write_simulation_methods(methodsFile, simulationInfo):
+    for stepIndex, sim in enumerate(simulationInfo):
+        write_per_step_simulation_methods(methodsFile, sim, stepIndex, len(simulationInfo))
 
 
-#     2. Charge Balancing:
-#         - To balence the charge of our system, {nCls} Chloride ions were added // {nNas} sodium ions were added.
-#     """
 
 
-def write_per_step_simulation_methods(simulationInfo):
-    pass
-
-def  write_simulation_methods(simulationInfo):
-    pass
 
 
 def cite(key) -> str:
