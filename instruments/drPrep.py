@@ -369,6 +369,7 @@ def ligand_mol2(
     # Look for mol2 from config, then in ligParamDir, if not found, create new mol2
     if ligand.get("mol2"):  # Look in config
         ligMol2: FilePath = p.join(inputDir, f"{ligandName}.mol2")
+        ligLib: FilePath = p.join(inputDir, f"{ligandName}.lib")
 
     elif p.isfile(p.join(ligandParamDir, f"{ligandName}.mol2")):  # Look in ligParamDir
         ligMol2: FilePath = p.join(ligandParamDir, f"{ligandName}.mol2")
@@ -386,7 +387,8 @@ def ligand_mol2(
     
     # Add mol2 path to lig_file_dict
     ligandFileDict.update({"mol2": ligMol2})
-    
+    ligandFileDict.update({"lib": ligLib})
+
     return ligMol2, ligandFileDict
 ######################### TOPPAR CREATION ##########################################
 def ligand_toppar(ligand: dict,
@@ -629,6 +631,7 @@ def make_amber_params(
     ## find dusulphides
     disulphidePairs: List[Tuple[int, int]] = detect_disulphides(pdbFile)
 
+
     # Write the TLEAP input file
     tleapInput: str = p.join(outDir, "TLEAP.in")
     with open(tleapInput, "w") as f:
@@ -646,8 +649,13 @@ def make_amber_params(
             for ligandName, ligandInfo in ligandFileDict.items():
                 ligMol2: FilePath = ligandInfo["mol2"]
                 ligFrcmod: FilePath = ligandInfo["frcmod"]
-                f.write(f"{ligandName} = loadmol2 {ligMol2}\n")
-                f.write(f"loadamberparams {ligFrcmod}\n\n")
+                ligLib: FilePath = ligandInfo["lib"]
+                if p.isfile(ligMol2):
+                    f.write(f"{ligandName} = loadmol2 {ligMol2}\n")
+                if p.isfile(ligFrcmod):
+                    f.write(f"loadamberparams {ligFrcmod}\n")
+                if p.isfile(ligLib):
+                    f.write(f"loadoff {ligLib}\n")
 
         # Load the protein structure
         f.write(f"mol = loadpdb {pdbFile}\n")

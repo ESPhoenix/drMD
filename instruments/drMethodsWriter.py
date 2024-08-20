@@ -15,9 +15,6 @@ from instruments.drCustomClasses import FilePath, DirectoryPath
 
 from pdbUtils import pdbUtils
 
-
-
-
 ##########################################################################################
 def main(batchConfigYaml: Dict, configDir: DirectoryPath, outDir: DirectoryPath) -> None:
     ## find all config files
@@ -143,10 +140,10 @@ def write_protein_preparation_methods(configDicts, methodsFile) -> None:
 
             methods.write(f"\nThe proteins {nonProtonatedText} were protonated using software pdb2pqr [Ref. {cite('pdb2pqr')}]")
             methods.write(f"which uses ProPKA to calculate per-residue proton affinities [Ref. {cite('propka')}].")
-            methods.write(f"Proteins were protonated using the following pH: {pH}")
+            methods.write(f"Proteins were protonated using the following pH: {pH}. ")
             methods.write("This process also automatically creates disulfide bonds as appropriate.")
             methods.write(f"\n\n**WARNING** drMD did not protonate proteins {protonatedText}. ")
-            methods.write("You will need to fill in this secion manually.\n\n")
+            methods.write("You will need to fill in this section manually.\n\n")
 
 
         methods.write("\n")
@@ -162,24 +159,33 @@ def count_waters(pdbFile: FilePath) -> int:
 def write_solvation_charge_balence_methods(batchConfig, configDicts, methodsFile):
 
     boxGeometry = configDicts[0]["miscInfo"]["boxGeometry"]
-    approxWaterCount = get_approximate_water_count(configDicts, batchConfig)
+    approxWaterCount, counterIonCounts = get_solvation_atom_counts(configDicts, batchConfig)
 
     with open(methodsFile, "a") as methods:
+        ## info on solvation box
         methods.write(f"All proteins were placed in a {boxGeometry} solvation box with a 10 Å buffer between")
         methods.write(f" the protein and the nearest edge of the box. ")
-
-
+        ## average water count
         methods.write(f"Approximately {approxWaterCount} TIP3P water molecules were added to this box. ")
+        ## info on counter ions
+        methods.write(f"Sodium and Chloride ions were added to the box to balence the charge of the system.\n")
+        methods.write(f"Exact counts of counter ions are provided below:\n")
+        methods.write("| Protein Name | Sodium Ions | Clo")
+        for protName in counterIonCounts:
+            methods.write(f"{protName}: {counterIonCounts[protName]}\n")
 
 
-    ## TODO: amount of CL- / Na+ added
 
 
-def get_approximate_water_count(configDicts, batchConfig):
+
+
+def get_solvation_atom_counts(configDicts, batchConfig):
     waterCounts = []
+    counterIonCounts = {}
     outDir = batchConfig["pathInfo"]["outputDir"]
     for config in configDicts:
-        proteinInfo = config.get("proteinInfo", False)
+        protName = config["proteinInfo"]["proteinName"]
+        ## find a the solvated pdb file
         inputPdbName = p.splitext(p.basename(config["pathInfo"]["inputPdb"]))[0]
         prepDir = p.join(outDir, inputPdbName, "00_prep")
 
@@ -188,18 +194,30 @@ def get_approximate_water_count(configDicts, batchConfig):
         else:
             solvationDir = p.join(prepDir,"PROT")
         solvatedPdb = [p.join(solvationDir, file) for file in os.listdir(solvationDir) if file.endswith("solvated.pdb")][0]
-        print(solvatedPdb)
 
         waterCount = count_waters(solvatedPdb)
         waterCounts.append(waterCount)
+
+        nNa, nCl = count_ions(solvatedPdb)
+
+        counterIonCounts[protName] = {"Sodium": nNa, "Chloride": nCl}
+
     
     waterCounts = np.array(waterCounts)
     averageWaterCount = np.mean(waterCounts)
     approximateAverageWaterCount = int(round(averageWaterCount, 2 - len(str(int(averageWaterCount)))))
 
 
-    return approximateAverageWaterCount
-    
+    return approximateAverageWaterCount, counterIonCounts
+##########################################################################################
+
+def count_ions(pdbFile):
+    pdbDf = pdbUtils.pdb2df(pdbFile)
+
+    naDf = pdbDf[pdbDf["RES_NAME"] == "Na+"]
+    clDf = pdbDf[pdbDf["RES_NAME"] == "Cl-"]
+
+    return len(naDf) , len(clDf)
 
 ##########################################################################################
 def format_list(ligandList: List[str]) -> str:
@@ -256,6 +274,6 @@ def cite(key) -> str:
 if __name__ == "__main__":
     configDir = "/home/esp/scriptDevelopment/drMD/03_outputs/00_configs"
     outDir = "/home/esp/scriptDevelopment/drMD/03_outputs/00_methods"
-    batchConfigYaml = "/home/esp/scriptDevelopment/drMD/prescriptions/em_config.yaml"
+    batchConfigYaml = "/home/esp/scriptDevelopment/drMD/prescriptions/standard_MD_config.yaml"
     main(batchConfigYaml, configDir, outDir)
 

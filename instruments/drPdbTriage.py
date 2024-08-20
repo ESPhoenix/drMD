@@ -49,7 +49,7 @@ def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
             continue
         pdbFile: FilePath = p.join(pdbDir, file)
         # Check for common problems in the PDB file
-        problemsDict = pdb_triage_protocol(pdbFile, pdbDir)
+        problemsDict = pdb_triage_protocol(pdbFile, pdbDir, config)
         # Update the dictionary that looks at all PDB files
         commonPdbProblems = update_problem_dict(commonPdbProblems, problemsDict)
     # Print the results to the terminal
@@ -132,7 +132,7 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
 
 #################################################################################################
 
-def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,bool]:
+def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict) -> Dict[str,bool]:
     """
     Runs before drMD main protocol
     Checks input pdb files for common problems that will cause drMD to crash
@@ -158,6 +158,9 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
     ## load pdb file as a dataframe
     pdbDf: pd.DataFrame = pdbUtils.pdb2df(pdbFile)
 
+    ## check for non-canonical amino acids
+    isNonCanonicalAminoAcids, nonCanonicalAminoAcids = check_for_non_canonical_amino_acids(pdbDf, inputDir, config)
+
     ## check for multiple conformers
     isMultipleConformers, multipleConformers = check_for_multiple_conformers(pdbDf)
 
@@ -167,8 +170,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
     ## check for missing sidechains
     isMissingSidechains, missingSideChains = check_for_missing_sidechains(pdbDf)
 
-    ## check for non-canonical amino acids
-    isNonCanonicalAminoAcids, nonCanonicalAminoAcids = check_for_non_canonical_amino_acids(pdbDf, inputDir)
+    print(nonCanonicalAminoAcids)
 
     ## check for organimetallic ligands
     isOrganimetallicLigands, organimetallicLigands = check_for_organometallic_ligands(pdbDf)
@@ -209,7 +211,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath) -> Dict[str,
     return problemsDict
 
 #################################################################################################
-def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optional[Dict[str, int]]]:
+def check_for_organometallic_ligands(pdbDf: pd.DataFrame, uaaInfo: Optional[Dict] = None) -> tuple[bool, Optional[Dict[str, int]]]:
     """
     Check for organometallic ligands in a pdb dataframe.
 
@@ -242,9 +244,12 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optiona
             except:
                 logging.info(f"No elements column found in pdb dataframe")
                 return False,  None
-            
+    
             # If there are non-organic atoms, add the residue ID and atom count to the dictionary
             inorganicElements = [ele for ele in resElements if ele.upper() not in organicElements]
+
+
+            
             if len(inorganicElements) > 0:
                 organoMetallicResidues[f"{chainId}:{resName}:{str(resId)}"] = inorganicElements
 
@@ -254,7 +259,7 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame) -> tuple[bool, Optiona
 
     
 #################################################################################################
-def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: DirectoryPath) -> tuple[bool, Optional[Dict[str, int]]]:
+def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: DirectoryPath, config: dict) -> tuple[bool, Optional[Dict[str, int]]]:
     """
     Check for non-canonical amino acids in the pdb dataframe.
 
@@ -268,6 +273,13 @@ def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: Directory
     """
     # Initialize lists
     aminoAcidResNames, _, _, _ = initialise_lists()
+
+
+    uaaInfo = config.get("nonCanonicalAminoAcids", False)
+    if uaaInfo:
+        for uaa in uaaInfo:
+            aminoAcidResNames.add(uaa["residueName"])
+
     backboneAtoms: set  = {"N", "CA", "C", "O"}
 
     # Dictionary to store residue IDs and messages
@@ -282,17 +294,17 @@ def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: Directory
             # Skip residues with no backbone residues (i.e. ligands)
             if  not  backboneAtoms.issubset(resDf["ATOM_NAME"].unique()):
                 continue
-            # Look for missing frcmod and/or mol2 files
+            # Look for missing frcmod and/or lib files
             resKey: str = f"{chainId}:{resName}:{str(resId)}"
             frcmodFile: FilePath = p.join(inputDir, f"{resName}.frcmod")
-            mol2File: FilePath = p.join(inputDir, f"{resName}.mol2")
+            libFile: FilePath = p.join(inputDir, f"{resName}.lib")
 
-            if not p.isfile(frcmodFile) and not p.isfile(mol2File):
-                nonCanonicalAminoAcids[resKey] = "non-canonical amino acid missing frcmod and mol2 files"
+            if not p.isfile(frcmodFile) and not p.isfile(libFile):
+                nonCanonicalAminoAcids[resKey] = "non-canonical amino acid missing frcmod and lib files"
             elif not p.isfile(frcmodFile):
                 nonCanonicalAminoAcids[resKey] = "non-canonical amino acid missing frcmod file"
-            elif not p.isfile(mol2File):
-                nonCanonicalAminoAcids[resKey] = "non-canonical amino acid missing mol2 file"
+            elif not p.isfile(libFile):
+                nonCanonicalAminoAcids[resKey] = "non-canonical amino acid missing lib file"
 
     # Return boolean indicating if non-canonical amino acids were found and the dictionary
     return bool(nonCanonicalAminoAcids), nonCanonicalAminoAcids or None
