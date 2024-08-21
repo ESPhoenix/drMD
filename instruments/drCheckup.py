@@ -163,7 +163,10 @@ def check_up_handler():
         def wrapper(*args, **kwargs):
             saveFile: FilePath = simulationFunction(*args, **kwargs)
 
-            vitalsFiles, simDir = find_vitals_files(kwargs["sim"], kwargs["outDir"], kwargs["prmtop"])
+            vitalsFiles, simDir = find_vitals_files(simInfo=kwargs["sim"],
+                                                     outDir=kwargs["outDir"], 
+                                                     pdbFile=kwargs["refPdb"],
+                                                     config=kwargs["config"])
 
             try:
                 check_vitals(simDir = simDir,
@@ -178,7 +181,8 @@ def check_up_handler():
 ######################################################################
 def find_vitals_files(simInfo: Dict,
                        outDir: DirectoryPath,
-                       prmtop: app.AmberPrmtopFile) -> Tuple[Dict[str, FilePath], DirectoryPath]:
+                       pdbFile: FilePath,
+                       config: Dict) -> Tuple[Dict[str, FilePath], DirectoryPath]:
     
     ## get the simulation directory
     simDir: DirectoryPath= p.join(outDir, simInfo["stepName"])
@@ -187,7 +191,10 @@ def find_vitals_files(simInfo: Dict,
     trajectoryDcds: list = [p.join(simDir, file) for file in os.listdir(simDir) if file.endswith(".dcd")]
     ## if more than one trajectory is found, merge partial outputs before running the health check
     if len(trajectoryDcds) > 1:
-        drSplicer.merge_partial_outputs(simDir = simDir, prmtop = prmtop, simInfo = simInfo)
+        drSplicer.merge_partial_outputs(simDir = simDir,
+                                            pdbFile=pdbFile,
+                                            config=config,
+                                            simInfo = simInfo)
 
     ## find vitals reporter file
     vitalsReport: FilePath = p.join(simDir, "vitals_report.csv")

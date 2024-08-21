@@ -28,17 +28,17 @@
 [] redo PDF image sizes and locations
 
 ## drMethodScribe
-[] MAKE
+[] general simulation infos
 
 ## drConfigWriter
 [] hardwareInfo: null appearing in automatically generated config files
 
-
 ## drPdbTriage
 [] HIS, HIP ect being identified as a UAA
 
-## drSelector
-ligand -> ligand (will make methodsWriter easier!)
-
 ## drRestraints
 [] improper restraints
+
+
+## drCheckup
+[] look at convergance again -- be a bit more lenient!

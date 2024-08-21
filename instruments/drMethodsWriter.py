@@ -83,7 +83,6 @@ def write_ligand_parameterisation_methods(configFiles, methodsFile) -> None:
 
 
     ## if no ligand in ligandInfo, then return an empty string 
-    print(allLigandNames)
 
     if len(allLigandNames) == 0:
         return 
@@ -91,7 +90,7 @@ def write_ligand_parameterisation_methods(configFiles, methodsFile) -> None:
     with open (methodsFile, "a") as methods:
         ## when we have ligand, but none have been processed by drMD, write a warning to fill this in manually
         if len(obabelProtonatedLigands) > 0 and len(antechamberChargesLigands) > 0 and len(parmchkParamsLigands) > 0:
-            methods.write(f"\n\n**WARNING** drMD did not run any automated procedures to parameterise your ligand. \
+            methods.write(f"\n\n**WARNING** drMD did not run any automated procedures to parameterise your ligand(s). \
                           You will need to fill in this section manually.\n\n")
             return
 

@@ -182,7 +182,6 @@ def skip_resume_or_simulate(simDir: str, simulations: list, i: int, outDir: str)
     if not p.isdir(simDir):
         ## if this is the first simulation in the series and the simDir doesn't exist, run the step from scratch
         if i == 0:
-            print(f"Simulation directory {simDir} does not exist, running step from scratch.")
             return "simulate", None
 
         previousSimName = simulations[i-1]["stepName"]

@@ -29,7 +29,7 @@ miscInfo:
   boxGeometry: cubic
   heavyProtons: True
   skipPdbTriage: True
-
+  firstAidMaxRetries: 100
 ########################################################################
 loggingInfo:
   trajectorySelections:

@@ -22,7 +22,7 @@ from pdbUtils import pdbUtils
 
 ########################################################################################################
 @drLogger.monitor_progress_decorator()
-@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation, max_retries=2)
+@drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation)
 @drCheckup.check_up_handler()
 def run_metadynamics(prmtop: app.Topology,
                       inpcrd: any,

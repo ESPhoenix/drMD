@@ -31,12 +31,12 @@ from os import PathLike
 
 
 #######################################################################
-def firstAid_handler(firstAid_function: callable, max_retries: int=10):
+def firstAid_handler(firstAid_function: callable):
     """
     A decorator that handles firstAid retries.
 
     Implementation in drSim.py:
-        @drTriage.firstAid_handler(drTriage.run_firstAid_simulation, max_retries=5)
+        @drTriage.firstAid_handler(drTriage.run_firstAid_simulation, maxRetries=5)
         def run_molecular_dynamics(prmtop: str, inpcrd: str, sim: dict, saveFile: str, outDir: str, platform: openmm.Platform, refPdb: str) -> str:
         
     How it works:
@@ -64,7 +64,7 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
 
     Args:
         firstAid_function (callable): The function to be decorated.   
-        max_retries (int, optional): The maximum number of retries. Defaults to 10.
+        maxRetries (int, optional): The maximum number of retries. Defaults to 10.
 
     Returns:
         None
@@ -76,7 +76,8 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
             ## initialise a retry counter
             retries: int = 0
             ## keep running firstAid simulations until max retries is reached or the simulation succeeds
-            while retries < max_retries:
+            maxRetries: int = kwargs["config"]["miscInfo"]["firstAidMaxRetries"]
+            while retries < maxRetries:
                 ## try to run the simulation - if this runs without errors, the rest of this function is skipped
                 try:
                     saveFile: Union[PathLike, str] = simulationFunction(*args, **kwargs)
@@ -87,14 +88,17 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
                         ## merge partial reports and trajectories
                         runOutDir: Union[PathLike, str] = kwargs["outDir"]
                         simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
-                        drSplicer.merge_partial_outputs(simDir, kwargs["refPdb"], kwargs["sim"])
+                        drSplicer.merge_partial_outputs(simDir=simDir,
+                                                         pdbFile=kwargs["refPdb"],
+                                                           simInfo=kwargs["sim"],
+                                                            config = kwargs["config"])
                     ## return the saveFile (XML) of the simulation to be used by subsequent simulations
                     return saveFile
                 ## if our simulation crashes due to a numeriacal error or an OpenMM exception
                 ## run firstAid protocol to try and recover
                 except (OpenMMException, ValueError) as e:
                     errorOpenMM = e
-                    saveFile, retries = run_first_aid_protocol(retries, max_retries, *args, **kwargs)
+                    saveFile, retries = run_first_aid_protocol(retries, maxRetries, *args, **kwargs)
 
             else:
                 ## If we have got here, the firstAid has failed
@@ -105,13 +109,13 @@ def firstAid_handler(firstAid_function: callable, max_retries: int=10):
         return wrapper
     return decorator
 
-def  run_first_aid_protocol(retries: int, max_retries: int, *args, **kwargs):
+def  run_first_aid_protocol(retries: int, maxRetries: int, *args, **kwargs):
     retries += 1
     ## let user know whats going on
     if retries == 1:
         drSplash.print_performing_first_aid()
 
-    drLogger.log_info(f"-->{' '*4}Attempting simulation firstAid, try {retries} of {max_retries}", True)
+    drLogger.log_info(f"-->{' '*4}Attempting simulation firstAid, try {retries} of {maxRetries}", True)
     ## find simulation output directory
     runOutDir: Union[PathLike, str] = kwargs["outDir"]
     simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
@@ -310,7 +314,7 @@ def run_firstAid_energy_minimisation(prmtop: str,
         "simulationType": "NPT",
         "duration" : "10 ps",
         "timestep" : "0.5 ps",
-        "temp" : 300,
+        "temperature" : 300,
         "logInterval" : "2 ps",
         "maxIterations" : 1000
         }
