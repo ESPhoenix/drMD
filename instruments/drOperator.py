@@ -182,6 +182,7 @@ def skip_resume_or_simulate(simDir: str, simulations: list, i: int, outDir: str)
     if not p.isdir(simDir):
         ## if this is the first simulation in the series and the simDir doesn't exist, run the step from scratch
         if i == 0:
+            print(f"Simulation directory {simDir} does not exist, running step from scratch.")
             return "simulate", None
 
         previousSimName = simulations[i-1]["stepName"]
@@ -192,7 +193,7 @@ def skip_resume_or_simulate(simDir: str, simulations: list, i: int, outDir: str)
     ## if the simDir already exists:
     ## 1. look for XML file in simDir, if found *skip* and return saveFile
     ## 2. look for CHK file in simDir, if found *resume* and return saveFile
-    ## 3. if neither exists, delete the simDir and run the step from scratch
+    ## 3. if neither exists, delete the simDir -> find the last saveFile -> run the step from scratch
     else:
         thisSimName = simulations[i]["stepName"]
         saveXml = p.join(simDir, f"{thisSimName}.xml")  
@@ -203,6 +204,9 @@ def skip_resume_or_simulate(simDir: str, simulations: list, i: int, outDir: str)
             return "resume", saveChk
         else:
             rmtree(simDir)
-            return "simulate", None
+            previousSimName = simulations[i-1]["stepName"]
+            previousSimDir = p.join(outDir, previousSimName) if i > 0 else False
+            saveXml = p.join(previousSimDir, f"{previousSimName}.xml") if previousSimDir else False
+            return "simulate", saveXml
 
 

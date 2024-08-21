@@ -42,9 +42,16 @@ def make_per_protein_config(
     fileData: List[str] = p.splitext(pdbFile)
     if fileData[1] != ".pdb":
         return
+    
+
+
+
     ## read info from batchConfig
     outDir = batchConfig["pathInfo"]["outputDir"]
     yamlDir = p.join(outDir, "00_configs")
+
+
+   
 
     # Get filename of pdb file and use that to make a run directory
     protName: str = p.splitext(p.basename(pdbFile))[0]
@@ -52,9 +59,11 @@ def make_per_protein_config(
     runDir: DirectoryPath = p.join(outDir, protName)
     os.makedirs(runDir, exist_ok=True)
 
+    ## if config file has already been made, skip and return it
+    configYaml = p.join(yamlDir, f"{protName}_config.yaml")
+    if p.exists(configYaml):
+        return configYaml
 
-
-    #
 
     ## load pdb file into DataFrame
     pdbDf = pdbUtils.pdb2df(pdbFile)

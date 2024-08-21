@@ -1,6 +1,7 @@
 #### README updates
-[x]  redo installation instructions
-[]  work out what needs changing
+[] advanced YAML-fu with variables
+[] miscInfo
+
 
 ## configTriage
 [] loggingInfo
