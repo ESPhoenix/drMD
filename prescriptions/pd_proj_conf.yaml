@@ -1,12 +1,12 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/pd_proj"
-  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs/pd_proj
+  outputDir: /home/esp/scriptDevelopment/drMD/03_outputs
   
 ########################################################################
 hardwareInfo:
   parallelCPU: 1
-  platform: "CUDA"
+  platform: CUDA
   subprocessCpus: 1
 
 ########################################################################
@@ -26,234 +26,141 @@ ligandInfo:
 miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
-  boxGeometry: "cubic"
+  boxGeometry: cubic
   heavyProtons: True
+  skipPdbTriage: True
 
 ########################################################################
 loggingInfo:
   trajectorySelections:
   - selection:
-      keyword: "protein"
+      keyword: protein
   - selection:
-      keyword: "custom"
+      keyword: custom
       customSelection:
-      - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "all"}
-      - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "all"}
+      - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: all}
+      - {CHAIN_ID: A, RES_NAME: PD, RES_ID: all, ATOM_NAME: all}
 ########################################################################
 
+ligandRestraints: &ligandRestraints
+  - restraintType: distance
+    parameters:
+      k: 1000
+      r0: 2.5
+    selection:
+      keyword: custom
+      customSelection:
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: N1}
+        - {CHAIN_ID: A, RES_NAME: PD, RES_ID: all, ATOM_NAME: PD}
+  - restraintType: distance
+    parameters:
+      k: 1000
+      r0: 2.5
+    selection:
+      keyword: custom
+      customSelection:
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: N2}
+        - {CHAIN_ID: A, RES_NAME: PD, RES_ID: all, ATOM_NAME: PD}
+  - restraintType: angle
+    parameters:
+      k: 1000
+      theta0: 67.9
+    selection:
+      keyword: custom
+      customSelection:
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: N2}
+        - {CHAIN_ID: A, RES_NAME: PD, RES_ID: all, ATOM_NAME: PD}
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: N1}
+  - restraintType: torsion
+    parameters:
+      k: 200
+      phi0: 0
+    selection:
+      keyword: custom
+      customSelection:
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: N2}
+        - {CHAIN_ID: A, RES_NAME: PD, RES_ID: all, ATOM_NAME: PD}
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: N1}
+        - {CHAIN_ID: A, RES_NAME: C8X, RES_ID: all, ATOM_NAME: C9}
+
+
+equilibraitionRestraints: &equilibraitionRestraints
+  - restraintType: position
+    parameters:
+      k: 1000 
+    selection:
+      keyword: protein
+
+  - restraintType: position
+    selection: 
+      keyword: ligands  
+    parameters:
+      k: 1000
+
+
+
 simulationInfo:
-  - stepName: "01_energy_minimisation"
-    simulationType: "EM"
+  - stepName: 01_energy_minimisation
+    simulationType: EM
     temperature: 300
     maxIterations: 1000
-    restraintInfo:
-    ##
-    - restraintType: "distance"
-      parameters:
-        k: 1000
-        r0: 2.5
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-    ##
-    - restraintType: "distance"
-      parameters:
-        k: 1000
-        r0: 2.5
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-    ##
-    - restraintType: "angle"
-      parameters:
-        k: 1000
-        theta0: 67.9
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-    ##
-    - restraintType: "torsion"
-      parameters:
-        k: 200
-        phi0: 0
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "C9"}
-
-
+    restraintInfo: *ligandRestraints
 
 
     ###################################################
-  - stepName: "02_NVT_pre-equilibraition"
-    simulationType: "NVT"
-    duration: "100 ps"
-    timestep: "2 fs"
+  - stepName: 02_NVT_pre-equilibraition
+    simulationType: NVT
+    duration: 100 ps
+    timestep: 4 fs
+    heavyProtons: True
     temperature: 300
-    logInterval: "10 ps"
-    restraintInfo:
-    - restraintType: "position"
-      parameters:
-        k: 1000 
-      selection:
-        keyword: "protein"
-
-    - restraintType: "position"
-      selection: 
-        keyword: "ligands"  
-      parameters:
-        k: 1000
+    logInterval: 10 ps
+    restraintInfo: *equilibraitionRestraints
 
   ###################################################
-  - stepName: "03_NPT_pre-equilibraition"
-    simulationType: "NPT"
-    duration: "100 ps"
-    timestep: "4 fs"
+  - stepName: 03_NPT_pre-equilibraition
+    simulationType: NPT
+    duration: 100 ps
+    timestep: 4 fs
+    heavyProtons: True
     temperature: 300
-    logInterval: "10 ps"
-    restraintInfo:
-    - restraintType: "position"
-      parameters:
-        k: 1000
-      selection:
-        keyword: "protein"
-
-    - restraintType: "position"
-      selection: 
-        keyword: "ligands"  
-      parameters:
-        k: 1000
+    logInterval: 10 ps
+    restraintInfo: *equilibraitionRestraints
   ##################################################
-  - stepName: "04_NpT_slowIntergrator"
-    simulationType: "NpT"
-    duration: "10 ps"
-    timestep: "0.5 fs"
+  - stepName: 04_NpT_slowIntergrator
+    simulationType: NpT
+    duration: 10 ps
+    timestep: 0.5 fs
+    heavyProtons: False
     temperature: 300
-    logInterval: "1 ps"
-    restraintInfo:
-    ##
-    - restraintType: "distance"
-      parameters:
-        k: 1000
-        r0: 2.5
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-    ##
-    - restraintType: "distance"
-      parameters:
-        k: 1000
-        r0: 2.5
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-    ##
-    - restraintType: "angle"
-      parameters:
-        k: 1000
-        theta0: 67.9
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-    ##
-    - restraintType: "torsion"
-      parameters:
-        k: 200
-        phi0: 0
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "C9"}
+    logInterval: 1 ps
+    restraintInfo: *ligandRestraints
 
     ###################################################
-  - stepName: "05_production"
-    simulationType: "NPT"
+  - stepName: 05_production
+    simulationType: NPT
     temperature: 300
     logInterval: 5 ps
-    timestep: 2 fs
+    timestep: 4 fs
+    heavyProtons: True
     duration: 5 ns
     maxIterations: 1000
-    heavyProtons: False
-    restraintInfo:
-    ##
-    - restraintType: "distance"
-      parameters:
-        k: 1000
-        r0: 2.5
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-    ##
-    - restraintType: "distance"
-      parameters:
-        k: 1000
-        r0: 2.5
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-    ##
-    - restraintType: "angle"
-      parameters:
-        k: 1000
-        theta0: 67.9
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-    ##
-    - restraintType: "torsion"
-      parameters:
-        k: 50
-        phi0: 0
-      selection:
-        keyword: "custom"
-        customSelection:
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N2"}
-        - {"CHAIN_ID": "A", "RES_NAME": "PD", "RES_ID": "all", "ATOM_NAME": "PD"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "N1"}
-        - {"CHAIN_ID": "A", "RES_NAME": "C8X", "RES_ID": "all", "ATOM_NAME": "C9"}
-
+    restraintInfo: *ligandRestraints
 
 
 ################################################
 
 # postSimulationInfo:
 #   endPointInfo:
-#     stepNames: ["01_energy_minimisation"]
+#     stepNames: [01_energy_minimisation]
 #     removeAtoms: 
 #     - selection:
-#         keyword: "ions"
+#         keyword: ions
 #     - selection:
-#         keyword: "ligands"
+#         keyword: ligands
 #     collate: True
 #   directoryCleanUpInfo:
 #     removeAllSimulationDirs: True
-#     # stepsToRemove: ["00_prep"]
+#     # stepsToRemove: [00_prep]
 
 

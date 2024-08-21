@@ -48,6 +48,8 @@ def read_and_validate_config() -> Tuple[dict, FilePath]:
         drSplash.print_config_error(e) 
     except ValueError as e:
         drSplash.print_config_error(e) 
+
+
     
     ## check each major section in config file
     ## throw errors with a nice splash screen if something goes wrong

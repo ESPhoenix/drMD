@@ -5,6 +5,8 @@
 ## configTriage
 [] loggingInfo
 [] trajectoryAtoms -- do we allow for multiple trajectories per simulation (or too complex??)
+[] miscInfo
+
 
 ## drFirstAid
 [] alternate between EM and MD to fix problem

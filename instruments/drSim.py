@@ -61,20 +61,24 @@ def initialise_simulation(prmtop: app.AmberPrmtopFile,
     nonbondedMethod: openmm.NonbondedForce = app.PME
     nonbondedCutoff: unit.Quantity = 1 * unit.nanometer
 
-
+    ## deal with heavy protons
     heavyProtons = sim.get("heavyProtons", False)
     if heavyProtons:
-        bondConstraints = app.AllBonds
-        protonMass = 1.00784 * unit.amu
+        protonMass = 1.00784 * 4 * unit.amu
+        ## check to see if a large timestep has been used
+        timestep = sim["timestep"].value_in_unit(unit.femtoseconds)
+        if timestep <= 2:
+            drLogger.log_info("WARNING: Timestep is too small for heavy protons", True, True)
+            drLogger.log_info("WARNING: Use at least 2 fs to get a faster simulation", True, True)
+
     else:
-        bondConstraints = app.HBonds
         protonMass = 1.00784 * unit.amu
  
 
     # Create the system.
     system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
                                                 nonbondedCutoff=nonbondedCutoff,
-                                                constraints=bondConstraints,
+                                                constraints=app.HBonds,
                                                 hydrogenMass=protonMass)
     
     ## use static temperature if specified, or use first value in temperatureRange to start with
