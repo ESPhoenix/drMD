@@ -77,7 +77,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
     
     else:
-        solvatedPdb, inputCoords, amberParams = no_ligands_prep_protocol(config=config,
+        solvatedPdb, inputCoords, amberParams = no_ligand_prep_protocol(config=config,
                                                                           protName=protName,
                                                                             prepDir=prepDir)
         
@@ -90,7 +90,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
     return solvatedPdb, inputCoords, amberParams
 #####################################################################################
-def no_ligands_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) -> Tuple[FilePath, FilePath, FilePath]:
+def no_ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) -> Tuple[FilePath, FilePath, FilePath]:
     ## PREPARE PROTEIN STRUCTURE
     protPdb: FilePath = prepare_protein_structure(config=config, outDir = prepDir)  
     ## MERGE PROTEIN PDBS
@@ -256,7 +256,7 @@ def split_input_pdb(inputPdb: FilePath, config: Dict, outDir: DirectoryPath) -> 
 
     Args:
         inputPdb (str): The path to the input PDB file.
-        config (dict): The configuration dictionary containing information about the ligands.
+        config (dict): The configuration dictionary containing information about the ligand.
         outDir (str): The output directory where the split PDB files will be saved.
 
     Returns:
@@ -265,8 +265,8 @@ def split_input_pdb(inputPdb: FilePath, config: Dict, outDir: DirectoryPath) -> 
     # Read whole pdb into a df
     pdbDf: pd.DataFrame = pdbUtils.pdb2df(inputPdb)
     # Write each ligand to a separate pdb file
-    ligandsInfo: List[dict] = config["ligandInfo"]
-    for ligand in ligandsInfo:
+    ligandInfo: List[dict] = config["ligandInfo"]
+    for ligand in ligandInfo:
         ligandName: str = ligand["ligandName"]
         ligPrepDir: DirectoryPath = p.join(outDir, ligandName)
         os.makedirs(ligPrepDir, exist_ok=True)
@@ -450,7 +450,7 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
     """
     # read inputs from config file
     outDir: DirectoryPath = config["pathInfo"]["outputDir"]
-    ligandsInfo: dict = config["ligandInfo"]
+    ligandInfo: dict = config["ligandInfo"]
     inputDir: DirectoryPath = config["pathInfo"]["inputDir"]
     mainDir: DirectoryPath = p.dirname(config["pathInfo"]["outputDir"])
     # create a dir to save parameter files in (saves re-running on subsequent runs)
@@ -460,7 +460,7 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
     ligandPdbs: List[FilePath] = []
     ligandFileDict: Dict = {}
     # for each ligand in config
-    for ligand in ligandsInfo:
+    for ligand in ligandInfo:
         ## init an empty dict to store the ligand file paths
         ligFileDict: Dict = {}
         ## get ligand name
@@ -644,7 +644,7 @@ def make_amber_params(
         f.write("loadamberparams frcmod.ions1lm_126_tip3p\n")
         f.write("loadamberparams frcmod.ions234lm_126_tip3p\n")
 
-        # Load molecular mechanics parameters for ligands
+        # Load molecular mechanics parameters for ligand
         if ligandFileDict:
             for ligandName, ligandInfo in ligandFileDict.items():
                 ligMol2: FilePath = ligandInfo["mol2"]

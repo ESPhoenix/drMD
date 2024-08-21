@@ -43,6 +43,10 @@ def main() -> None:
 
     ## get batchConfig
     batchConfig, configTriageLog  = drConfigTriage.read_and_validate_config()
+
+
+
+
     ## unpack batchConfig into variables for this function
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]
     yamlDir: DirectoryPath = p.join(outDir,"00_configs")

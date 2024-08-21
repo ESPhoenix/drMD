@@ -62,7 +62,7 @@ def get_config_dicts(configDir: DirectoryPath) -> List[Dict]:
 
 ##########################################################################################
 def write_ligand_parameterisation_methods(configFiles, methodsFile) -> None:
-    ## find all ligands in config files, see what drMD has done with them
+    ## find all ligand in config files, see what drMD has done with them
     obabelProtonatedLigands = set()
     antechamberChargesLigands = set()
     parmchkParamsLigands = set()
@@ -82,33 +82,35 @@ def write_ligand_parameterisation_methods(configFiles, methodsFile) -> None:
                 parmchkParamsLigands.add(ligand["ligandName"])
 
 
-    ## if no ligands in ligandInfo, then return an empty string 
+    ## if no ligand in ligandInfo, then return an empty string 
+    print(allLigandNames)
+
     if len(allLigandNames) == 0:
         return 
     ## open methods file and append to it
     with open (methodsFile, "a") as methods:
-        ## when we have ligands, but none have been processed by drMD, write a warning to fill this in manually
+        ## when we have ligand, but none have been processed by drMD, write a warning to fill this in manually
         if len(obabelProtonatedLigands) > 0 and len(antechamberChargesLigands) > 0 and len(parmchkParamsLigands) > 0:
-            methods.write(f"\n\n**WARNING** drMD did not run any automated procedures to parameterise your ligands. \
+            methods.write(f"\n\n**WARNING** drMD did not run any automated procedures to parameterise your ligand. \
                           You will need to fill in this section manually.\n\n")
             return
 
         methods.write(f"Ligand parameter generation was performed using the following procedure: ")
 
         if obabelProtonatedLigands == antechamberChargesLigands == parmchkParamsLigands:
-            methods.write(f"All ligands were protonated using OpenBabel [Ref. {cite('obabel')}], newly added hydrogen atoms were then renamed to ensure compatability with the AMBER forcefeild. ")
-            methods.write(f"Partial charges of all ligands were calculated, and atom types were assigned using antechamber [Ref. {cite('antechamber')}], and the parameters for the ligands were generated using parmchk [Ref. {cite('parmchk')}].")
+            methods.write(f"All ligand were protonated using OpenBabel [Ref. {cite('obabel')}], newly added hydrogen atoms were then renamed to ensure compatability with the AMBER forcefeild. ")
+            methods.write(f"Partial charges of all ligand were calculated, and atom types were assigned using antechamber [Ref. {cite('antechamber')}], and the parameters for the ligand were generated using parmchk [Ref. {cite('parmchk')}].")
 
         else:
             if len(obabelProtonatedLigands) > 0:
-                ligands = format_list(list(obabelProtonatedLigands))
-                methods.write(f"The ligands {ligands} were protonated using OpenBabel [Ref. {cite('obabel')}], novel hydrogen atoms were then renamed to ensure compatability with the AMBER forcefeild")
+                ligand = format_list(list(obabelProtonatedLigands))
+                methods.write(f"The ligand {ligand} were protonated using OpenBabel [Ref. {cite('obabel')}], novel hydrogen atoms were then renamed to ensure compatability with the AMBER forcefeild")
             if len(antechamberChargesLigands) > 0:
-                ligands = format_list(list(antechamberChargesLigands))
-                methods.write(f"For the ligands {ligands} partial charges were calculated and atom types were assigned using antechamber [Ref. {cite('antechamber')}]")
+                ligand = format_list(list(antechamberChargesLigands))
+                methods.write(f"For the ligand {ligand} partial charges were calculated and atom types were assigned using antechamber [Ref. {cite('antechamber')}]")
             if len(parmchkParamsLigands) > 0:
-                ligands = format_list(list(parmchkParamsLigands))
-                methods.write(f"The parameters for the ligands {ligands} were generated using parmchk [Ref. {cite('parmchk')}]")
+                ligand = format_list(list(parmchkParamsLigands))
+                methods.write(f"The parameters for the ligand {ligand} were generated using parmchk [Ref. {cite('parmchk')}]")
 
         methods.write("\n")
 ##########################################################################################

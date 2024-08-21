@@ -44,7 +44,7 @@ simulationInfo:
 
     - restraintType: "position"
       selection: 
-        keyword: "ligands"  
+        keyword: "ligand"  
       parameters:
         k: 1000
 # ########################################################################
@@ -63,7 +63,7 @@ simulationInfo:
 
     - restraintType: "position"
       selection: 
-        keyword: "ligands"  
+        keyword: "ligand"  
       parameters:
         k: 1000
 

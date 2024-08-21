@@ -30,7 +30,7 @@ simulationInfo:
         keyword: "protein"
     - restraintType: "position"
       selection: 
-        keyword: "ligands"  
+        keyword: "ligand"  
       parameters:
         k: 1000
 ################################################

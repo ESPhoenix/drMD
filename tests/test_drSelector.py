@@ -89,8 +89,8 @@ def test_get_atom_indexes_ions(mock_pdb_utils):
 
 ########
 
-def test_get_atom_indexes_ligands(mock_pdb_utils):
-    selection = {"keyword": "ligands"}
+def test_get_atom_indexes_ligand(mock_pdb_utils):
+    selection = {"keyword": "ligand"}
     pdbFile = "mock.pdb"
     atom_indexes = drSelector.get_atom_indexes(selection, pdbFile)
     assert atom_indexes == []

@@ -31,7 +31,7 @@ simulationInfo:
 
     - restraintType: "position"
       selection: 
-        keyword: "ligands"  
+        keyword: "ligand"  
       parameters:
         k: 1000
 # ########################################################################
@@ -49,7 +49,7 @@ simulationInfo:
     #     k: 1000
     # - restraintType: "position"
     #   selection: 
-    #     keyword: "ligands"  
+    #     keyword: "ligand"  
     #   parameters:
     #     k: 1000
 # ########################################################################
@@ -119,4 +119,4 @@ postSimulationInfo:
     - selection:
         keyword: "ions"
     - selection:
-        keyword: "ligands"
+        keyword: "ligand"

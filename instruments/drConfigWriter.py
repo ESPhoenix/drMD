@@ -69,7 +69,7 @@ def make_per_protein_config(
     pdbDf = pdbUtils.pdb2df(pdbFile)
     ## generate infomation on the protein portion of the pdb file
     proteinInfo = make_proteinInfo(pdbDf, protName)
-    ## generate information on the ligands in the pdb file
+    ## generate information on the ligand in the pdb file
     inputDir = p.dirname(pdbFile)
 
     ligandInfo = make_ligandInfo(pdbDf, inputDir, yamlDir, batchConfig)
@@ -146,12 +146,12 @@ def make_ligandInfo(
     ## GET LIGAND ATOMS IN INPUT GEOMETRY 
     aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
 
-    ligandsDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids) &
+    ligandDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids) &
                     ~pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) &
                     ~pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
 
     ## GET NAMES OF LIGANDS
-    ligNames = ligandsDf["RES_NAME"].unique().tolist()
+    ligNames = ligandDf["RES_NAME"].unique().tolist()
 
     ## SKIP IF NOT LIGAND
     if len(ligNames) == 0:
@@ -167,7 +167,7 @@ def make_ligandInfo(
     else:
         ligandInfo = []
         for ligName in ligNames:
-            ligandDf = ligandsDf[ligandsDf["RES_NAME"] == ligName]
+            ligandDf = ligandDf[ligandDf["RES_NAME"] == ligName]
             # detect protons in ligand
             isLigandProtonated = False
             if (ligandDf["ELEMENT"] == "H").any():

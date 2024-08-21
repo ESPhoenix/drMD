@@ -40,7 +40,7 @@ def pdb_triage(pdbDir: DirectoryPath, config: dict) -> None:
         "isBrokenChains": False,  # PDB contains broken chains
         "isMissingSidechains": False,  # PDB contains missing sidechains
         "isNonCanonicalAminoAcids": False,  # PDB contains non-canonical amino acids
-        "isOrganimetallicLigands": False  # PDB contains organimetallic ligands
+        "isOrganimetallicLigands": False  # PDB contains organimetallic ligand
     }
 
     # Iterate through all PDB files in the directory
@@ -115,9 +115,9 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
             logging.info(f"\t> and supply them in the inputs directory")
 
         if commonPdbProblems["isOrganimetallicLigands"]: 
-            logging.info(f"\n  * Organimetallic ligands have been identified *")
+            logging.info(f"\n  * Organimetallic ligand have been identified *")
             logging.info(f"\t> This will cause parameterisation of your system to fail")
-            logging.info(f"\t> You can create your own parameters for organometallic ligands")
+            logging.info(f"\t> You can create your own parameters for organometallic ligand")
             logging.info(f"\t> and supply them in the inputs directory")
     else:
         logging.info(f"-->{' '*4}No common problems found in the PDB files.")
@@ -172,8 +172,8 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
 
     print(nonCanonicalAminoAcids)
 
-    ## check for organimetallic ligands
-    isOrganimetallicLigands, organimetallicLigands = check_for_organometallic_ligands(pdbDf)
+    ## check for organimetallic ligand
+    isOrganimetallicLigands, organimetallicLigands = check_for_organometallic_ligand(pdbDf)
 
     ## report any problems found in pdb file
     if isMultipleConformers:
@@ -193,7 +193,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
         for key, value in nonCanonicalAminoAcids.items():
             logging.info(f"\t\t{key}: {value}")
     if isOrganimetallicLigands:
-        logging.info(f"  * Organimetallic ligands found in {pdbName} for the following residues: *")
+        logging.info(f"  * Organimetallic ligand found in {pdbName} for the following residues: *")
         for key, value in organimetallicLigands.items():
             logging.info(f"\t\t{key}: {value}")
 
@@ -211,16 +211,16 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
     return problemsDict
 
 #################################################################################################
-def check_for_organometallic_ligands(pdbDf: pd.DataFrame, uaaInfo: Optional[Dict] = None) -> tuple[bool, Optional[Dict[str, int]]]:
+def check_for_organometallic_ligand(pdbDf: pd.DataFrame, uaaInfo: Optional[Dict] = None) -> tuple[bool, Optional[Dict[str, int]]]:
     """
-    Check for organometallic ligands in a pdb dataframe.
+    Check for organometallic ligand in a pdb dataframe.
 
     Args:
         pdbDf (pd.DataFrame): The pdb dataframe.
 
     Returns:
-        Tuple[bool, Optional[Dict[str, int]]]: A tuple containing a boolean indicating if organometallic ligands were found,
-        and a dictionary with the residue IDs of the organometallic ligands and the number of non-organic atoms in each.
+        Tuple[bool, Optional[Dict[str, int]]]: A tuple containing a boolean indicating if organometallic ligand were found,
+        and a dictionary with the residue IDs of the organometallic ligand and the number of non-organic atoms in each.
     """
     # Initialize lists
     aminoAcidResNames, _, _, _ = initialise_lists()
@@ -253,7 +253,7 @@ def check_for_organometallic_ligands(pdbDf: pd.DataFrame, uaaInfo: Optional[Dict
             if len(inorganicElements) > 0:
                 organoMetallicResidues[f"{chainId}:{resName}:{str(resId)}"] = inorganicElements
 
-    # Return boolean indicating if organometallic ligands were found and the dictionary
+    # Return boolean indicating if organometallic ligand were found and the dictionary
     return bool(organoMetallicResidues), organoMetallicResidues or None
 
 
@@ -291,7 +291,7 @@ def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: Directory
             # Skip if cannonical amio acid residue, water,
             if resName in aminoAcidResNames or resName == "HOH":
                 continue
-            # Skip residues with no backbone residues (i.e. ligands)
+            # Skip residues with no backbone residues (i.e. ligand)
             if  not  backboneAtoms.issubset(resDf["ATOM_NAME"].unique()):
                 continue
             # Look for missing frcmod and/or lib files

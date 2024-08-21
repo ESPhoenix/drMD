@@ -43,7 +43,7 @@ simulationInfo:
 #     - selection:
 #         keyword: "ions"
 #     - selection:
-#         keyword: "ligands"
+#         keyword: "ligand"
 #     collate: True
 #   directoryCleanUpInfo:
 #     removeAllSimulationDirs: True

@@ -94,13 +94,13 @@ hardwareInfo:
 ```
 
 ## ligandInfo
-The **ligandInfo** entry in the config file is optional and must be used if your PDB files have organic ligands or cofactors.
+The **ligandInfo** entry in the config file is optional and must be used if your PDB files have organic ligand or cofactors.
 These small molecules will not have parameters in the AMBER forcefield, drMD will run an automated protocol to generate these parameters for you.
 To do this, you will need to tell drMD some things about each ligand you whish tp simulate.
 
 
 > :medical_symbol:
-> The **ligandInfo** entry is *optional*. drMD will automatically detect ligands in your PDB files. It will also detect
+> The **ligandInfo** entry is *optional*. drMD will automatically detect ligand in your PDB files. It will also detect
 > parameter files in your input directory
 
 **ligandInfo** is a list of dictionaries that contain the following parameters:
@@ -111,10 +111,10 @@ To do this, you will need to tell drMD some things about each ligand you whish t
                 If set to FALSE, drMD will run an automated protonation protocol to add protons to your ligand
 
   > :medical_symbol:
-  > The automatic protonation protocol only works reliably for simple organic ligands.
+  > The automatic protonation protocol only works reliably for simple organic ligand.
 
   > :medical_symbol:
-  > For more complex ligands, we recommended that you manually add protons in your input PDB file prior to running drMD
+  > For more complex ligand, we recommended that you manually add protons in your input PDB file prior to running drMD
 
 - **charge**:       This is the charge of the ligand (int)
 
@@ -265,7 +265,7 @@ When creating restraints, metadynamics bias variables or running post-simulation
   - **"protein"** : This will select all protein atoms in your system
   - **"water"** : This will select all water molecules in your system
   - **"ions"**: This will select all ions in your system
-  - **"ligands"** : This will select all non-protein, non-water and non-ion atoms in your system
+  - **"ligand"** : This will select all non-protein, non-water and non-ion atoms in your system
   - **"custom"** : This will select all atoms that match the selectionSyntax
 
 Example use of keywords in the selection dictionary:

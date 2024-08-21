@@ -93,7 +93,7 @@ equilibraitionRestraints: &equilibraitionRestraints
 
   - restraintType: position
     selection: 
-      keyword: ligands  
+      keyword: ligand  
     parameters:
       k: 1000
 
@@ -157,7 +157,7 @@ simulationInfo:
 #     - selection:
 #         keyword: ions
 #     - selection:
-#         keyword: ligands
+#         keyword: ligand
 #     collate: True
 #   directoryCleanUpInfo:
 #     removeAllSimulationDirs: True

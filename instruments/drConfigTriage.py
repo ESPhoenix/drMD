@@ -425,7 +425,7 @@ def check_selection(selection: dict, stepName: str) -> None:
     keyword, = check_info_for_args(selection, "selection", ["keyword"], optional=False)
     if not isinstance(keyword, str):
         raise TypeError(f"-->{' '*4}selection keywords incorrect in {stepName}, see README.md for more details")
-    if not keyword in ["all", "protein", "ligands", "water", "ions", "custom"]:
+    if not keyword in ["all", "protein", "ligand", "water", "ions", "custom"]:
         raise ValueError(f"-->{' '*4}selection keywords incorrect in {stepName}, see README.md for more details")
 
     if keyword == "custom":

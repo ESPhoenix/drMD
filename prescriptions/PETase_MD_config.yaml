@@ -16,7 +16,7 @@ loggingInfo:
   - selection:
       keyword: "protein"
   - selection:
-      keyword: "ligands"
+      keyword: "ligand"
 
 
 hardwareInfo:
@@ -128,7 +128,7 @@ simulationInfo:
       parameters:
         k: 150
       selection:
-        keyword: "ligands"
+        keyword: "ligand"
   ##
   - stepName: "022_NpT_warmup"
     simulationType: "NPT"
@@ -141,7 +141,7 @@ simulationInfo:
       parameters:
         k: 150
       selection:
-        keyword: "ligands"
+        keyword: "ligand"
 
   ##
   - stepName: "022_NpT_equilibration"
@@ -155,7 +155,7 @@ simulationInfo:
       parameters:
         k: 150
       selection:
-        keyword: "ligands"
+        keyword: "ligand"
 ########################################################################
 ## PRODUCTION MD
   - stepName: "031_production_md"
