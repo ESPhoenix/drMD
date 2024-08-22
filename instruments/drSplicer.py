@@ -162,11 +162,6 @@ def merge_partial_trajectories(config: Dict,
 
 #######################################################################
 def fix_merged_vitals(vitalsDf: pd.DataFrame, simInfo: Dict) -> pd.DataFrame:
-
-    # simInfo = drSim.process_sim_data(simInfo)
-
-    # print(simInfo)
-
     ## read stuff from simInfo
     logInterval: int = simInfo["logInterval"]
     timeStep: openmm.Quantity = simInfo["timestep"]

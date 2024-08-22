@@ -170,8 +170,6 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
     ## check for missing sidechains
     isMissingSidechains, missingSideChains = check_for_missing_sidechains(pdbDf)
 
-    print(nonCanonicalAminoAcids)
-
     ## check for organimetallic ligand
     isOrganimetallicLigands, organimetallicLigands = check_for_organometallic_ligand(pdbDf)
 

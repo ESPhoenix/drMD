@@ -43,15 +43,10 @@ def make_per_protein_config(
     if fileData[1] != ".pdb":
         return
     
-
-
-
     ## read info from batchConfig
     outDir = batchConfig["pathInfo"]["outputDir"]
     yamlDir = p.join(outDir, "00_configs")
 
-
-   
 
     # Get filename of pdb file and use that to make a run directory
     protName: str = p.splitext(p.basename(pdbFile))[0]
@@ -129,7 +124,8 @@ def make_proteinInfo(
     isProteinProtonated = False
     if (protDf["ELEMENT"] == "H").any():
         isProteinProtonated = True
-
+    else:
+        isProteinProtonated = False
     ## CREATE proteinInfo
     proteinInfo = {"proteinName":  protName,
                     "protons": isProteinProtonated}   
@@ -167,10 +163,11 @@ def make_ligandInfo(
     else:
         ligandInfo = []
         for ligName in ligNames:
-            ligandDf = ligandDf[ligandDf["RES_NAME"] == ligName]
+            print(ligName)
+            thisLigandDf = ligandDf[ligandDf["RES_NAME"] == ligName]
             # detect protons in ligand
             isLigandProtonated = False
-            if (ligandDf["ELEMENT"] == "H").any():
+            if (thisLigandDf["ELEMENT"] == "H").any():
                 isLigandProtonated = True
             # check for mol2 file in input pdb directory
             ligMol2 = p.join(pdbDir, f"{ligName}.mol2")
@@ -188,7 +185,7 @@ def make_ligandInfo(
             if p.isfile(ligFrcmod):
                 isLigandFrcmod = True  
             # deal with charge
-            charge = drPrep.find_ligand_charge(ligandDf, ligName, yamlDir, pH=7.4)
+            charge = drPrep.find_ligand_charge(thisLigandDf, ligName, yamlDir, pH=7.4)
             # write to temporary dict, then to ligandInfo for config
             tmpDict = {"ligandName": ligName,
                        "protons": isLigandProtonated,

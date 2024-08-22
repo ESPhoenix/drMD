@@ -18,7 +18,7 @@
 [] more metaDynamics parameters
 [] maxRetries for firstAid as a config parameter
 [] different box geometies
-[???] heavy protons and fast intergrators [NEED TO BENCHMARK WHETHER THIS MAKES IT FASTER]
+[x] heavy protons and fast intergrators [NEED TO BENCHMARK WHETHER THIS MAKES IT FASTER]
 
 ## drLogger
 [] do clean code
@@ -39,6 +39,8 @@
 ## drRestraints
 [] improper restraints
 
-
 ## drCheckup
 [] look at convergance again -- be a bit more lenient!
+
+## drPrep
+[] protein protonation running even when protons in starting structure??

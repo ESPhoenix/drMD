@@ -366,6 +366,7 @@ def ligand_mol2(
         Tuple[str, Dict[str, str]]: A tuple containing the path to the mol2 file and the updated lig_file_dict.
     """
 
+    ligLib = False
     # Look for mol2 from config, then in ligParamDir, if not found, create new mol2
     if ligand.get("mol2"):  # Look in config
         ligMol2: FilePath = p.join(inputDir, f"{ligandName}.mol2")
@@ -387,7 +388,8 @@ def ligand_mol2(
     
     # Add mol2 path to lig_file_dict
     ligandFileDict.update({"mol2": ligMol2})
-    ligandFileDict.update({"lib": ligLib})
+    if  ligLib:
+        ligandFileDict.update({"lib": ligLib})
 
     return ligMol2, ligandFileDict
 ######################### TOPPAR CREATION ##########################################
@@ -542,6 +544,11 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
         # Copy the input PDB file to the output directory
         copy(config["pathInfo"]["inputPdb"], protPdb)
 
+    ## read per-protein config file and return protein PDB if already protonated
+    proteinInfo: Dict = config.get("proteinInfo")
+    isProteinProtonated: bool = proteinInfo.get("protons")
+    if isProteinProtonated:
+        return protPdb
 
     ## use pdb2pqr to protonate the protein at a specific pH
     pH: int = str(float(config["miscInfo"]["pH"]))
@@ -636,7 +643,7 @@ def make_amber_params(
     tleapInput: str = p.join(outDir, "TLEAP.in")
     with open(tleapInput, "w") as f:
         # Load Amber force fields and TIP3P water model
-        f.write("source oldff/leaprc.ff14SB\n")
+        f.write("source leaprc.protein.ff19SB\n")
         f.write("source leaprc.gaff2\n")
         f.write("source leaprc.water.tip3p\n\n")
 
@@ -649,7 +656,7 @@ def make_amber_params(
             for ligandName, ligandInfo in ligandFileDict.items():
                 ligMol2: FilePath = ligandInfo["mol2"]
                 ligFrcmod: FilePath = ligandInfo["frcmod"]
-                ligLib: FilePath = ligandInfo["lib"]
+                ligLib: FilePath = ligandInfo.get("lib",False)
                 if p.isfile(ligMol2):
                     f.write(f"{ligandName} = loadmol2 {ligMol2}\n")
                 if p.isfile(ligFrcmod):
