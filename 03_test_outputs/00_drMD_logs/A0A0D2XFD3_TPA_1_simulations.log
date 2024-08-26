@@ -1,0 +1,273 @@
+-->    Running 01_energy_minimisation Step for: A0A0D2XFD3_TPA_1           
+Force 0: HarmonicBondForce
+Force 1: HarmonicAngleForce
+Force 2: PeriodicTorsionForce
+Force 3: CMAPTorsionForce
+Force 4: NonbondedForce
+Force 5: CMMotionRemover
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+Force 0: HarmonicBondForce
+Force 1: HarmonicAngleForce
+Force 2: PeriodicTorsionForce
+Force 3: CMAPTorsionForce
+Force 4: NonbondedForce
+Force 5: CMMotionRemover
+Force 6: CustomExternalForce
+Force 7: CustomExternalForce
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 10.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 10.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 20.0% | Time Remaining: 0:38 | Average Speed: 89 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 30.0% | Time Remaining: 0:34 | Average Speed: 118 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 30.0% | Time Remaining: 0:34 | Average Speed: 118 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 40.0% | Time Remaining: 0:29 | Average Speed: 132 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 40.0% | Time Remaining: 0:29 | Average Speed: 132 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 50.0% | Time Remaining: 0:24 | Average Speed: 141 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 60.0% | Time Remaining: 0:19 | Average Speed: 146 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 60.0% | Time Remaining: 0:19 | Average Speed: 146 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 70.0% | Time Remaining: 0:14 | Average Speed: 150 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 70.0% | Time Remaining: 0:14 | Average Speed: 150 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 80.0% | Time Remaining: 0:09 | Average Speed: 153 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 90.0% | Time Remaining: 0:04 | Average Speed: 156 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 90.0% | Time Remaining: 0:04 | Average Speed: 156 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 157 ns/day 
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 157 ns/day 
+-->    Checking vitals...
+-->    Running 02_NVT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 157 ns/day 
+RMS calculation for 2184 atoms.
+Choosing frames to analyze
+Starting preparation
+Starting analysis loop over 10 trajectory frames
+Finishing up
+maxp pruned
+cmap pruned
+fpgm dropped
+prep dropped
+cvt  dropped
+kern dropped
+post pruned
+GPOS dropped
+GSUB dropped
+glyf pruned
+Added gid0 to subset
+Closing glyph list over 'glyf': 13 glyphs before
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Closed glyph list over 'glyf': 13 glyphs after
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Retaining 13 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+FFTM NOT subset; don't know how to subset
+GDEF subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+name pruned
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1
+Force 0: HarmonicBondForce
+Force 1: HarmonicAngleForce
+Force 2: PeriodicTorsionForce
+Force 3: CMAPTorsionForce
+Force 4: NonbondedForce
+Force 5: CMMotionRemover
+Force 6: CustomExternalForce
+Force 7: CustomExternalForce
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 10.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 20.0% | Time Remaining: 0:26 | Average Speed: 131 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 30.0% | Time Remaining: 0:22 | Average Speed: 176 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 40.0% | Time Remaining: 0:19 | Average Speed: 198 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 50.0% | Time Remaining: 0:16 | Average Speed: 211 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 60.0% | Time Remaining: 0:13 | Average Speed: 220 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 70.0% | Time Remaining: 0:09 | Average Speed: 226 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 70.0% | Time Remaining: 0:09 | Average Speed: 226 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 80.0% | Time Remaining: 0:06 | Average Speed: 231 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 90.0% | Time Remaining: 0:03 | Average Speed: 234 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 237 ns/day 
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 237 ns/day 
+-->    Checking vitals...
+RMS calculation for 2184 atoms.
+Choosing frames to analyze
+Starting preparation
+Starting analysis loop over 10 trajectory frames
+Finishing up
+-->    Running 03_NPT_pre-equilibraition Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 237 ns/day 
+maxp pruned
+cmap pruned
+fpgm dropped
+prep dropped
+cvt  dropped
+kern dropped
+post pruned
+GPOS dropped
+GSUB dropped
+glyf pruned
+Added gid0 to subset
+Closing glyph list over 'glyf': 13 glyphs before
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Closed glyph list over 'glyf': 13 glyphs after
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Retaining 13 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+FFTM NOT subset; don't know how to subset
+GDEF subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+name pruned
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+Force 0: HarmonicBondForce
+Force 1: HarmonicAngleForce
+Force 2: PeriodicTorsionForce
+Force 3: CMAPTorsionForce
+Force 4: NonbondedForce
+Force 5: CMMotionRemover
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 10.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 20.0% | Time Remaining: 0:16 | Average Speed: 21 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 40.0% | Time Remaining: 0:12 | Average Speed: 31 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 50.0% | Time Remaining: 0:10 | Average Speed: 33 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 70.0% | Time Remaining: 0:06 | Average Speed: 35 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 80.0% | Time Remaining: 0:04 | Average Speed: 36 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 90.0% | Time Remaining: 0:02 | Average Speed: 36 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 37 ns/day 
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 37 ns/day 
+-->    Checking vitals...
+RMS calculation for 2184 atoms.
+Choosing frames to analyze
+Starting preparation
+Starting analysis loop over 10 trajectory frames
+Finishing up
+-->    Running 04_NpT_slowIntergrator Step for: A0A0D2XFD3_TPA_1 | Progress: 100.0% | Time Remaining: 0:00 | Average Speed: 37 ns/day 
+maxp pruned
+cmap pruned
+fpgm dropped
+prep dropped
+cvt  dropped
+kern dropped
+post pruned
+GPOS dropped
+GSUB dropped
+glyf pruned
+Added gid0 to subset
+Closing glyph list over 'glyf': 13 glyphs before
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Closed glyph list over 'glyf': 13 glyphs after
+Glyph names: ['.notdef', 'S', 'V', 'a', 'i', 'l', 'm', 'n', 'o', 's', 'space', 't', 'u']
+Glyph IDs:   [0, 3, 54, 57, 68, 76, 79, 80, 81, 82, 86, 87, 88]
+Retaining 13 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+FFTM NOT subset; don't know how to subset
+GDEF subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+name pruned
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1
+Force 0: HarmonicBondForce
+Force 1: HarmonicAngleForce
+Force 2: PeriodicTorsionForce
+Force 3: CMAPTorsionForce
+Force 4: NonbondedForce
+Force 5: CMMotionRemover
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: N/A | Time Remaining: N/A | Average Speed: N/A ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 1.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 1.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 1.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 1.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 1.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 1.0% | Time Remaining: -- | Average Speed: 0 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 2.0% | Time Remaining: 28:22 | Average Speed: 124 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 2.0% | Time Remaining: 28:22 | Average Speed: 124 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 2.0% | Time Remaining: 28:22 | Average Speed: 124 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 2.0% | Time Remaining: 28:22 | Average Speed: 124 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 2.0% | Time Remaining: 28:22 | Average Speed: 124 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 2.0% | Time Remaining: 28:22 | Average Speed: 124 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 3.0% | Time Remaining: 27:58 | Average Speed: 166 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 3.0% | Time Remaining: 27:58 | Average Speed: 166 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 3.0% | Time Remaining: 27:58 | Average Speed: 166 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 3.0% | Time Remaining: 27:58 | Average Speed: 166 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 3.0% | Time Remaining: 27:58 | Average Speed: 166 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 3.0% | Time Remaining: 27:58 | Average Speed: 166 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 4.0% | Time Remaining: 27:43 | Average Speed: 187 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 4.0% | Time Remaining: 27:43 | Average Speed: 187 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 4.0% | Time Remaining: 27:43 | Average Speed: 187 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 4.0% | Time Remaining: 27:43 | Average Speed: 187 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 4.0% | Time Remaining: 27:43 | Average Speed: 187 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 5.0% | Time Remaining: 27:22 | Average Speed: 200 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 5.0% | Time Remaining: 27:22 | Average Speed: 200 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 5.0% | Time Remaining: 27:22 | Average Speed: 200 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 5.0% | Time Remaining: 27:22 | Average Speed: 200 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 5.0% | Time Remaining: 27:22 | Average Speed: 200 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 5.0% | Time Remaining: 27:22 | Average Speed: 200 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 6.0% | Time Remaining: 27:02 | Average Speed: 208 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 6.0% | Time Remaining: 27:02 | Average Speed: 208 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 6.0% | Time Remaining: 27:02 | Average Speed: 208 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 6.0% | Time Remaining: 27:02 | Average Speed: 208 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 6.0% | Time Remaining: 27:02 | Average Speed: 208 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 6.0% | Time Remaining: 27:02 | Average Speed: 208 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 7.0% | Time Remaining: 26:46 | Average Speed: 214 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 7.0% | Time Remaining: 26:46 | Average Speed: 214 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 7.0% | Time Remaining: 26:46 | Average Speed: 214 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 7.0% | Time Remaining: 26:46 | Average Speed: 214 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 7.0% | Time Remaining: 26:46 | Average Speed: 214 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 8.0% | Time Remaining: 26:30 | Average Speed: 218 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 8.0% | Time Remaining: 26:30 | Average Speed: 218 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 8.0% | Time Remaining: 26:30 | Average Speed: 218 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 8.0% | Time Remaining: 26:30 | Average Speed: 218 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 8.0% | Time Remaining: 26:30 | Average Speed: 218 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 8.0% | Time Remaining: 26:30 | Average Speed: 218 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 9.0% | Time Remaining: 26:14 | Average Speed: 222 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 9.0% | Time Remaining: 26:14 | Average Speed: 222 ns/day 
+-->    Running 05_Production_MD Step for: A0A0D2XFD3_TPA_1 | Progress: 9.0% | Time Remaining: 26:14 | Average Speed: 222 ns/day 

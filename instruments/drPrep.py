@@ -101,7 +101,7 @@ def no_ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath)
                                                     pdbFile= protPdb,
                                                 outName= outName)
     
-    solvatedPdb = drFixer.reset_chains_residues(protPdb,solvatedPdb)
+    solvatedPdb = drFixer.reset_chains_residues(protPdb, solvatedPdb)
 
     return solvatedPdb, inputCoords, amberParams
 
@@ -131,8 +131,8 @@ def ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) ->
                             pdbFile= mergedPdb,
                             outName= outName)
 
-        solvatedPdb = drFixer.reset_chains_residues(inputPdb,solvatedPdb)
-        return solvatedPdb, inputCoords, amberParams
+        niceChainsPdb = drFixer.reset_chains_residues(mergedPdb, solvatedPdb)
+        return niceChainsPdb, inputCoords, amberParams
 #####################################################################################   
 def choose_to_skip_prep(config: dict, prepDir: DirectoryPath, protName: str) -> Tuple[bool, Optional[Tuple[FilePath, FilePath, FilePath]]]:
     """
@@ -204,7 +204,7 @@ def find_ligand_charge(ligDf: pd.DataFrame,
     os.chdir(outDir)
     
     # Fix atom names in the ligand dataframe
-    ligDf: pd.DataFrame = pdbUtils.fix_atom_names(ligDf)
+    ligDf: pd.DataFrame = drFixer.fix_atom_names(ligDf)
     # Remove hydrogen atoms and rename ATOM to HETATM
     ligDf: pd.DataFrame = ligDf[ligDf["ELEMENT"] != "H"]
     ligDf["ATOM"] = "HETATM"
@@ -285,7 +285,8 @@ def ligand_protonation(
     ligand: Dict[str, Union[bool, int, str]],
     ligPrepDir: DirectoryPath,
     ligandName: str,
-    ligandPdbs: List[FilePath]) -> Tuple[str, List[str]]:
+    ligandPdbs: List[FilePath],
+    ligPdb: FilePath) -> Tuple[str, List[str]]:
     """
     Protonates a ligand if specified in the configuration, otherwise performs protonation using Open Babel and pdb4amber.
 
@@ -298,44 +299,36 @@ def ligand_protonation(
         ligPrepDir (str): The directory where the ligand files are prepared (str).
         ligandName (str): The name of the ligand (str).
         ligandPdbs (List[str]): A list of ligand pdb files (List[str]).
-        prepLog (str): The log file for preparation (str).
-
+        liPdb (FilePath): The path to the ligand pdb file (FilePath).
     Returns:
         Tuple[str, List[str]]: A tuple containing the protonated ligand pdb file (str) and the updated list of ligand pdb files (List[str]).
     """
 
     # If the ligand is already protonated, return the ligand pdb file
     if ligand["protons"]:
-        ligPdb: FilePath = p.join(ligPrepDir, f"{ligandName}.pdb")
-        ligDf: pd.DataFrame = pdbUtils.pdb2df(ligPdb)
-        ligDf: pd.DataFrame = pdbUtils.fix_atom_names(ligDf)
-        pdbUtils.df2pdb(ligDf, ligPdb)
-        # rename_hydrogens(ligPdb, ligPdb)
-        ligandPdbs.append(ligPdb)
         return ligPdb, ligandPdbs
 
     # If the ligand is not protonated, perform protonation using Open Babel and pdb4amber
     else:
         # # find pdb ligand pdb file
-        ligPdb: FilePath = p.join(ligPrepDir, f"{ligandName}.pdb")
         ligPdb_H: FilePath = p.join(ligPrepDir, f"{ligandName}_H.pdb")
 
         # Protonate the ligand using Open Babel
         obabelCommand: str = f"obabel {ligPdb} -O {ligPdb_H} -h"
         run_with_log(obabelCommand, ligPdb_H)
 
-        ligPdb_newH: FilePath = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
+        # ligPdb_newH: FilePath = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
 
-        # Rename the hydrogens in the ligand pdb file
-        rename_hydrogens(ligPdb_H, ligPdb_newH)
+        # # Rename the hydrogens in the ligand pdb file
+        # rename_hydrogens(ligPdb_H, ligPdb_newH)
 
-        # Run pdb4amber to get compatible types and fix atom numbering
-        ligPdb_amber: FilePath = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
-        pdb4amberCommand: str = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
-        run_with_log(pdb4amberCommand, ligPdb_amber)
+        # # Run pdb4amber to get compatible types and fix atom numbering
+        # ligPdb_amber: FilePath = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
+        # pdb4amberCommand: str = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
+        # run_with_log(pdb4amberCommand, ligPdb_amber)
 
-        ligandPdbs.append(ligPdb_amber)
-        return ligPdb_amber, ligandPdbs
+        ligandPdbs.append(ligPdb_H)
+        return ligPdb_H, ligandPdbs
 
 ###############################  MOL2 CREATION #####################################
 def ligand_mol2(
@@ -472,10 +465,17 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
         # find files and directories
         ligPrepDir: DirectoryPath = p.join(outDir,"00_prep",ligandName)
         os.chdir(ligPrepDir)
-        
+        ## get ligand pdb location
+        ligPdb: FilePath = p.join(ligPrepDir, f"{ligandName}.pdb")
+
+
         # Protonate the ligand
         drLogger.log_info(f"{' '*4}--> Protonating ligand {ligandName}...",True)
-        ligPdb, ligandPdbs = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs)  
+        ligPdb, ligandPdbs = ligand_protonation(ligand,ligPrepDir,ligandName,ligandPdbs, ligPdb)  
+
+        # deal with atom names in ligand, make sure they are all unique
+        ligPdb = ensure_ligand_atoms_are_unique(ligPdb)
+
 
         # Create mol2 file
         drLogger.log_info(f"{' '*4}--> Calculating partial charges for ligand {ligandName}...",True)
@@ -489,6 +489,44 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
 
         ligandFileDict.update({ligandName:ligFileDict})
     return ligandPdbs, ligandFileDict
+
+#####################################################################################
+def ensure_ligand_atoms_are_unique(ligPdb: FilePath) -> FilePath:
+    """
+    Ensure that all atoms in the ligand have unique atom names.
+
+    Args:
+        ligPdb (str): Path to the input ligand PDB file.
+
+    Returns:
+        str: Path to the output PDB file with unique atom names.
+    """
+    # Read PDB file
+    ligDf = pdbUtils.pdb2df(ligPdb)
+
+    atomNames = ligDf["ATOM_NAME"].tolist()
+    uniqueAtomName = set(atomNames)
+
+    if len(atomNames) != len(uniqueAtomName):
+        ligDf = rename_heteroatoms(ligDf)    
+
+    pdbUtils.df2pdb(ligDf, ligPdb)
+    return ligPdb
+#####################################################################################
+def rename_heteroatoms(pdbDf: pd.DataFrame) -> pd.DataFrame:
+    
+    # Generate new names for hydrogens
+    letters: List[str] = list(string.ascii_uppercase)
+    numbers: List[str] = [str(i) for i in range(1,10)]
+    newNameSuffixes: List[str] = [number+letter for letter in letters for number in numbers]
+
+    # Rename hydrogens in the DataFrame
+    count: int = 0
+    for index, _ in pdbDf.iterrows():
+        pdbDf.loc[index,"ATOM_NAME"] = pdbDf.loc[index,"ATOM_NAME"][0]  + newNameSuffixes[count]
+        count += 1
+    return pdbDf
+
 #####################################################################################
 def rename_hydrogens(pdbFile: FilePath, outFile: DirectoryPath) -> None:
     """
@@ -695,7 +733,6 @@ def make_amber_params(
     inputCoords: FilePath = p.join(outDir, f"{outName}.inpcrd")
     ## reset chain and residue IDs in amber PDB
     solvatedPdb: FilePath = p.join(outDir, solvatedPdb)
-    # drFixer.reset_chains_residues(pdbFile, solvatedPdb)
     return inputCoords, amberParams, solvatedPdb
 #####################################################################################
 def run_with_log(

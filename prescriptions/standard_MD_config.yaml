@@ -1,7 +1,7 @@
 ########################################################################
 pathInfo:
   inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
-  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_test_outputs"
   
 ########################################################################
 hardwareInfo:
@@ -10,7 +10,7 @@ hardwareInfo:
   subprocessCpus: 1
 ########################################################################
 miscInfo:
-  pH: 1
+  pH: 7.4
   firstAidMaxRetries: 10
   boxGeometry: "cubic"
   heavyProtons: True
@@ -22,7 +22,19 @@ loggingInfo:
       keyword: "protein"
   - selection:
       keyword: "ligand"
+########################################################################
+equilibriationRestraints: &equilibriationRestraints
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
 
+    - restraintType: "position"
+      selection: 
+        keyword: "ligand"  
+      parameters:
+        k: 1000
 
 ########################################################################
 simulationInfo:
@@ -35,39 +47,20 @@ simulationInfo:
     simulationType: "NVT"
     duration: "100 ps"
     timestep: "2 fs"
+    heavyProtons: False
     temperature: 300
     logInterval: "10 ps"
-    restraintInfo:
-    - restraintType: "position"
-      parameters:
-        k: 10000
-      selection:
-        keyword: "protein"
+    restraintInfo: *equilibriationRestraints
 
-    - restraintType: "position"
-      selection: 
-        keyword: "ligand"  
-      parameters:
-        k: 1000
 # ########################################################################
   - stepName: "03_NPT_pre-equilibraition"
     simulationType: "NPT"
     duration: "100 ps"
     timestep: "4 fs"
+    heavyProtons: True
     temperature: 300
     logInterval: "10 ps"
-    restraintInfo:
-    - restraintType: "position"
-      parameters:
-        k: 1000
-      selection:
-        keyword: "protein"
-
-    - restraintType: "position"
-      selection: 
-        keyword: "ligand"  
-      parameters:
-        k: 1000
+    restraintInfo: *equilibriationRestraints
 
 ########################################################################
   - stepName: "04_NpT_slowIntergrator"
@@ -79,18 +72,19 @@ simulationInfo:
 ########################################################################
   - stepName: "05_Production_MD"
     simulationType: "NpT"
-    duration: "500 ps"
-    timestep: "2 fs"
-    temperature: 400
+    duration: "5 ns"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
     logInterval: "50 ps"
 ################################################
 postSimulationInfo:
   clusterInfo:
     stepNames: ["05_Production_MD"] 
-    nClusters: 2
+    nClusters: 25
     clusterBy:
     - selection:
-        keyword: "all"
+        keyword: "protein"
     removeAtoms:
     - selection:
         keyword: "water"

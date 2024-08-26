@@ -68,7 +68,6 @@ def make_per_protein_config(
     inputDir = p.dirname(pdbFile)
 
     ligandInfo = make_ligandInfo(pdbDf, inputDir, yamlDir, batchConfig)
-
     # construct pathInfo
     pathInfo = {
         "inputDir": inputDir,
@@ -138,7 +137,10 @@ def make_ligandInfo(
     yamlDir: str,
     batchConfig: dict,
     ) -> Optional[Dict]:
-    
+    ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
+    if "ligandInfo" in batchConfig:    
+        ligandInfo = batchConfig["ligandInfo"]
+        return ligandInfo
     ## GET LIGAND ATOMS IN INPUT GEOMETRY 
     aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
 
@@ -152,18 +154,14 @@ def make_ligandInfo(
     ## SKIP IF NOT LIGAND
     if len(ligNames) == 0:
         ligandInfo = None
-        return None
-    
-    ## USE ligandInfo IF SUPPLIED IN BATCH CONFIG
-    if "ligandInfo" in batchConfig:
-        ligandInfo = batchConfig["ligandInfo"]
         return ligandInfo
+    
+
     
     ## CREATE ligandInfo AUTOMATICALLY (WORKS FOR SIMPLE LIGANDS)
     else:
         ligandInfo = []
         for ligName in ligNames:
-            print(ligName)
             thisLigandDf = ligandDf[ligandDf["RES_NAME"] == ligName]
             # detect protons in ligand
             isLigandProtonated = False

@@ -43,4 +43,5 @@
 [] look at convergance again -- be a bit more lenient!
 
 ## drPrep
-[] protein protonation running even when protons in starting structure??
+[x] protein protonation running even when protons in starting structure??
+[] handle exceptions for all prep steps

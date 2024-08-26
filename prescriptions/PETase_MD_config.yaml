@@ -24,7 +24,7 @@ hardwareInfo:
   subprocessCpus: 1
 ########################################################################
 simulationInfo:
-  ## EM STEPS
+## EM STEPS ##################################
   - stepName: 011_energy_minimisation
     simulationType: EM
     temperature: 0
@@ -118,7 +118,8 @@ simulationInfo:
   - stepName: 021_NVT_warmup
     simulationType: NVT
     duration: 20 ps
-    timestep: 2 fs
+    heavyProtons: true
+    timestep: 4 fs
     temperatureRange: [10,20,30,40,50,60,70,80,100]
     logInterval: 1 ps
     restraintInfo:
@@ -131,7 +132,8 @@ simulationInfo:
   - stepName: 022_NpT_warmup
     simulationType: NPT
     duration: 9 ns
-    timestep: 2 fs
+    heavyProtons: true
+    timestep: 4 fs
     temperatureRange: [100, 125, 150, 175, 200, 225, 250, 275, 300]
     logInterval: 100 ps
     restraintInfo:
@@ -155,11 +157,11 @@ simulationInfo:
         k: 150
       selection:
         keyword: ligand
-##
+## PRODUCTION MD
   - stepName: 031_production_md
     simulationType: NPT
-    duration: 50 ns
+    duration: 500 ns
     heavyProtons: true
-    timestep: 2 fs
+    timestep: 4 fs
     temperature: 300
     logInterval: 100 ps

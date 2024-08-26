@@ -45,7 +45,7 @@ def restraints_handler(
         openmm.System: The system with restraints applied.
     """
     ## if we are loading from a XML file, we need to clear all restraints
-    if not saveFile == None:
+    if saveFile:
         if p.splitext(saveFile)[1] == ".xml":
             clear_all_restraints(saveFile)
     ## check if there are any restraints specified in simulation config
@@ -77,8 +77,9 @@ def restraints_handler(
     else:
         ## if we have a checkpoint file, we are continuing a simulation
         ## just return the checkpoint file as-is
-        if p.splitext(saveFile)[1] == ".chk":
-            return system
+        if saveFile:
+            if p.splitext(saveFile)[1] == ".chk":
+                return system
 
     inspect_restraints(system)
     return system
