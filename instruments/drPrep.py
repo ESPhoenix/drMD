@@ -13,9 +13,11 @@ from pdbUtils import pdbUtils
 ## drMD MODULES
 from instruments import drFixer 
 from instruments import drLogger
+from instruments import drSplash
 ## CLEAN CODE
 from typing import Optional, Dict, List, Tuple, Union, Any
 from instruments.drCustomClasses import FilePath, DirectoryPath
+
 #####################################################################################
 
 def prep_protocol(config: dict) -> Tuple[str, str, str]:
@@ -215,7 +217,7 @@ def find_ligand_charge(ligDf: pd.DataFrame,
     # Run propka to predict charges on the ligand
     proPkaCommand: str = f"propka3 {tmpPdb}"
 
-    run_with_log(proPkaCommand, None)
+    run_with_log(proPkaCommand, "ligand PKA prediction", None)
     
     # Read the propka output to extract charge at the specified pH
     proPkaFile: FilePath = f"{ligName}.pka"
@@ -315,17 +317,7 @@ def ligand_protonation(
 
         # Protonate the ligand using Open Babel
         obabelCommand: str = f"obabel {ligPdb} -O {ligPdb_H} -h"
-        run_with_log(obabelCommand, ligPdb_H)
-
-        # ligPdb_newH: FilePath = p.join(ligPrepDir, f"{ligandName}_newH.pdb")
-
-        # # Rename the hydrogens in the ligand pdb file
-        # rename_hydrogens(ligPdb_H, ligPdb_newH)
-
-        # # Run pdb4amber to get compatible types and fix atom numbering
-        # ligPdb_amber: FilePath = p.join(ligPrepDir, f"{ligandName}_amber.pdb")
-        # pdb4amberCommand: str = f"pdb4amber -i {ligPdb_newH} -o {ligPdb_amber}"
-        # run_with_log(pdb4amberCommand, ligPdb_amber)
+        run_with_log(obabelCommand, "Ligand protonation", ligPdb_H)
 
         ligandPdbs.append(ligPdb_H)
         return ligPdb_H, ligandPdbs
@@ -375,7 +367,7 @@ def ligand_mol2(
             f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
         )
         # Run antechamber and log the command
-        run_with_log(antechamberCommand, ligMol2)
+        run_with_log(antechamberCommand, "Ligand charge calculation", ligMol2)
         # Copy to ligParamDir for future use
         copy(ligMol2, p.join(ligandParamDir, f"{ligandName}.mol2"))
     
@@ -423,7 +415,7 @@ def ligand_toppar(ligand: dict,
         # Create a new frcmod file using parmchk2
         ligFrcmod: FilePath = p.join(ligPrepDir, f"{ligandName}.frcmod")
         parmchk2Command: str = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
-        run_with_log(parmchk2Command, ligFrcmod)
+        run_with_log(parmchk2Command, "Ligand parameter generation", ligFrcmod)
         copy(ligFrcmod, p.join(ligParamDir, f"{ligandName}.frcmod"))
 
     # Add frcmod path to ligFileDict
@@ -599,7 +591,7 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
                            "--with-ph", str(float(pH)),
                              protPdb, protPqr]
     
-    run_with_log(pdb2pqrCommand)
+    run_with_log(pdb2pqrCommand, "Protein protonation", protPqr)
     ## fix the betafactor and occupancy cols to zero
     protPqr = pdbUtils.pdb2df(protPqr)
     protPqr["OCCUPANCY"] = 0
@@ -726,7 +718,7 @@ def make_amber_params(
     tleapOutput: FilePath = p.join(outDir, "TLEAP.out")
     amberParams: FilePath = p.join(outDir, f"{outName}.prmtop")
     tleapCommand: str = f"tleap -f {tleapInput} > {tleapOutput}"
-    run_with_log(tleapCommand, amberParams)
+    run_with_log(tleapCommand, "System Parameterisation", amberParams)
 
     # Reset chain and residue IDs in Amber PDB file
     solvatedPdb: FilePath = p.join(outDir, solvatedPdb)
@@ -737,6 +729,7 @@ def make_amber_params(
 #####################################################################################
 def run_with_log(
     command: str,
+    stepName: str,
     expectedOutput: Optional[str] = None
 ) -> None:
     """
@@ -753,15 +746,18 @@ def run_with_log(
     if isinstance(command, str):
         command = command.split()
 
-
-    # Execute the command and capture its output
-    result: subprocess.CompletedProcess[str] = subprocess.run(
-        command,
-        capture_output=True,
-        check=True,
-        text=True, 
-        env = os.environ
-    )
+    try: 
+        # Execute the command and capture its output
+        result: subprocess.CompletedProcess[str] = subprocess.run(
+            command,
+            capture_output=True,
+            check=True,
+            text=True, 
+            env = os.environ
+        )
+    except Exception as errorMessage:
+        print("WONK")
+        drSplash.print_prep_failed(errorMessage, stepName)
 
 
     # Log the command output
