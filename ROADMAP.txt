@@ -17,7 +17,7 @@
 [x] pH for protonation
 [] more metaDynamics parameters
 [x] maxRetries for firstAid as a config parameter
-[] different box geometies
+[x] different box geometies
 [x] heavy protons and fast intergrators [NEED TO BENCHMARK WHETHER THIS MAKES IT FASTER]
 
 ## drLogger

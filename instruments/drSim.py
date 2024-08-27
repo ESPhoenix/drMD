@@ -337,11 +337,14 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
     protName: str = p.basename(p.dirname(simDir))
     # save result as pdb - reset chain and residue Ids
     state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
-    nptPdb: str = p.join(simDir, f"{protName}.pdb")
-    with open(nptPdb, 'w') as output:
+    endPointPdb: str = p.join(simDir, f"{protName}.pdb")
+    with open(endPointPdb, 'w') as output:
         app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
-    drFixer.reset_chains_residues(refPdb, nptPdb)
+    drFixer.reset_chains_residues(refPdb, endPointPdb)
 
+    ## create a PDB file with the same atoms as the trajectory
+    trajectoryPdb = p.join(simDir, "trajectory.pdb")
+    drSelector.slice_pdb_file(config["loggingInfo"]["trajectorySelections"], endPointPdb, trajectoryPdb)
     # save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
@@ -426,8 +429,8 @@ def run_energy_minimisation(prmtop: app.AmberPrmtopFile,
         app.pdbfile.PDBFile.writeFile(simulation.topology,
                                      state.getPositions(),
                                      output)
-    
     drFixer.reset_chains_residues(refPdb, minimisedPdb)
+
 
     # Save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")

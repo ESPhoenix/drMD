@@ -52,9 +52,7 @@ warnings.filterwarnings('ignore')
 
 ######################################################################
 def check_vitals(simDir: DirectoryPath,
-                  vitalsFiles: Dict[str, FilePath],
-                    trajectorySelections: List[Dict],
-                     refPdb: FilePath) -> None:
+                  vitalsFiles: Dict[str, FilePath]) -> None:
     """
     Looks at the following properties of the simulation:
         - RMSD
@@ -84,7 +82,7 @@ def check_vitals(simDir: DirectoryPath,
 
     ## use mdtraj to calculate RMSD for non water and ions, get that data into a dataframe
     rmsdDf: pd.DataFrame = calculate_rmsd_mda(trajectoryDcd = vitalsFiles["trajectory"],
-                                           trajectoryPdb = refPdb)
+                                                trajectoryPdb = vitalsFiles["pdb"])
     ## plot RMSD as a function of time
     rmsdPng: FilePath = plot_rmsd(rmsdDf, simDir, "Backbone_RMSD")
     ## get time data, plot a table
@@ -169,9 +167,7 @@ def check_up_handler():
 
             try:
                 check_vitals(simDir = simDir,
-                            vitalsFiles = vitalsFiles,
-                            trajectorySelections= kwargs["config"]["loggingInfo"]["trajectorySelections"],
-                                refPdb = kwargs["refPdb"])
+                            vitalsFiles = vitalsFiles)
             except Exception as e:
                 drLogger.log_info(f"-->{' '*4}Error running checkup: {e}", True)
             return saveFile
@@ -209,11 +205,8 @@ def find_vitals_files(simInfo: Dict,
         raise FileNotFoundError(f"->\Trajectory file not found at {trajectoryDcd}")
     
     ## find the pdb file
-    pdbFile = False
-    for file in os.listdir(simDir):
-        if file.endswith(".pdb"):
-            pdbFile = p.join(simDir, file)
-    if not pdbFile:
+    pdbFile = p.join(simDir, "trajectory.pdb")
+    if not p.isfile(pdbFile):
         raise FileNotFoundError(f"->\tPDB file not found at {simDir}")
     
     ## collect files into a dictionary
@@ -638,5 +631,4 @@ if __name__ == "__main__":
 
     check_vitals(simDir,
                   vitals,
-                    [{"selection":{"keyword": "protein"}}, {"selection":{"keyword": "ligand"}}],
-                    refPdb=pdbFile)
+                    [{"selection":{"keyword": "protein"}}, {"selection":{"keyword": "ligand"}}])

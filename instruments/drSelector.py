@@ -88,6 +88,25 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
     return atomIndexes
 
 #######################################################################
+def slice_pdb_file(trajectorySelection: Dict, inputPdb: FilePath, outputPdb: FilePath) -> FilePath:
+    """
+    This function takes a selection dictionary and a PDB file as input,
+    And returns a sliced PDB file based on the selection
+    """
+    atomIndexes: list = []
+    for selection in trajectorySelection:
+        atomIndexes.extend(get_atom_indexes(selection["selection"], inputPdb))
+    inputDf: pd.DataFrame = pdbUtils.pdb2df(inputPdb)
+
+    outputDf: pd.DataFrame = inputDf.iloc[atomIndexes]
+
+    pdbUtils.df2pdb(outputDf, outputPdb)
+
+    return outputPdb
+
+
+
+#######################################################################
 def init_name_lists() -> Tuple[List[str], List[str], List[str], List[str]]:
     aminoAcidResNames: List = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
             'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
