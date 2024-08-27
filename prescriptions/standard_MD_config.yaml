@@ -12,7 +12,7 @@ hardwareInfo:
 miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
-  boxGeometry: "cubic"
+  boxGeometry: "octahedral"
   heavyProtons: True
 
 ########################################################################

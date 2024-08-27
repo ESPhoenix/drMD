@@ -16,12 +16,12 @@
 ## Extra features
 [x] pH for protonation
 [] more metaDynamics parameters
-[] maxRetries for firstAid as a config parameter
+[x] maxRetries for firstAid as a config parameter
 [] different box geometies
 [x] heavy protons and fast intergrators [NEED TO BENCHMARK WHETHER THIS MAKES IT FASTER]
 
 ## drLogger
-[] do clean code
+[x] do clean code
 
 ## drCheckup
 [] if this fails, continue with everything
@@ -34,14 +34,14 @@
 [x] hardwareInfo: null appearing in automatically generated config files
 
 ## drPdbTriage
-[] HIS, HIP ect being identified as a UAA 
+[x] HIS, HIP ect being identified as a UAA 
 
 ## drRestraints
-[] improper restraints
+[??] improper restraints
 
 ## drCheckup
-[] look at convergance again -- be a bit more lenient!
+[x] look at convergance again -- be a bit more lenient!
 
 ## drPrep
 [x] protein protonation running even when protons in starting structure??
-[] handle exceptions for all prep steps
+[x] handle exceptions for all prep steps

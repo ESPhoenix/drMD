@@ -232,14 +232,12 @@ def cusum_test(series: pd.Series, threshold: float=0.05):
     """
     ## remove any inf and -inf values
     seriesClean = series.replace([np.inf, -np.inf], np.nan).dropna()
-    print(seriesClean)
     ## check to see if series is long enough to perform the test
     if len(seriesClean) < 2:
         return False
     ## perform the test
     cumSumSeries = np.cumsum(seriesClean - seriesClean.mean())
 
-    print(np.max(np.abs(cumSumSeries)))
     return np.max(np.abs(cumSumSeries)) < threshold
 
 ######################################################################

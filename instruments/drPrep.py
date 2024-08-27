@@ -99,9 +99,11 @@ def no_ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath)
     outName: str = config["pathInfo"]["outputName"]
     ## MAKE AMBER PARAMETER FILES WITH TLEAP
     drLogger.log_info(f"-->{' '*4}Solvating, Charge Balencing and Creating parameters for {protName}...")
+
     inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                     pdbFile= protPdb,
-                                                outName= outName)
+                                                outName= outName, 
+                                                config = config)
     
     solvatedPdb = drFixer.reset_chains_residues(protPdb, solvatedPdb)
 
@@ -131,6 +133,7 @@ def ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) ->
         inputCoords, amberParams, solvatedPdb  = make_amber_params(outDir = wholePrepDir,
                             ligandFileDict=ligandFileDict,
                             pdbFile= mergedPdb,
+                            config= config,
                             outName= outName)
 
         niceChainsPdb = drFixer.reset_chains_residues(mergedPdb, solvatedPdb)
@@ -644,6 +647,7 @@ def make_amber_params(
     outDir: DirectoryPath,
     pdbFile: FilePath,
     outName: str,
+    config : Dict,
     ligandFileDict: Optional[Dict[str, Dict[str, str]]] = None
 ) -> Tuple[FilePath, FilePath, FilePath]:
     """
@@ -661,6 +665,8 @@ def make_amber_params(
         Tuple[FilePath, FilePath, FilePath]: The paths to the input coordinate file and the Amber
             parameter files and a pdb file
     """
+
+    drLogger.log_info(f"-->{' '*4}Preparing parameters for system: {outName}...",True)
     # Change the working directory to the output directory
     os.chdir(outDir)
 
@@ -668,6 +674,11 @@ def make_amber_params(
     ## find dusulphides
     disulphidePairs: List[Tuple[int, int]] = detect_disulphides(pdbFile)
 
+    boxGeometry: str = config["miscInfo"]["boxGeometry"]
+    if boxGeometry == "cubic":
+        solvateKeyword: str = "solvatebox"
+    elif boxGeometry == "octahedral":
+        solvateKeyword: str = "solvateoct"
 
     # Write the TLEAP input file
     tleapInput: str = p.join(outDir, "TLEAP.in")
@@ -698,7 +709,7 @@ def make_amber_params(
         f.write(f"mol = loadpdb {pdbFile}\n")
 
         # Solvate the protein and add ions
-        f.write("solvatebox mol TIP3PBOX 10.0\n")
+        f.write(f"{solvateKeyword} mol TIP3PBOX 10.0\n")
         f.write("addions mol Na+ 0\n")
         f.write("addions mol Cl- 0\n")
 
@@ -756,7 +767,6 @@ def run_with_log(
             env = os.environ
         )
     except Exception as errorMessage:
-        print("WONK")
         drSplash.print_prep_failed(errorMessage, stepName)
 
 
