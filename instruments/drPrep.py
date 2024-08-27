@@ -763,6 +763,7 @@ def run_with_log(
         env = os.environ
     )
 
+
     # Log the command output
     if result.stdout:
         drLogger.log_info(f"Command output:\n{result.stdout}")

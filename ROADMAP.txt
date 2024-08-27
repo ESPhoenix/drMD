@@ -28,13 +28,13 @@
 [] redo PDF image sizes and locations
 
 ## drMethodScribe
-[] general simulation infos
+[x] general simulation infos
 
 ## drConfigWriter
-[] hardwareInfo: null appearing in automatically generated config files
+[x] hardwareInfo: null appearing in automatically generated config files
 
 ## drPdbTriage
-[] HIS, HIP ect being identified as a UAA
+[] HIS, HIP ect being identified as a UAA 
 
 ## drRestraints
 [] improper restraints

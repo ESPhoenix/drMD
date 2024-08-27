@@ -11,6 +11,9 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Agg")
+from scipy.ndimage import gaussian_filter1d
+from scipy.signal import medfilt
+
 
 ## PDF LIBS
 from jinja2 import Environment, FileSystemLoader
@@ -78,15 +81,10 @@ def check_vitals(simDir: DirectoryPath,
     
     if len(progressDf) < 5:
         return
-    
-
-    trajectoryPdb = make_trajectory_pdb(trajectorySelections = trajectorySelections,
-                                        pdbFile=refPdb,
-                                        outDir=simDir)
 
     ## use mdtraj to calculate RMSD for non water and ions, get that data into a dataframe
     rmsdDf: pd.DataFrame = calculate_rmsd_mda(trajectoryDcd = vitalsFiles["trajectory"],
-                                           trajectoryPdb = trajectoryPdb)
+                                           trajectoryPdb = refPdb)
     ## plot RMSD as a function of time
     rmsdPng: FilePath = plot_rmsd(rmsdDf, simDir, "Backbone_RMSD")
     ## get time data, plot a table
@@ -110,8 +108,9 @@ def check_vitals(simDir: DirectoryPath,
     convergancePng: FilePath = plot_converged(simDir, converganceDf)
     ## create report PDF using all the plots created above
     create_vitals_pdf(simDir)
-    ## tidy up reporters to avoid clutter (hash out when testing)
-    #tidy_up(simDir)
+    ## tidy up reporters to avoid clutter (dont do this while testing!)
+    if not __name__ == "__main__":
+        tidy_up(simDir)
 ######################################################################
 def tidy_up(simDir: DirectoryPath):
     """
@@ -233,16 +232,18 @@ def cusum_test(series: pd.Series, threshold: float=0.05):
     """
     ## remove any inf and -inf values
     seriesClean = series.replace([np.inf, -np.inf], np.nan).dropna()
+    print(seriesClean)
     ## check to see if series is long enough to perform the test
     if len(seriesClean) < 2:
         return False
     ## perform the test
     cumSumSeries = np.cumsum(seriesClean - seriesClean.mean())
 
+    print(np.max(np.abs(cumSumSeries)))
     return np.max(np.abs(cumSumSeries)) < threshold
 
 ######################################################################
-def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> pd.DataFrame:
+def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 3) -> pd.DataFrame:
     """
     Checks for convergence in the dataframe
 
@@ -257,13 +258,13 @@ def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> p
 
     # define the conversion tolerances TODO: make these a bit more scientific
     conversionTolerances = {
-        "Potential Energy (kJ/mole)" : 50, 
-        "Kinetic Energy (kJ/mole)": 50,
-        "Total Energy (kJ/mole)": 50,
-        "Temperature (K)": 1,
-        "Box Volume (nm^3)" : 50,
-        "Density (g/mL)" : 0.1,
-        "Backbone RMSD" : 1                      ## 1 Angstrom
+        "Potential Energy (kJ/mole)" : 3000, 
+        "Kinetic Energy (kJ/mole)": 3000,
+        "Total Energy (kJ/mole)": 3000,
+        "Temperature (K)": 5,
+        "Box Volume (nm^3)" : 1,
+        "Density (g/mL)" : 1,
+        "Backbone RMSD" : 3                     
 
     }
 
@@ -271,6 +272,7 @@ def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> p
     ## create a dictionary to store the results
     convergedDict = {}
     ## loop through the columns in our dataframe
+
     for column in columns:
         ## skip if column length is 1 (we can't do any checks on that!)
         if len(column) == 1:
@@ -279,7 +281,6 @@ def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> p
         runningAverage = df[column].rolling(window=windowSize).mean()
         ## check for convergence using cumsum test
         isConverged = cusum_test(runningAverage, threshold=conversionTolerances[column])
-
         ## update the dictionary
         entryLabel = column.split("(")[0].split()[0]
         convergedDict.update({entryLabel:isConverged})
@@ -288,6 +289,8 @@ def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 5) -> p
     convergedDf = pd.DataFrame(convergedData, columns=["Property", "Converged"])    
 
     return convergedDf
+
+
 ######################################################################
 def plot_converged(simDir: DirectoryPath, convergedDf: pd.DataFrame) -> FilePath:
     """
@@ -550,31 +553,8 @@ def plot_rmsd(rmsdDf: pd.DataFrame,
     plt.savefig(savePng, bbox_inches="tight", facecolor='#1a1a1a')
     plt.close()
     return savePng
-#########################################################################################################
-def make_trajectory_pdb(trajectorySelections: List[Dict], pdbFile: FilePath, outDir: DirectoryPath) -> None:
-    """
-    Creates a trajectory PDB file based on the provided trajectory selections and PDB file.
-
-    Args:
-        trajectorySelections (List[Dict]): A list of dictionaries containing the trajectory selections.
-        pdbFile (FilePath): The path to the PDB file.
-        outDir (DirectoryPath): The output directory for the trajectory PDB file.
-
-    Returns:
-        None
-    """
-    dcdAtomSelection: List = []
-    for selection in trajectorySelections:
-        dcdAtomSelection.extend(drSelector.get_atom_indexes(selection["selection"], pdbFile))
 
 
-    pdbDf = pdbUtils.pdb2df(pdbFile)
-    dcdDf = pdbDf.iloc[dcdAtomSelection]
-
-    trajectoryPdb = p.join(outDir, "trajectory.pdb")
-    pdbUtils.df2pdb(dcdDf, trajectoryPdb)
-
-    return trajectoryPdb
 #########################################################################################################
 def calculate_rmsd_mda(trajectoryDcd: FilePath, trajectoryPdb: FilePath) -> pd.DataFrame:
 
@@ -643,8 +623,7 @@ def calculate_rmsd(trajectoryDcd: FilePath, pdbFile: FilePath, trajectorySelecti
 if __name__ == "__main__":
 
 
-    simDir = "/home/esp/scriptDevelopment/drMD/03_outputs/A0A0D2XFD3_TPA_1/05_Production_MD"
-    refPdb = "/home/esp/scriptDevelopment/drMD/03_outputs/A0A0D2XFD3_TPA_1/00_prep/WHOLE/A0A0D2XFD3_TPA_1_solvated.pdb"
+    simDir = "/home/esp/scriptDevelopment/drMD/04_PET_proj_outputs/6eqe_PET-tetramer_1/021_NVT_warmup"
 
 
     for file in os.listdir(simDir):
@@ -652,14 +631,14 @@ if __name__ == "__main__":
             os.remove(p.join(simDir, file))
 
 
-
     vitalsCsv = p.join(simDir,"vitals_report.csv")
     progressCsv = p.join(simDir,"progress_report.csv")
     trajectoryDcd = p.join(simDir,"trajectory.dcd")
-    pdbFile = p.join(simDir,"A0A0D2XFD3_TPA_1")
+    pdbFile = p.join(simDir,"trajectory.pdb")
 
     vitals = {"vitals": vitalsCsv, "progress": progressCsv, "trajectory": trajectoryDcd, "pdb": pdbFile}
+
     check_vitals(simDir,
                   vitals,
-                    [{"selection":{"keyword": "protein"}}],
-                    refPdb=refPdb)
+                    [{"selection":{"keyword": "protein"}}, {"selection":{"keyword": "ligand"}}],
+                    refPdb=pdbFile)
