@@ -1,0 +1,161 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/PET_proj"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+hardwareInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+
+########################################################################
+simulationInfo:
+  ## EM STEPS
+  - stepName: "011_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 1000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 209000
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "012_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 179740
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "013_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150480
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "014_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 121220
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "015_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 91960
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "015_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 62700
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "016_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 33440
+      selection:
+        keyword: "all"
+
+  ##
+  - stepName: "017_energy_minimisation"
+    simulationType: "EM"
+    temperature: 0
+    maxIterations: 10000
+########################################################################
+## EQUILIBRATION STEPS
+  - stepName: "021_NVT_warmup"
+    simulationType: "NVT"
+    duration: "20 ps"
+    timestep: "2 fs"
+    temperatureRange: [10,20,30,40,50,60,70,80,100]
+    logInterval: "1 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150
+      selection:
+        keyword: "ligand"
+  ##
+  - stepName: "022_NpT_warmup"
+    simulationType: "NPT"
+    duration: "9 ns"
+    timestep: "2 fs"
+    temperatureRange: [100, 125, 150, 175, 200, 225, 250, 275, 300]
+    logInterval: "100 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150
+      selection:
+        keyword: "ligand"
+
+  ##
+  - stepName: "022_NpT_equilibration"
+    simulationType: "NPT"
+    duration: "5 ns"
+    timestep: "2 fs"
+    temperature: 300
+    logInterval: "100 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 150
+      selection:
+        keyword: "ligand"
+########################################################################
+## PRODUCTION MD
+  - stepName: "031_production_metadynamics"
+    simulationType: "META"
+    duration: "50 ns"
+    timestep: "2 fs"
+    temperature: 300
+    logInterval: "10 ps"
+    metaDynamicsInfo:
+      height: 5
+      biasFactor: 10
+      biases:
+      - biasVar: "RMSD"
+        selection:
+          keyword: "custom"
+          customSelection:
+          - {CHAIN_ID: "A", RES_NAME: "all", RES_ID: [204,205,206,207,208,209,210], ATOM_NAME: ["N", "CA", "C", "O"]}
+

@@ -1,29 +1,26 @@
-## BASIC LIBS
+## BASIC PYTHON LIBRARIES
 import os
 from os import path as p
 import numpy as np
-from shutil import move
-## CUSTOM DR MD MODULES
-from pdbUtils import pdbUtils
-from  instruments import drCleanup 
-from  instruments import drOperator 
-from  instruments import drConfigTriage 
-from  instruments import drSplash
-from  instruments import drPdbTriage
-from  instruments import drConfigWriter
-## Multiprocessing
-import concurrent.futures as cf
+
+## PARALLELISATION LIBRARIES
 from tqdm import tqdm
-from subprocess import run
-import multiprocessing as mp
 from tqdm.contrib.concurrent import process_map
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from concurrent.futures.process import BrokenProcessPool
 
+## CUSTOM DR MD MODULES
+from Triage import drConfigTriage, drPdbTriage, drConfigWriter
+from Surgery import drOperator
+from ExaminationRoom import  drCleanup
+from UtilitiesCloset import drSplash
+
+
+
 ## CLEAN CODE
-from typing import Optional, Dict, List, Tuple, Union, Any
-from instruments.drCustomClasses import FilePath, DirectoryPath
+from typing import Optional, Dict, Tuple
+from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
 
 ######################################################################################################
 def main() -> None:
@@ -43,9 +40,6 @@ def main() -> None:
 
     ## get batchConfig
     batchConfig, configTriageLog  = drConfigTriage.read_and_validate_config()
-
-
-
 
     ## unpack batchConfig into variables for this function
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]

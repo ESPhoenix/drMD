@@ -1,0 +1,94 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_test_outputs"
+  
+########################################################################
+hardwareInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+########################################################################
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: "octahedral"
+  heavyProtons: True
+
+########################################################################
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: "protein"
+  - selection:
+      keyword: "ligand"
+########################################################################
+equilibriationRestraints: &equilibriationRestraints
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
+
+    - restraintType: "position"
+      selection: 
+        keyword: "ligand"  
+      parameters:
+        k: 1000
+
+########################################################################
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temperature: 300
+    maxIterations: 1000
+########################################################################
+  - stepName: "02_NVT_pre-equilibraition"
+    simulationType: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    heavyProtons: False
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo: *equilibriationRestraints
+
+# ########################################################################
+  - stepName: "03_NPT_pre-equilibraition"
+    simulationType: "NPT"
+    duration: "100 ps"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo: *equilibriationRestraints
+
+########################################################################
+  - stepName: "04_NpT_slowIntergrator"
+    simulationType: "NpT"
+    duration: "10 ps"
+    timestep: "0.5 fs"
+    temperature: 300
+    logInterval: "1 ps"
+########################################################################
+  - stepName: "05_Production_MD"
+    simulationType: "NpT"
+    duration: "5 ns"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
+    logInterval: "50 ps"
+################################################
+postSimulationInfo:
+  clusterInfo:
+    stepNames: ["05_Production_MD"] 
+    nClusters: 25
+    clusterBy:
+    - selection:
+        keyword: "protein"
+    removeAtoms:
+    - selection:
+        keyword: "water"
+    - selection:
+        keyword: "ions"
+    collate: True
+

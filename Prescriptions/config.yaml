@@ -1,0 +1,122 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+hardwareInfo:
+  parallelCPU: 1
+  platform: "CUDA"
+  subprocessCpus: 1
+
+########################################################################
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temperature: 300
+    maxIterations: 1000
+########################################################################
+  - stepName: "02_NVT_pre-equilibraition"
+    simulationType: "NVT"
+    duration: "100 ps"
+    timestep: "2 fs"
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo:
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
+
+    - restraintType: "position"
+      selection: 
+        keyword: "ligand"  
+      parameters:
+        k: 1000
+# ########################################################################
+  - stepName: "03_this_will_explode"
+    simulationType: "NpT"
+    duration: "300 ps"
+    timestep: "2 fs"
+    temperature: 1400
+    logInterval: "10 ps"
+    # restraintInfo:
+    # - restraintType: "position"
+    #   selection:
+    #     keyword: "protein"
+    #   parameters: 
+    #     k: 1000
+    # - restraintType: "position"
+    #   selection: 
+    #     keyword: "ligand"  
+    #   parameters:
+    #     k: 1000
+# ########################################################################
+#   - stepName: "04_NpT_slowIntergrator"
+#     simulationType: "NpT"
+#     duration: "10 ps"
+#     timestep: "0.5 fs"
+#     temperature: 300
+#     logInterval: "1 ps"
+########################################################################
+  # - stepName: "05_RMSD_Metadynamics_Dummy"
+  #   simulationType: "Meta"
+  #   duration: "1 ns"
+  #   timestep: "2 fs"
+  #   temperature: 600
+  #   logInterval: "5 ps"
+  #   metaDynamicsInfo:
+  #     height: 2
+  #     biasFactor: 5
+  #     biases: 
+  #     - biasVar: "DIHEDRAL"
+  #       selection: 
+  #         keyword: "custom"
+  #         customSelection: 
+  #         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "N10"}
+  #         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C1"}
+  #         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C21"}
+  #         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C3"}
+#     restraintInfo:
+#     - restraintType: "distance"
+#       selection: 
+#         keyword: "custom"
+#         customSelection:
+#         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "P"}
+#         - {CHAIN_ID: "A", RES_NAME: "FMN",RES_ID: 248, ATOM_NAME: "C8M"}
+#       parameters:
+#         r0: 3
+#         k: 1000
+#     - restraintType: "position"
+#       selection:
+#         keyword: "protein"
+#       parameters:
+#         k: 1000
+
+################################################
+
+postSimulationInfo:
+  clusterInfo:
+    stepNames: ["05_RMSD_Metadynamics_Dummy", "03_NpT_pre-equilibriation"] 
+    nClusters: 3
+    clusterBy:
+      selection:
+        keyword: "custom"
+        customSelection: 
+        - {CHAIN_ID: "A", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
+    removeAtoms:
+    - selection:
+        keyword: "water"
+    - selection:
+        keyword: "ions"
+    collate: True
+  endPointInfo:
+    stepNames: ["03_NpT_pre-equilibriation"]
+    removeAtoms:
+    - selection:
+        keyword: "water"
+    - selection:
+        keyword: "ions"
+    - selection:
+        keyword: "ligand"

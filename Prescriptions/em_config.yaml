@@ -1,0 +1,52 @@
+########################################################################
+pathInfo:
+  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/pd_proj"
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  
+########################################################################
+hardwareInfo:
+  parallelCPU: 5
+  platform: "CUDA"
+  subprocessCpus: 1
+
+########################################################################
+nonCannonicalAminoAcidInfo:
+  - residueName: "C8X"
+  - residueName: "PD"
+
+########################################################################
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: "cubic"
+  heavyProtons: True
+
+########################################################################
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: "protein"
+########################################################################
+
+simulationInfo:
+  - stepName: "01_energy_minimisation"
+    simulationType: "EM"
+    temperature: 300
+    maxIterations: 1000
+
+################################################
+
+# postSimulationInfo:
+#   endPointInfo:
+#     stepNames: ["01_energy_minimisation"]
+#     removeAtoms: 
+#     - selection:
+#         keyword: "ions"
+#     - selection:
+#         keyword: "ligand"
+#     collate: True
+#   directoryCleanUpInfo:
+#     removeAllSimulationDirs: True
+#     # stepsToRemove: ["00_prep"]
+
+
