@@ -37,7 +37,7 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
 
     ## list of dirs created by drMD that we don't want to cluster
     notRunDirs: list  = ["00_configs",
-                          "01_ligand_parameters"
+                          "01_ligand_parameters",
                             "00_collated_pdbs",
                               "00_clustered_pdbs",
                                 "00_drMD_logs", 
