@@ -7,9 +7,10 @@ pathInfo:
 miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
-  boxGeometry: cubic
+  boxGeometry: oactahedral
   skipPdbTriage: false
   firstAidMaxRetries: 100
+  writeMyMethodsSection: True
 ########################################################################
 loggingInfo:
   trajectorySelections:
@@ -113,8 +114,7 @@ simulationInfo:
     simulationType: EM
     temperature: 0
     maxIterations: 10000
-########################################################################
-## EQUILIBRATION STEPS
+## EQUILIBRATION STEPS #######################
   - stepName: 021_NVT_warmup
     simulationType: NVT
     duration: 20 ps
@@ -157,11 +157,11 @@ simulationInfo:
         k: 150
       selection:
         keyword: ligand
-## PRODUCTION MD
+## PRODUCTION MD #######################
   - stepName: 031_production_md
     simulationType: NPT
     duration: 500 ns
     heavyProtons: true
     timestep: 4 fs
     temperature: 300
-    logInterval: 100 ps
+    logInterval: 10 ps

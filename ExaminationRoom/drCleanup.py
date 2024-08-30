@@ -65,10 +65,9 @@ def cluster_handler(batchConfig: Dict) -> None:
 
     ## postprocess cluster PDB files
     ## remove atoms from cluster PDBS files as instructed
-    if "removeAtoms" in clusterInfo:
-        removeAtomsSelections: Dict = clusterInfo["removeAtoms"]
-        for removeAtomsSelection in removeAtomsSelections:
-            remove_atoms_from_pdbs(allClusterPdbs, removeAtomsSelection)
+    removeAtoms = clusterInfo.get("removeAtoms", False)
+    if removeAtoms:
+        remove_atoms_from_pdbs(allClusterPdbs, removeAtoms)
     ## collect clustered PDB files and put them in one directory per step
     if "collate" in clusterInfo:
         if clusterInfo["collate"]:
@@ -88,19 +87,17 @@ def endpoint_handler(batchConfig: Dict) -> None:
     ## unpack batchConfig
     postSimulationInfo: Dict = batchConfig["postSimulationInfo"]
     pathInfo: Dict = batchConfig["pathInfo"]
-
-    ## skip no endPointInfo key in postSimulationInfo exists
-    if not "endPointInfo" in postSimulationInfo:
+    endpointInfo = postSimulationInfo.get("endPointInfo", False)
+    ## skip no endpointInfo key in postSimulationInfo exists
+    if not endpointInfo:
         return
-    ## get endpointInfo dict
-    endpointInfo: Dict = postSimulationInfo["endPointInfo"]
     ## get endpoint PDB files
     endpointPdbs: List[Union[PathLike, str]] = get_endpoint_pdbs(endpointInfo, pathInfo)
     ## postprocess endpoint PDB files
     ## remove atoms from cluster PDBS files as instructed
-    if "removeAtoms" in endpointInfo:
-        removeAtomsSelections = [sele["selection"] for sele in endpointInfo["removeAtoms"]]
-        remove_atoms_from_pdbs(endpointPdbs, removeAtomsSelections)
+    removeAtoms = endpointInfo.get("removeAtoms", False)
+    if removeAtoms:
+        remove_atoms_from_pdbs(endpointPdbs, removeAtoms)
     ## collect endpoint PDB files and put them in one directory per step
     collate_pdbs(endpointPdbs, pathInfo)
 ######################################################################################################
@@ -148,7 +145,7 @@ def remove_step_directories(batchConfig: dict, stepsToRemove: list) -> None:
         None
     """
     ## let user know what we are doing
-    drLogger.log_info("-->\tRemoving specified simulation directories", True)
+    drLogger.log_info(f"-->{' '*4}Removing specified simulation directories", True)
 
     ## unpack batchConfig
     inputDir: DirectoryPath= batchConfig["pathInfo"]["inputDir"]
@@ -176,7 +173,7 @@ def remove_siulation_directories(batchConfig: dict) -> None:
         None
     """
     ## let user know what we are doing
-    drLogger.log_info("-->\tRemoving all simulation directories", True)
+    drLogger.log_info(f"-->{' '*4}Removing all simulation directories", True)
 
     ## unpack batchConfig
     inputDir = batchConfig["pathInfo"]["inputDir"]
@@ -201,7 +198,7 @@ def collate_pdbs(pdbFiles: List[FilePath], pathInfo: Dict) -> None:
         None
     """
     ## let user know what we are doing
-    drLogger.log_info(f"-->\tCollating {len(pdbFiles)} PDB files into per-step directories", True)
+    drLogger.log_info(f"-->{' '*4}Collating {len(pdbFiles)} PDB files into per-step directories", True)
 
     ## for each pdb file, move it to its per-step directory
     for pdbFile in pdbFiles:
@@ -243,7 +240,7 @@ def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict) -> List[FilePath]:
 ######################################################################################################
 def remove_atoms_from_pdbs(
     pdbFiles: List[FilePath],
-    removeAtomsSelections: List[Dict]) -> None:  
+    removeAtoms: List[Dict]) -> None:  
     """
     Removes atoms from a PDB file based on a selection
     This functoin is used to remove atoms from cluster and endpoint PDB files
@@ -257,13 +254,16 @@ def remove_atoms_from_pdbs(
 
     drLogger.log_info(f"-->{' '*4}Removing atoms from clustering pdbs...", True)
 
+    removeAtomsSelections = [sele["selection"] for sele in removeAtoms]
+
     ## for each pdb file in input list
     for pdbFile in pdbFiles:
         ## convert to a dataframe
         pdbDf = pdbUtils.pdb2df(pdbFile)
+        indexesToRemove = []
         for removeAtomsSelection in removeAtomsSelections:
-            indexesToRemove = drSelector.get_atom_indexes(removeAtomsSelection, pdbFile)
-            droppedDf = pdbDf.drop(indexesToRemove)
+            indexesToRemove.extend(drSelector.get_atom_indexes(removeAtomsSelection, pdbFile))
+        droppedDf = pdbDf.drop(indexesToRemove)
         pdbUtils.df2pdb(droppedDf, pdbFile)
 ######################################################################################################
 

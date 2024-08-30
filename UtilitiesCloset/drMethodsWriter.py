@@ -11,25 +11,21 @@ import inflect
 from pdbUtils import pdbUtils
 
 ##  CLEAN CODE
-from typing import Dict, Callable
+from typing import Dict, Callable, List, Tuple, Set, Union
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
 
 ##########################################################################################
-def main(batchConfigYaml: Dict, configDir: DirectoryPath, outDir: DirectoryPath) -> None:
+def methods_writer_protocol(batchConfig: Dict, configDir: DirectoryPath, outDir: DirectoryPath) -> None:
     global inflecter
     inflecter = inflect.engine()
 
     ## find all config files
     configDicts = get_config_dicts(configDir)
-    ## read batch config
-    with open(batchConfigYaml, 'r') as f:
-        batchConfig = yaml.safe_load(f)
-
-    
+    autoMethodsDir = p.join(outDir, "00_AutoMethods")
     ## make outDir if it doesn't exist
-    os.makedirs(outDir, exist_ok=True)
+    os.makedirs(autoMethodsDir, exist_ok=True)
     ## create methods file
-    methodsFile = p.join(outDir, "drMD_AutoMethods.md")
+    methodsFile = p.join(autoMethodsDir, "drMD_AutoMethods.md")
     ## write a header to the methods file
     with open(methodsFile, "w") as f:
         f.write("# Molecular Dynamics Protocol\n\n")
@@ -460,5 +456,5 @@ if __name__ == "__main__":
     configDir = "/home/esp/scriptDevelopment/drMD/04_PET_proj_outputs/00_configs"
     outDir = "/home/esp/scriptDevelopment/drMD/04_PET_proj_outputs/00_methods"
     batchConfigYaml = "/home/esp/scriptDevelopment/drMD/prescriptions/PETase_MD_config.yaml"
-    main(batchConfigYaml, configDir, outDir)
+    methods_writer_protocol(batchConfigYaml, configDir, outDir)
 

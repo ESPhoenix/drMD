@@ -14,34 +14,14 @@
 [] if no checkpoint exists at all, run an EM from previous?
 
 ## Extra features
-[x] pH for protonation
 [] more metaDynamics parameters
-[x] maxRetries for firstAid as a config parameter
-[x] different box geometies
-[x] heavy protons and fast intergrators [NEED TO BENCHMARK WHETHER THIS MAKES IT FASTER]
-
-## drLogger
-[x] do clean code
 
 ## drCheckup
 [] if this fails, continue with everything
 [] redo PDF image sizes and locations
 
-## drMethodScribe
-[x] general simulation infos
-
-## drConfigWriter
-[x] hardwareInfo: null appearing in automatically generated config files
-
-## drPdbTriage
-[x] HIS, HIP ect being identified as a UAA 
 
 ## drRestraints
 [??] improper restraints
 
-## drCheckup
-[x] look at convergance again -- be a bit more lenient!
-
-## drPrep
-[x] protein protonation running even when protons in starting structure??
-[x] handle exceptions for all prep steps
+## auto defaults for missing config entries

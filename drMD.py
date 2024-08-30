@@ -14,7 +14,7 @@ from concurrent.futures.process import BrokenProcessPool
 from Triage import drConfigTriage, drPdbTriage, drConfigWriter
 from Surgery import drOperator
 from ExaminationRoom import  drCleanup
-from UtilitiesCloset import drSplash
+from UtilitiesCloset import drSplash, drMethodsWriter
 
 
 
@@ -70,6 +70,11 @@ def main() -> None:
         run_serial(batchConfig)
     elif parallelCPU > 1:
         run_parallel(batchConfig)
+
+    ## write a methods section if desired
+    writeMyMethodsSection = batchConfig["miscInfo"].get("writeMyMethodsSection", False)
+    if writeMyMethodsSection:
+        drMethodsWriter.methods_writer_protocol(batchConfig, yamlDir, outDir)
 
     ## unset envorment variables for OpenMP and OpenMM
     manage_cpu_usage_for_subprocesses("OFF")

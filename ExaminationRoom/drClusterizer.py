@@ -36,7 +36,12 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
     os.makedirs(clusterDir, exist_ok=True)
 
     ## list of dirs created by drMD that we don't want to cluster
-    notRunDirs: list  = ["00_configs", "01_ligand_parameters", "00_collated_pdbs", "00_clustered_pdbs", "00_drMD_logs"]
+    notRunDirs: list  = ["00_configs",
+                          "01_ligand_parameters"
+                            "00_collated_pdbs",
+                              "00_clustered_pdbs",
+                                "00_drMD_logs", 
+                                "00_AutoMethods"]
 
     ## create list of dirs to cluster
     runDirs: List[DirectoryPath] = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
@@ -96,8 +101,6 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
     for clusterBySelection in clusterBy:
         clusterSelection = clusterBySelection["selection"]
         clusterSelectionAtomIndexes.extend(drSelector.get_atom_indexes(clusterSelection, pdbFile))
-
-    exit()
 
     # Load trajectory
     traj: md.Trajectory = md.load(dcdFile, top=pdbFile)

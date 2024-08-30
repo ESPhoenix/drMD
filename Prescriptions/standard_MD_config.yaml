@@ -12,9 +12,9 @@ hardwareInfo:
 miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
-  boxGeometry: "octahedral"
+  boxGeometry: "cubic"
   heavyProtons: True
-
+  writeMyMethodsSection: True
 ########################################################################
 loggingInfo:
   trajectorySelections:
@@ -46,8 +46,8 @@ simulationInfo:
   - stepName: "02_NVT_pre-equilibraition"
     simulationType: "NVT"
     duration: "100 ps"
-    timestep: "2 fs"
-    heavyProtons: False
+    timestep: "4 fs"
+    heavyProtons: True
     temperature: 300
     logInterval: "10 ps"
     restraintInfo: *equilibriationRestraints
@@ -86,9 +86,9 @@ postSimulationInfo:
     - selection:
         keyword: "protein"
     removeAtoms:
-    - selection:
-        keyword: "water"
-    - selection:
-        keyword: "ions"
-    collate: True
+      - selection:
+          keyword: "water"
+      - selection:
+          keyword: "ions"
+    collate: False
 
