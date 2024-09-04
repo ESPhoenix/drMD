@@ -1,5 +1,5 @@
 pyyaml
-argparse
+argpass
 pandas
 mdtraj
 numpy

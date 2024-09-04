@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: drMD
-Version: 0.0.1
+Version: 0.0.3
 Summary: drMD: Molecular Dynamics for Protein Scientists
 Home-page: https://github.com/ESPhoenix/drMD
 Author: Dr Eugene Shrimpton-Phoenix
@@ -13,7 +13,7 @@ Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: pyyaml
-Requires-Dist: argparse
+Requires-Dist: argpass
 Requires-Dist: pandas
 Requires-Dist: mdtraj
 Requires-Dist: numpy
