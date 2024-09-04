@@ -19,9 +19,12 @@
 ## drCheckup
 [] if this fails, continue with everything
 [] redo PDF image sizes and locations
-
+[] Display relative energies for Potential, Kinetic and Total
 
 ## drRestraints
 [??] improper restraints
 
 ## auto defaults for missing config entries
+
+##drPrep
+[] LYN is written as a HETATM, messing with PDB order

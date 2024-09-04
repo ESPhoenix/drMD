@@ -1,0 +1,4 @@
+ExaminationRoom
+Surgery
+Triage
+UtilitiesCloset

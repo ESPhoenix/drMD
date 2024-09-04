@@ -1,0 +1,13 @@
+pyyaml
+argparse
+pandas
+mdtraj
+numpy
+matplotlib
+weasyprint
+scipy
+tqdm
+pdbutils
+scikit-learn
+propka
+mdanalysis
