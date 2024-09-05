@@ -28,6 +28,9 @@ setup(
         'pdbutils',
         'scikit-learn',
         'propka',
-        'mdanalysis'
+        'mdanalysis',
+        'jinja2',
+        'inflect',
+        'pdb2pqr',
     ],
 )
