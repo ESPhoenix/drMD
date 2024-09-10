@@ -1,6 +1,7 @@
 # :medical_symbol: drMD :medical_symbol:
 Automated workflow for running molecular dynamics simulations with Amber and Openmm
-# Installation
+# GitHub Installation 
+We reccomned that you use the following steps to install drMD:
 1. Clone this repository
 ```bash
 git clone https://github.com/ESPhoenix/drMD.git
@@ -29,14 +30,52 @@ conda install -c conda-forge openbabel
 pip install -r requirements.txt
 ```
 
+# Pip Installation
+If you want to intergate drMD into a python-based pipeline, you can install drMD with pip and use it as a python module:
+
+1. Create and activate conda environment
+```bash
+conda create -n drMD python=3.10
+```
+```bash
+conda activate drMD
+```
+2. Install drMD with pip
+```bash
+pip install drMD
+```
+3. Install AmberTools (needs to be before OpenMM) with conda
+```bash
+conda install -c conda-forge ambertools=23
+``` 
+4. Install OpenMM with conda
+```bash
+conda install -c omnia openmm
+``` 
+5. Install OpenBabel with conda
+```bash
+conda install -c conda-forge openbabel
+```
+
+
 # Usage
 
 Now that you have sucessfully set up the dependancies for drMD, you are nearly ready to run some biomolecular simulations!
 
-To the drMD script takes a single config.yaml file as a command line argument, using the "--config" flag:
+If you have used the GitHub installation method, you can run drMD using the following command:
 
 ```bash
 python drMD.py --config config.yaml
+```
+
+If you have used the Pip installation method, you can import drMD as a python module, and as following:
+
+```python
+import drMD
+
+myBatchConfig = "/path/to/config.yaml"
+
+drMD.main(myBatchConfig)
 ```
 
 This config file contains all of the user inputs drMD needs to run a series of biomolecular simulations.
@@ -62,7 +101,8 @@ The **pathInfo** entry in the config file is a dictionary containing two paramet
   > The outputDir will be created if it does not already exist at the point of running drMD
 
   > :medical_symbol:
-  > Within outputDir, a directory will be created for each PDB file contained in inputDir, in this document, thesesubdirectories will be refered to as **runDirs**
+  > Within outputDir, a directory will be created for each PDB file contained in inputDir, in this document, these subdirectories will be refered to
+  > as **runDirs**
 
 Example pathInfo:
 ```yaml
@@ -74,54 +114,58 @@ pathInfo:
 ## hardwareInfo
 This config entry tells drMD about your computer hardware and how you want to use it to run your simulations
 The **hardwareInfo** entry in the config file is a dictionary containing three parameters:
-- **platform**: *(str)* This is the platform that will be used to run simulations in OpenMM. If you have access to GPU acceleration using CUDA, we reccomend this option. If you don't but have access through OpenCL, this is a close second.  
+- **platform**: *(str)* This is the platform that will be used to run simulations in OpenMM. Accepted arguments for **platform** are *"CUDA"*, *"OpenCL"*, and *"CPU"*
+
+  
 
   > :medical_symbol:
-  > Accepted arguments for **platform** are *"CUDA"*, *"OpenCL"*, and *"CPU"*
+  > If you have access to GPU acceleration using CUDA, we reccomend this option. If you don't but have access through OpenCL, this is a close second.
+  > If you don't have a GPU you can use the CPU option, this will be a lot slower.
 
-- **paralellCPU**:      This is the number (int) of simulations that will be run in paralell
-- **subprocessCpus**:  This is the number (int) of cpu cores that will be allocated to each simulation. It is recommended to set this to 1. 
+- **paralellCPU**:   *(int)* This is the number  of simulations that will be run in paralell
+- **subprocessCpus**: *(int)* This is the number of cpu cores that will be allocated to each simulation.  
 
   > :medical_symbol:
-  > The total CPU usage will be parallelCPU * subprocessCpus, so make sure you have enough CPus when you set these parameters
+  > The total CPU usage will be parallelCPU * subprocessCpus, so make sure you have enough CPUs when you set these parameters
 
 Example hardwareInfo:
 ```yaml
 hardwareInfo:
-  parallelCPU: 1
+  parallelCPU: 16
   platform: "CUDA"
-  subprocessCpus: 1
+  subprocessCpus: 2
 ```
+This will use CUDA git achive GPU acceleration and run 16 simulations in paralell using 2 cores each for a total useage of 32 cores.
+
 
 ## ligandInfo
-The **ligandInfo** entry in the config file is optional and must be used if your PDB files have organic ligand or cofactors.
+The **ligandInfo** entry in the config file is optional and may be used if your PDB files have organic ligand or cofactors.
 These small molecules will not have parameters in the AMBER forcefield, drMD will run an automated protocol to generate these parameters for you.
 To do this, you will need to tell drMD some things about each ligand you whish tp simulate.
 
-
 > :medical_symbol:
 > The **ligandInfo** entry is *optional*. drMD will automatically detect ligand in your PDB files. It will also detect
-> parameter files in your input directory
+> parameter files in your input directory. If you have frcmod and mol2 files for your ligand already made, they must be located in your **inputDir**
 
 **ligandInfo** is a list of dictionaries that contain the following parameters:
 
-- **ligandName**:   This is the three letter name of the ligand, this will be used to match the residue names in your PDB files
+- **ligandName**: *(str)*  This is the three letter name of the ligand, this will be used to match the residue names in your PDB files
 
-- **protons**:      This is a boolean (TRUE/FALSE) to tell drMD whether you have protons on your ligand. 
+- **protons**:    *(bool)*  This is a to tell drMD whether you have protons on your ligand. 
                 If set to FALSE, drMD will run an automated protonation protocol to add protons to your ligand
 
   > :medical_symbol:
-  > The automatic protonation protocol only works reliably for simple organic ligand.
+  > The automatic protonation protocol only works reliably for simple organic ligands.
 
   > :medical_symbol:
   > For more complex ligand, we recommended that you manually add protons in your input PDB file prior to running drMD
 
-- **charge**:       This is the charge of the ligand (int)
+- **charge**:  *(int)*  This is the formal charge of the ligand 
 
-- **toppar**:       This is a boolean (TRUE/FALSE) to tell drMD whether you have an frcmod file for your ligand already made.
+- **toppar**:   *(bool)*  This is to tell drMD whether you have an frcmod file for your ligand already made.
                 If you already have one, it must be located in the 01_ligand_parameters directory within your outputDir
 
-- **mol2**:         This is a boolean (TRUE/FALSE) to tell drMD whether you have a mol2 file for your ligand already made.
+- **mol2**:   *(bool)*   This is to tell drMD whether you have a mol2 file for your ligand already made.
                 If you already have one, it must be located in the 01_ligand_parameters directory within your outputDir
 
 Example ligandInfo:
@@ -138,6 +182,8 @@ ligandInfo:
     toppar: False
     mol2: False
 ```
+This **ligandInfo** tells drMD to expect two ligands: FMN and TPA. FMN has a formal charge of -1 and TPA has a formal charge of -2. Both ligands already have protons, so drMD will not add any. For both ligands the toppar and mol2 parameters are set to False, drMD will automatically generate these files for you
+
 ---
 
 ## simulationInfo
@@ -150,7 +196,7 @@ Each simulation detailed in **simulationInfo** will be run in sequence, with the
 Each simulation dictionary contains the following parameters:
 - **stepName**:         This is the name of the step that will be used to create a subdirectory in the runDir, we reccomend prefixing these names with numbers to make them order nicely
 
-- **simulationType**: This is the type of simulation that will be run. Accepted arguments are:
+- **simulationType**: *(str)* This is the type of simulation that will be run. Accepted arguments are:
 
     - **"EM"**:         This will run a steepest-decent Energy Minimisation step. 
     > :medical_symbol:
@@ -158,21 +204,21 @@ Each simulation dictionary contains the following parameters:
     - **"NVT"**:        This will run an NVT (constant volume) molecular dynamics simulation
     - **"NPT"**:        This will run an NPT (constant pressure) molecular dynamics simulation
     > :medical_symbol:
-    > For the majority of protein simulations, the NPT ensemble is used for production MD simulations, while the NVT ensemble is oonly used in equilibration steps
-    - **"META"**:       This will run a Metadynamics simulation
+    > For the majority of protein simulations, the NPT ensemble is used for production MD simulations, while the NVT ensemble is only used in equilibration steps
+    - **"META"**:       This will run a Metadynamics simulation (see later on for more details)
 
 ### Selecting simulation temperature 
 For most simulations, a constant temperature is used. In this case the following parameter is required:
 
-- **temperature**: This is the temperature (int) of the simulation in Kelvin 
+- **temperature**: *(int)* This is the temperature of the simulation in Kelvin 
 
 If you wish to change the temperature throughout the simulation, the following parameter is required:
 
-- **temperatureRange**: This is a list of integers (again, in Kelvin) that will be used to change the temperature throughout the simulation. 
+- **temperatureRange**: *(list of int)* This is a list of integers (again, in Kelvin) that will be used to change the temperature throughout the simulation. 
 
 ### Energy Minimisation Pararameters
 For Energy Minimisation steps, the following additional parameters are required:
-- **maxIterations**:    This is the maximum number (int) of iterations that will be run in the Energy Minimisation step
+- **maxIterations**:   *(int)* This is the maximum number of iterations that will be run in the Energy Minimisation step
                     If this parameter is set to -1, the step will run until the energy converges
 Example Energy Minimisation syntax:
 ```yaml
@@ -186,11 +232,11 @@ This will run a energy minimisation until the energy converges
 
 #### Generic Simulation Parameters
 For "normal" MD simulations using NVT or NpT ensembles, as well as for Metadynamics simulations, the following additional parameters are required:
-- **duration**:         This is the duration of the simulation step, as a string "int unit" eg. "1000 ps"
+- **duration**: *(str)* This is the duration of the simulation step, as a string "int unit" eg. "1000 ps"
 
-- **timestep**:         This is the timestep of the simulation, as a string "int unit" eg. "2 fs"
+- **timestep**:  *(str)* This is the timestep of the simulation, as a string "int unit" eg. "2 fs"
 
-- **logInterval**:      This is the frequency that the simulation will write to file using built-in OpemMM reporters. As a string "int unit" eg. "100 ps"
+- **logInterval**:  *(str)* This is the frequency that the simulation will write to file using built-in OpemMM reporters. As a string "int unit" eg. "100 ps"
 
 Example NVT simulation syntax:
 ```yaml
@@ -205,30 +251,30 @@ simulationInfo:
 This will run a 100 ps NVT molecular dynamics simulation with a timestep of 2 fs, a temp of 300 and a logInterval of 10 ps
 
 ### Adding Restraints with drMD
-If you whish to perform simulations (not Energy Minimisations) with restraints, the following additional parameters are required:
+If you whish to perform simulations with restraints, the following additional parameters are required:
 - **restraintInfo**:       This is a list of dictionaries containing information about each restraints. 
 
 Within the restraintInfo list, you must provied at least one dictionary that contains the following parameters:
 
-- **restraintType**: This is the type of restraints that will be added. Accepted arguments are: "distance", "angle", "dihedral", "position"
+- **restraintType**: *(str)* This is the type of restraints that will be added. Accepted arguments are: "distance", "angle", "dihedral", "position"
 
-- **parameters**:   This is a dictionary containing the parameters for the restraints.
+- **parameters**:  *(dict)*  This is a dictionary containing the parameters for the restraints.
 
 Within the parameters dictionary, all restraint types require the following parameter:
 
-- **k** :        This is the force constant of the restraint (int), given in kJ/mol A^-2
+- **k** :   *(int)*  This is the force constant of the restraint (int), given in kJ/mol A^-2
 
 
 Additional entries in the parameters dictionary depend on the type of restraints:
 
-- **r0**:        *Required for distance restraints*. This is the distance in Angstroms that the restraint should be applied at (int/float)
+- **r0**: *(int or float)*  *Required for distance restraints*. This is the distance in Angstroms that the restraint should be applied to 
 
-- **theta0**:    *Required for angle restraints*. This is the angle in degrees that the angle should be constrained at (int/float)
+- **theta0**: *(int or float)*   *Required for angle restraints*. This is the angle in degrees that the angle should be constrained to 
 
-- **phi0**:      *Required for torsion restraints*. This is the angle in degrees that the dihedral should be constrained at (int/float)
+- **phi0**: *(int or float)*     *Required for torsion restraints*. This is the angle in degrees that the dihedral should be constrained to
 
 All restraints require the selection parameter. This tells drMD what atoms to apply the restraint to
-    - **selection**:    This is a dictionary containing information on the selection of atoms that the restraints will be applied to.
+    - **selection**:  *(list of dicts)*  This is a dictionary containing information on the selection of atoms that the restraints will be applied to.
 
 > :medical_symbol:
 >The selection method is shared between multiple different inputs in the drMD config file. This is described in more detail in the next section
@@ -254,8 +300,9 @@ Example restraints syntax:
 
 ```
 
-This example will add a position restraints to the protein atoms and 
-a 3 Angstrom distance restraint between the CA atoms of residues 1 and 2 of the protein
+This example will add the following restraints:
+- Position restraints to the protein atoms with a force constant of 1000 kJ/mol 
+- A 3 Angstrom distance restraint between the CA atoms of residues 1 and 2 of the protein, with a force constant of 1000 kJ/mol
 
 ### drMD Selection syntax
 
@@ -369,6 +416,7 @@ Example MetaDynamics syntax:
             - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 4, ATOM_NAME: "CA"}
 
 ```
+
 This example will add a RMSD bias to the backbone of the protein
 and a torsion bias between the CA atoms of residues 1, 2, 3, and 4 of the protein
 ---
@@ -396,3 +444,84 @@ Molecular Dyamics simulations can generate very large output files that can beco
 > :medical_symbol:
 > By selecting only the parts of our system that you are interested in with the clusterBy parameter, you can generated cluster
 > PDB files where these atoms are most separated by RMSD.
+
+
+## Advanced YAML-fu with variables
+If you are running multiple simulation steps that share the same parameters, you can use variables in the YAML config file. This will most commonly come up when you are applying position restraints during equilibriation steps. Below is a standard syntax for a pair of equilibiation steps:
+```yaml
+simulationInfo:
+  - stepName: "01_NVT_pre-equilibraition"
+    simulationType: "NVT"
+    duration: "100 ps"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo: 
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
+    - restraintType: "position"
+      selection: 
+        keyword: "ligand"  
+      parameters:
+        k: 1000
+
+  - stepName: "02_NPT_pre-equilibraition"
+    simulationType: "NPT"
+    duration: "100 ps"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo:
+      - restraintType: "position"
+        parameters:
+          k: 1000
+        selection:
+          keyword: "protein"
+      - restraintType: "position"
+        selection: 
+          keyword: "ligand"  
+        parameters:
+          k: 1000
+
+``` 
+Instead of repeating the restraintsInfo section each time, **equilibriumRestraints** can be defined as a variable, then re-used in each equilibriation step:
+
+```yaml
+equilibriationRestraints: &equilibriationRestraints
+    - restraintType: "position"
+      parameters:
+        k: 1000
+      selection:
+        keyword: "protein"
+
+    - restraintType: "position"
+      selection: 
+        keyword: "ligand"  
+      parameters:
+        k: 1000
+
+simulationInfo:
+  - stepName: "01_NVT_pre-equilibraition"
+    simulationType: "NVT"
+    duration: "100 ps"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo: *equilibriationRestraints
+
+  - stepName: "02_NPT_pre-equilibraition"
+    simulationType: "NPT"
+    duration: "100 ps"
+    timestep: "4 fs"
+    heavyProtons: True
+    temperature: 300
+    logInterval: "10 ps"
+    restraintInfo: *equilibriationRestraints
+
+```
