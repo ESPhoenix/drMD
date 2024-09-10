@@ -137,6 +137,34 @@ hardwareInfo:
 ```
 This will use CUDA git achive GPU acceleration and run 16 simulations in paralell using 2 cores each for a total useage of 32 cores.
 
+## miscInfo
+This section allows you to set some general options for your simulations:
+
+- **pH**: *(int or float)* This is the pH of your simulation, this will affect the protonation states of your protein and any ligands present in your simulation
+
+- **firstAidMaxRetries**: *(int)* This is the maximum number of times that drMD will attempt to recover from an error in a simulation
+
+> :medical_symbol: This option can be very helpful for rescuing crashed simulations. However 
+> don't rely on it too much. If your simulation keeps crashing you may want to reduce the 
+> temperature or timestep parameters instead to make it more stable
+
+- **boxGeometry**: *(str)*  This is the shape of the solvation box that will be used in your simulations. Accepted arguments for **boxGeometry** are *"cubic" or "octahedral"
+
+- **writeMyMethodsSection**: *(bool)* If set to TRUE, drMD will automatically write a methods section for you to use in your publications or thesis.
+
+> :medical_symbol: drMD methods sections contain all of the information one might need to replicate your simulations.
+> The formatting of these methods section may be too robotic and repetative for you, feel free to reformat them as you see fit. 
+
+Example miscInfo:
+```yaml
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: "cubic"
+  writeMyMethodsSection: True
+```
+Simulations will be run with a pH of 7.4 in a cubic solvation box. The maximum number of first-aid retries will be 10. A methods section will automatically be generated. 
+
 
 ## ligandInfo
 The **ligandInfo** entry in the config file is optional and may be used if your PDB files have organic ligand or cofactors.
@@ -291,7 +319,7 @@ Example restraints syntax:
     - type: "distance"
       selection: 
         keyword: "custom"  
-        selectionSyntax:
+        customSelection:
           - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 1, ATOM_NAME: "CA"}
           - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 2, ATOM_NAME: "CA"}
       parameters:
@@ -308,12 +336,12 @@ This example will add the following restraints:
 
 When creating restraints, metadynamics bias variables or running post-simulation clustering, you will need to specify the selection of atoms that the restraints will be applied to. To do this, you will need to supply a "selection" dictionary. This dictionary must contain the following parameter:
 
-- **keyword**: This is the keyword that will be used to specify the selection. Accepted arguments are:
+- **keyword**: *(str)* This is the keyword that will be used to specify the selection. Accepted arguments are:
   - **"protein"** : This will select all protein atoms in your system
   - **"water"** : This will select all water molecules in your system
   - **"ions"**: This will select all ions in your system
   - **"ligand"** : This will select all non-protein, non-water and non-ion atoms in your system
-  - **"custom"** : This will select all atoms that match the selectionSyntax
+  - **"custom"** : This will select all atoms that match the customSelection
 
 Example use of keywords in the selection dictionary:
 
@@ -330,10 +358,10 @@ If you have used the **custom** keyword, you will need to use an additional para
 
 - **customSelection**: This is a list of dictionaries containing details of the atoms that will be selected.
 Each dictionary in the list must contain the following parameters:
-  - **CHAIN_ID**: (str, list[str], "all") This is the chain ID of the atom to be selected
-  - **RES_NAME**: (str, list[str], "all") This is the three-letter residue name of the atom to be selected
-  - **RES_ID**: (int, list[int], "all") This  is the residue ID of the atom to be selected
-  - **ATOM_NAME**: (str, list[str], "all") This is the atom name of the atom to be selected
+  - **CHAIN_ID**: *(str, list of str, or "all")* This is the chain ID of the atom to be selected
+  - **RES_NAME**: *(str, llist of str, or "all")*  This is the three-letter residue name of the atom to be selected
+  - **RES_ID**: *(int, list of int, or "all")* This  is the residue ID of the atom to be selected
+  - **ATOM_NAME**: *(str, list of str, or "all")*  This is the atom name of the atom to be selected
 
 
   For the above parameters:
@@ -357,9 +385,9 @@ selection:
     - {CHAIN_ID: "C", RES_NAME: "FMN", RES_ID: "all", ATOM_NAME: "all"}
 ```
 In the above example, a selection containing the following:
-- all CA atoms in chain A and chain B
-- the atoms CB, HB1, HB2, OG, and HG1 in chain A in residue Serine 131
-- all atoms in the residue FMN in chain B
+- all CA atoms in chains A and B
+- the atoms CB, HB1, HB2, OG, and HG1 in residue Ser131 in chain A 
+- all atoms in the residue FMN in chain C
 ---
 ### Running Metadynamics with drMD
 To run a metadynamics simulation, first set the **simulationType** to **"META"**.
@@ -373,8 +401,7 @@ Within the **metaDynamicsInfo** dictionary, you must provide the following param
 
   - **biasFactor**:           *(int)* This is the bias factor  parameter used in the Metadynamics simulation
 
-  - **biases**:               *(list[dict])* This is a list of dictionaries containing information about each biasVariable.
-
+  - **biases**:               *(list of dicts)* This is a list of dictionaries containing information about each biasVariable.
 
 
 Within each dictionary in **biases** you must provide the following parameters:

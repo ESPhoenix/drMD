@@ -1,12 +1,7 @@
-## drMD
-[] make a API input method
-    [] split the yaml -> dict away from configTriage
-    [] make a API method of inputing the config.yaml
-    [] feed configTriage a dict rather than a .yaml
+
 
 
 #### README updates
-[] advanced YAML-fu with variables
 [] miscInfo
 
 
