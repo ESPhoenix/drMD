@@ -2,6 +2,7 @@
 import os
 from os import path as p
 import numpy as np
+import yaml
 
 ## PARALLELISATION LIBRARIES
 from tqdm import tqdm
@@ -23,7 +24,7 @@ from typing import Optional, Dict, Tuple
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
 
 ######################################################################################################
-def main() -> None:
+def main(batchConfigYaml: Optional[FilePath] = None) -> None:
     '''
     Main function for drMD
     Unpacks batchConfig dictionary 
@@ -37,9 +38,15 @@ def main() -> None:
     '''
     ## print drMD logo
     drSplash.print_drMD_logo()
-
-    ## get batchConfig
-    batchConfig, configTriageLog  = drConfigTriage.read_and_validate_config()
+    ## if run from command line, use argpass to get batch config file
+    if __name__ == "__main__":
+        batchConfigYaml: FilePath = drConfigTriage.get_config_input_arg()
+    ## read bacth config file into a dictionary
+    try:
+        batchConfig: dict = drConfigTriage.read_input_yaml(batchConfigYaml)
+    except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValueError) as e:
+        drSplash.print_config_error(e)
+    configTriageLog  = drConfigTriage.validate_config(batchConfig)
 
     ## unpack batchConfig into variables for this function
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]

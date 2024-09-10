@@ -18,8 +18,10 @@ from pdbUtils import pdbUtils
 from typing import Tuple, Union
 from os import PathLike
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
+
+
 #####################################################################################
-def read_and_validate_config() -> Tuple[dict, FilePath]:
+def validate_config(config) -> FilePath:
     """
     Main script for drConfigInspector:
     1. Accepts --config flag arg with argpass, reads yaml file into a dict
@@ -36,23 +38,6 @@ def read_and_validate_config() -> Tuple[dict, FilePath]:
     configTriageLog: FilePath = p.join(topDir,"config_triage.log")
     drLogger.setup_logging(configTriageLog)
     drLogger.log_info(f"-->{' '*4}Checking config file...",True)
-
-    ## try to read config yaml file into a dict
-    ## throw errors with a nice splash screen if something goes wrong
-    try:
-        config: dict = read_input_yaml()
-    except FileNotFoundError as e:
-        drSplash.print_config_error(e) 
-    except yaml.YAMLError as e:
-        drSplash.print_config_error(e) 
-    except KeyError as e:
-        drSplash.print_config_error(e) 
-    except TypeError as e:
-        drSplash.print_config_error(e) 
-    except ValueError as e:
-        drSplash.print_config_error(e) 
-
-
     
     ## check each major section in config file
     ## throw errors with a nice splash screen if something goes wrong
@@ -76,7 +61,7 @@ def read_and_validate_config() -> Tuple[dict, FilePath]:
 
     drLogger.log_info(f"-->{' '*4}Config file is correct", True)
     drLogger.close_logging()
-    return config, configTriageLog
+    return configTriageLog
 #####################################################################################
 def check_postSimulationInfo(config: dict) -> None:
     """
@@ -607,13 +592,13 @@ def validate_path(argName: str, argPath: Union[PathLike, str]) -> None:
     if not p.exists(argPath):
         raise FileNotFoundError(f"-->{' '*4}The config argument {argName} = {argPath} does not exist.")
 #####################################################################################
-def read_input_yaml() -> dict:
+def get_config_input_arg() -> FilePath:
     """
+    Sets up argpass to read the config.yaml file from command line
     Reads a YAML file using the "--config" flag with argpass
-    Reads YAML file into a dict
 
     Returns:
-    - config (dict)
+    - configFile (FilePath)
     """
     # create an argpass parser, read config file,
     parser = argpass.ArgumentParser()
@@ -621,6 +606,17 @@ def read_input_yaml() -> dict:
     args = parser.parse_args()
 
     configFile: Union[PathLike, str] = args.config
+
+    return configFile
+#####################################################################################
+
+def read_input_yaml(configFile: FilePath) -> dict:
+    """
+    Reads YAML file into a dict
+
+    Returns:
+    - config (dict)
+    """
     # Read config.yaml into a dictionary
     try:
         with open(configFile, "r") as yamlFile:
