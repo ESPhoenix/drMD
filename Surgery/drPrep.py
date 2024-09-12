@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 ## drMD MODULES
-from UtilitiesCloset import drFixer, drSplash
+from UtilitiesCloset import drFixer, drSplash, drListInitiator
 from ExaminationRoom import drLogger
 
 ## PDB // DATAFRAME UTILS
@@ -125,7 +125,9 @@ def ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath) ->
         ## RE-COMBINE PROTEIN AND LIGAND PDB FILES
         wholePrepDir: DirectoryPath = p.join(prepDir,"WHOLE")
         os.makedirs(wholePrepDir,exist_ok=True)
-        allPdbs: List[str] = [protPdb] + ligandPdbs
+        allPdbs: List[FilePath] = [protPdb] + ligandPdbs
+        if p.isdir(p.join(prepDir, "IONS")):
+            allPdbs = allPdbs + [p.join(prepDir, "IONS", f"IONS.pdb")]
         outName: str = config["pathInfo"]["outputName"]
         mergedPdb: FilePath = p.join(wholePrepDir,f"{protName}.pdb")
         pdbUtils.mergePdbs(pdbList=allPdbs, outFile = mergedPdb)
@@ -280,10 +282,22 @@ def split_input_pdb(inputPdb: FilePath, config: Dict, outDir: DirectoryPath) -> 
         ligDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"] == ligandName]
         pdbUtils.df2pdb(ligDf, p.join(ligPrepDir, f"{ligandName}.pdb"), chain=False)
         pdbDf.drop(pdbDf[pdbDf["RES_NAME"] == ligandName].index, inplace=True)
+
+    ## extract ions from pdb dataframe
+    ionResidueNames = drListInitiator.get_ion_residue_names()
+    ionDf = pdbDf[pdbDf["RES_NAME"].isin(ionResidueNames)]
+    if len(ionDf) > 0:
+        # Write ions to pdb file    
+        ionDir = p.join(outDir, "IONS")
+        os.makedirs(ionDir, exist_ok=True)
+        pdbUtils.df2pdb(ionDf, p.join(ionDir, "IONS.pdb"))
+
+
     # Write protein only to pdb file
+    protDf = pdbDf[~pdbDf["RES_NAME"].isin(ionResidueNames)]
     protPrepDir: DirectoryPath = p.join(outDir, "PROT")
     os.makedirs(protPrepDir, exist_ok=True)
-    pdbUtils.df2pdb(pdbDf, p.join(protPrepDir, "PROT.pdb"))
+    pdbUtils.df2pdb(protDf, p.join(protPrepDir, "PROT.pdb"))
 
 #############################  PROTONATION & PDB CREATION ###############################
 

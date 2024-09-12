@@ -13,8 +13,8 @@ miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
   boxGeometry: "cubic"
-  heavyProtons: True
   writeMyMethodsSection: True
+  skipPdbTriage: True
 ########################################################################
 loggingInfo:
   trajectorySelections:
@@ -90,5 +90,6 @@ postSimulationInfo:
           keyword: "water"
       - selection:
           keyword: "ions"
-    collate: False
+  endPointInfo:
+    stepNames: []
 

@@ -17,8 +17,6 @@ from Surgery import drOperator
 from ExaminationRoom import  drCleanup
 from UtilitiesCloset import drSplash, drMethodsWriter
 
-
-
 ## CLEAN CODE
 from typing import Optional, Dict, Tuple
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
@@ -38,6 +36,7 @@ def main(batchConfigYaml: Optional[FilePath] = None) -> None:
     '''
     ## print drMD logo
     drSplash.print_drMD_logo()
+
     ## if run from command line, use argpass to get batch config file
     if __name__ == "__main__":
         batchConfigYaml: FilePath = drConfigTriage.get_config_input_arg()
@@ -46,6 +45,7 @@ def main(batchConfigYaml: Optional[FilePath] = None) -> None:
         batchConfig: dict = drConfigTriage.read_input_yaml(batchConfigYaml)
     except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValueError) as e:
         drSplash.print_config_error(e)
+
     configTriageLog  = drConfigTriage.validate_config(batchConfig)
 
     ## unpack batchConfig into variables for this function

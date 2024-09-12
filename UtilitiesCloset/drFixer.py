@@ -3,11 +3,14 @@ import os
 from os import path as p
 import pandas as pd
 
+## drMD LIBRARIES
+from UtilitiesCloset import drListInitiator
+
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
 
 ##  CLEAN CODE
-from typing import Dict, Callable
+from typing import Dict, Callable, List
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
 
 ##################################################################################################
@@ -85,6 +88,9 @@ def reset_chains_residues(goodPdb: str, badPdb: str) -> str:
     badDf["CHAIN_ID"] = goodDf["CHAIN_ID"]
     badDf["RES_ID"] = goodDf["RES_ID"]
 
+    ## reset "ATOM" column back to "ATOM" for protein residues
+    aminoAcidNames = drListInitiator.get_amino_acid_residue_names()
+    badDf.loc[badDf["RES_NAME"].isin(aminoAcidNames), "ATOM"] = "ATOM"
 
     recombinedDf = pd.concat([badDf, solventAndIonsDf])
 

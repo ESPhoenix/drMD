@@ -135,13 +135,15 @@ def create_position_restraint(
     positionRestraint.addPerParticleParameter("x0")
     positionRestraint.addPerParticleParameter("y0")
     positionRestraint.addPerParticleParameter("z0")
-    ## add position restrain to system
-    system.addForce(positionRestraint)
+
     ## use selectio to get atom indexes, add them to the restraint object
     restraintAtomIndexes: List[int] = drSelector.get_atom_indexes(selection, pdbFile)
     for restraintAtomIndex in restraintAtomIndexes:
         positionRestraint.addParticle(restraintAtomIndex,
                                        inpcrd.getPositions()[restraintAtomIndex])
+        
+    ## add position restrain to system
+    system.addForce(positionRestraint)
     return system
 
 ###########################################################################################

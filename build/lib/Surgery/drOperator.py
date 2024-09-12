@@ -31,6 +31,8 @@ def drMD_protocol(configYaml: FilePath) -> None:
 
     This function reads the configuration file, prepares the protocol, and runs the simulation.
     """
+
+
     # Read the configuration file
     config: dict = drConfigTriage.read_config(configYaml)
 
@@ -39,9 +41,8 @@ def drMD_protocol(configYaml: FilePath) -> None:
     os.makedirs(outDir, exist_ok=True)
 
     # Prepare the protocol
+
     solvatedPdb, inputCoords, amberParams = drPrep.prep_protocol(config)
-
-
 
     # Run the simulation
     run_simulation(config = config,

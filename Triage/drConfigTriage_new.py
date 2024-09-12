@@ -41,16 +41,20 @@ def validate_config(config) -> FilePath:
     
     ## check each major section in config file
     ## throw errors with a nice splash screen if something goes wrong
-    for function in [check_pathInfo,
-                      check_hardwareInfo,
-                        check_ligandInfo,
-                          check_simulationInfo,
-                          check_postSimulationInfo]:
-        try:
-            function(config)
-        except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValueError) as e:
-            drSplash.print_config_error(e) 
+    configDisorders = []
+    for function in [check_pathInfo, check_hardwareInfo, check_miscInfo]:
+                    #    check_hardwareInfo,
+                    #     check_ligandInfo,
+                    #       check_simulationInfo,
+                    #       check_postSimulationInfo]:
+        disorders = function(config)
+        if len (disorders) > 0:
+            configDisorders.append(disorders)
 
+
+    for problem in configDisorders:
+        print(problem)
+    exit()
     drLogger.log_info(f"-->{' '*4}Config file is correct", True)
     drLogger.close_logging()
     return configTriageLog
@@ -63,15 +67,169 @@ def check_pathInfo(config: dict) -> None:
     Checks paths in pathInfo to see if they are real
     Don't check outputDir, this will be made automatically
     """
+
+    pathInfoDisorders = []
     ## log this check
     drLogger.log_info(f"-->{' '*4}Checking pathInfo...")
-    ## check if pathInfo in config
-    pathInfo, = check_info_for_args(config, "config", ["pathInfo"], optional=False)
-    ## check for required args in pathInfo
-    inputDir, outputDir = check_info_for_args(pathInfo, "pathInfo", ["inputDir", "outputDir"], optional=False)
-    validate_path(f"inputDir", inputDir)
+
+    ## check to see if pathInfo in config
+    pathInfo = config.get("pathInfo", None)
+    if pathInfo == None:
+        pathInfoDisorders.append("No pathInfo specified, this should be a dictionary with absolute paths to your input files and output files")
+        return {"pathInfo" : pathInfoDisorders}
+
+    ## validate inputDir
+    inputDir = pathInfo.get("inputDir", None)
+    if inputDir == None:
+        pathInfoDisorders.append("No inputDir specified, this should be absolute path to your input files")
+    else:
+        inputDirPathProblem = validate_path(f"inputDir", inputDir)
+        if inputDirPathProblem != None:
+            pathInfoDisorders.append(inputDirPathProblem)
+
+    ## validate outputDir
+    outputDir = pathInfo.get("outputDir", None)
+    if outputDir == None:
+        pathInfoDisorders.append("No outputDir specified, this should be absolute path to your output files. Note that it does not need to exist, drMD will make this for you!")
+
     ## log that pathInfo is correct
     drLogger.log_info(f"-->{' '*4}pathInfo is correct...")
+
+    return {"pathInfo": pathInfoDisorders} if len(pathInfoDisorders) > 0 else pathInfoDisorders
+
+#####################################################################################
+def check_hardwareInfo(config: dict) -> None:
+    """
+    Checks hardwareInfo in config
+    Makes sure that CPU allocations are properly formatted
+    Makes sure that the "Platform" specified is an allowed value 
+    """
+    ## log this check
+    drLogger.log_info(f"-->{' '*4}Checking hardwareInfo...")
+
+    hardwareInfoDisorders = []
+    ## check if hardwareInfo in config
+    hardwareInfo = config.get("hardwareInfo", None)
+    if hardwareInfo == None:
+        hardwareInfoDisorders.append("No hardwareInfo specified, this should be a dictionary with parallelCPU, platform, and subprocessCpus")
+        return {"hardwareInfo": hardwareInfoDisorders}
+    ## validate parallelCPU
+    parallelCPU = hardwareInfo.get("parallelCPU", None)
+    if parallelCPU == None:
+        hardwareInfoDisorders.append("No parallelCPU specified, this should be an int")
+    else:
+        if not isinstance(parallelCPU, int):
+            hardwareInfoDisorders.append("parallelCPU is not an int")
+        else:
+            if parallelCPU < 1:
+                hardwareInfoDisorders.append("parallelCPU is less than 1, this must be a positive integer")
+
+
+    ## validate subprocessCpus
+    subprocessCpus = hardwareInfo.get("subprocessCpus", None)
+    if subprocessCpus == None:
+        hardwareInfoDisorders.append("No subprocessCpus specified, this should be an int")
+    else:
+        if not isinstance(subprocessCpus, int):
+            hardwareInfoDisorders.append("subprocessCpus is not an int")
+        else:
+            if subprocessCpus < 1:
+                hardwareInfoDisorders.append("subprocessCpus is less than 1, this must be a positive integer")
+
+    ## check to see if the number of CPU cores requested is less than the number of CPU cores available
+    if isinstance(parallelCPU,int) and isinstance(subprocessCpus,int):
+        systemCpus = mp.cpu_count()
+        if parallelCPU * subprocessCpus > systemCpus:
+            hardwareInfoDisorders.append("Number for CPU cores requested exceeds number of CPU cores available, change the values of parallelCPU and subprocessCpus")
+
+    ## validate platform
+    platform = hardwareInfo.get("platform", None)
+    if platform == None:
+        hardwareInfoDisorders.append("No platform specified, this should be either 'CUDA', 'OPENCL', or 'CPU'")
+    else:
+        if platform not in ["CUDA", "OPENCL", "CPU"]:
+            hardwareInfoDisorders.append("platform is not 'CUDA', 'OPENCL', or 'CPU'")
+    ## log that hardwareInfo is correct
+    drLogger.log_info(f"-->{' '*4}hardwareInfo is correct...")
+
+
+    return {"hardwareInfo": hardwareInfoDisorders} if len(hardwareInfoDisorders) > 0 else hardwareInfoDisorders
+#####################################################################################
+def check_miscInfo(config):
+    ## log this check
+    drLogger.log_info(f"-->{' '*4}Checking miscInfo...")
+
+    miscInfoDisorders = []
+
+
+    miscInfo = config.get("miscInfo", None)
+    if miscInfo == None:
+        miscInfoDisorders.append("No miscInfo specified, this should be a dictionary containing pH, firstAidMaxRetries, boxGeometry, skipPdbTriage, and writeMyMethodsSection")
+        return {"miscInfo": miscInfoDisorders}
+    
+    ## validate pH
+    pH = miscInfo.get("pH", None)
+    if pH == None:
+        miscInfoDisorders.append("No pH specified, this should be an int or float between 0 and 14")
+    else:
+        if not isinstance(pH, (int, float)):
+            miscInfoDisorders.append("pH must be an int or float between 0 and 14")
+        else:
+            if pH < 0 or pH > 14:
+                miscInfoDisorders.append("pH must be an int or float between 0 and 14")
+    ## validate firstAidMaxRetries
+    firstAidMaxRetries = miscInfo.get("firstAidMaxRetries", None)
+    if firstAidMaxRetries == None:
+        miscInfoDisorders.append("No firstAidMaxRetries specified, this should be an int greater than 0")
+    else:
+        if not isinstance(firstAidMaxRetries, int):
+            miscInfoDisorders.append("firstAidMaxRetries must be an int greater than 0")
+        else:
+            if firstAidMaxRetries < 1:
+                miscInfoDisorders.append("firstAidMaxRetries must be an int greater than 0")
+    ## validate boxGeometry
+    boxGeometry = miscInfo.get("boxGeometry", None)
+    if boxGeometry == None:
+        miscInfoDisorders.append("No boxGeometry specified, this should be either 'cubic' or 'ocatahedral'")
+    else:
+        if boxGeometry not in ["cubic", "ocatahedral"]:
+            miscInfoDisorders.append("boxGeometry must be either 'cubic' or 'ocatahedral'")
+
+    ## validate skipPdbTriage
+    skipPdbTriage = miscInfo.get("skipPdbTriage", None)
+    if skipPdbTriage == None:
+        miscInfoDisorders.append("No skipPdbTriage specified, this should be either True or False")
+    else:
+        if not isinstance(skipPdbTriage, bool):
+            miscInfoDisorders.append("skipPdbTriage must be either True or False")
+    
+    ## validate writeMyMethodsSection
+    writeMyMethodsSection = miscInfo.get("writeMyMethodsSection", None)
+    if writeMyMethodsSection == None:
+        miscInfoDisorders.append("No writeMyMethodsSection specified, this should be either True or False")
+    else:
+        if not isinstance(writeMyMethodsSection, bool):
+            miscInfoDisorders.append("writeMyMethodsSection must be either True or False")
+
+    ## validate trajectorySelections
+    trajectorySelections = miscInfo.get("trajectorySelections", None)
+    if trajectorySelections == None:
+        miscInfoDisorders.append("No trajectorySelections specified, this should be a list of selection dictionaries (see README for syntax!)")
+    else:
+        if not isinstance(trajectorySelections, list):
+            miscInfoDisorders.append("trajectorySelections must be a list of selection dictionaries (see README for syntax!)")
+        elif len(trajectorySelections) == 0:
+            miscInfoDisorders.append("trajectorySelections must be a list of selection dictionaries (see README for syntax!)")
+        else:
+            for selection in trajectorySelections:
+                selectionDisorder = check_selection(selection)
+                if len(selectionDisorder) > 0:
+                    miscInfoDisorders.append(selectionDisorder)
+
+        
+
+    return {"miscInfo": miscInfoDisorders} if len(miscInfoDisorders) > 0 else miscInfoDisorders
+
 
 #####################################################################################
 def check_postSimulationInfo(config: dict) -> None:
@@ -176,33 +334,8 @@ def check_clusterInfo(clusterInfo: dict) -> None:
 
 
 
-#########################################################################
-def check_hardwareInfo(config: dict) -> None:
-    """
-    Checks hardwareInfo in config
-    Makes sure that CPU allocations are properly formatted
-    Makes sure that the "Platform" specified is an allowed value 
-    """
-    ## log this check
-    drLogger.log_info(f"-->{' '*4}Checking hardwareInfo...")
-    ## check if hardwareInfo in config
-    hardwareInfo, = check_info_for_args(config, "config", ["hardwareInfo"], optional= False)
-    ## check for required args in hardwareInfo
-    parallelCPU, platform, subprocessCpus = check_info_for_args(hardwareInfo, "hardwareInfo", ["parallelCPU", "platform", "subprocessCpus"], optional= False)
-    ## check that hardwareInfo cpu arguments are int values and are positive
-    for argValue, argName in zip([parallelCPU, subprocessCpus], ["parallelCPU", "subprocessCpus"]):
-        if not isinstance(argValue, int):
-            raise TypeError(f"-->{' '*4}The config argument {argName} = {argValue} is not a an int type.")
-        if argValue < 1:
-            raise ValueError(f"-->{' '*4}The config argument {argName} = {argValue} must be a int greater than 1")
-    ## check that your computer has enough CPUs
-    if parallelCPU * subprocessCpus > mp.cpu_count():
-        raise ValueError(f"-->{' '*4}totalCpuUseage argument exceeds your computers number of cores")
-    ## ensure that compatable platform has been chosen 
-    if not platform in ["CUDA", "OpenCL", "CPU"]:
-        raise ValueError(f"-->{' '*4}Platform must be CUDA, OpenCL, or CPU")
-    ## log that hardwareInfo is correct
-    drLogger.log_info(f"-->{' '*4}hardwareInfo is correct...")
+
+
 #########################################################################
 def check_ligandInfo(config: dict) -> None:
     """
@@ -403,35 +536,73 @@ def check_restraint_parameters(restraintType: str, parameters: dict) -> None:
             raise ValueError(f"-->{' '*4}heta0 parameters must be between 0 and 180 for angle restraints")
 
 #########################################################################
-def check_selection(selection: dict, stepName: str) -> None:
-    keyword, = check_info_for_args(selection, "selection", ["keyword"], optional=False)
-    if not isinstance(keyword, str):
-        raise TypeError(f"-->{' '*4}selection keywords incorrect in {stepName}, see README.md for more details")
-    if not keyword in ["all", "protein", "ligand", "water", "ions", "custom"]:
-        raise ValueError(f"-->{' '*4}selection keywords incorrect in {stepName}, see README.md for more details")
+def check_selection(selection: dict) -> None:
 
+    selectionDisorders = []
+
+    ## check keyword
+    subSelection = selection.get("selection", None)
+    if subSelection is None:
+        selectionDisorders.append("No selection specified in selection")
+        return selectionDisorders
+
+    keyword = subSelection.get("keyword", None)
+    if keyword is None:
+        selectionDisorders.append("No keyword specified in selection")
+        return selectionDisorders
+
+    if not isinstance(keyword, str):
+        selectionDisorders.append(f"keyword must be a string, not {type(keyword)}")
+        return selectionDisorders
+    
+    if not keyword in ["all", "protein", "ligand", "water", "ions", "custom"]:
+        selectionDisorders.append(f"selection keywords incorrect see README.md for more details")
+        return selectionDisorders
+    
+    ## check custom selection syntax
     if keyword == "custom":
-        customSelection, = check_info_for_args(selection, stepName, ["customSelection"], optional=False)
+        customSelection = subSelection.get("customSelection", None)
+        if customSelection is None:
+            selectionDisorders.append("No customSelction specified in selection")
+            return selectionDisorders
         if not isinstance(customSelection, list):
-            raise TypeError(f"-->{' '*4}selectionSyntax in {stepName} must be a list of dcits")
-        for selection in customSelection:
-            chainId, residueName, residueNumber, atomName = check_info_for_args(selection, stepName, ["CHAIN_ID", "RES_NAME", "RES_ID", "ATOM_NAME"], optional=False)
-            if not isinstance(chainId, (str,list)):
-                raise TypeError(f"""-->{' '*4}Error in custom selection syntax in {stepName}:
--->{' '*4}CHAIN_ID must be a string, a list of strings or the keyword 'all'
-                                """)
-            if not isinstance(residueName, (str,list)):
-                raise TypeError(f"""-->{' '*4}Error in custom selection syntax in {stepName}:
--->{' '*4}RES_NAME must be a string, a list of strings or the keyword 'all'
-                                """)
-            if not isinstance(residueNumber, (int,list,str)):
-                raise TypeError(f"""-->{' '*4}Error in custom selection syntax in {stepName}:
--->{' '*4}RES_ID must be an int or a list of ints or the keyword 'all'
-                                """)
-            if not isinstance(atomName, (str,list)):
-                raise TypeError(f"""-->{' '*4}Error in custom selection syntax in {stepName}:
--->{' '*4}ATOM_NAME must be a string, a list of strings or the keyword 'all'
-                                """)
+            selectionDisorders.append("customSelection must be a list of selection dictionaries (see README for more details)")
+            return selectionDisorders
+        ## check each selection
+        for customSelctionDict in customSelection:
+            ## check chainId
+            chainId = customSelctionDict.get("CHAIN_ID", None)
+            if chainId is None:
+                selectionDisorders.append("No CHAIN_ID specified in selection")
+            ## check resName
+            resName = customSelctionDict.get("RES_NAME", None)
+            if resName is None:
+                selectionDisorders.append("No RES_NAME specified in selection")
+            elif resName == "all":
+                pass
+            elif not isinstance(resName, str):
+                selectionDisorders.append("RES_NAME must be a three-letter string")
+            elif len(resName) != 3:
+                selectionDisorders.append("RES_NAME must be a three-letter string")
+            ## check resId
+            resId = customSelctionDict.get("RES_ID", None)
+            if resId is None:
+                selectionDisorders.append("No RES_ID specified in selection")
+            elif resId == "all":
+                pass
+            elif not isinstance(resId, int):
+                selectionDisorders.append("RES_ID must be an integer")
+            ## check atomName
+            atomName = customSelctionDict.get("ATOM_NAME", None)
+            if atomName is None:
+                selectionDisorders.append("No ATOM_NAME specified in selection")
+            elif not isinstance(atomName, str):
+                selectionDisorders.append("ATOM_NAME must be a string")
+            elif len(atomName) > 4:
+                selectionDisorders.append("ATOM_NAME must be a string less than 4 characters")
+
+    return selectionDisorders
+
 
 #########################################################################
 def check_metadynamics_options(simulation: dict, stepName: str) -> None:
@@ -569,10 +740,11 @@ def validate_path(argName: str, argPath: Union[PathLike, str]) -> None:
     Check to see if the path exists
     """
     if  not isinstance(argPath, (PathLike, str)) :
-        raise TypeError(f"-->{' '*4}The config argument {argName} = {argPath} is not a PathLike.")
+        return f"The config argument {argName} = {argPath} is not a PathLike."
     # Check if the path exists
     if not p.exists(argPath):
-        raise FileNotFoundError(f"-->{' '*4}The config argument {argName} = {argPath} does not exist.")
+        return f"The config argument {argName} = {argPath} does not exist."
+    return None
 #####################################################################################
 def get_config_input_arg() -> FilePath:
     """

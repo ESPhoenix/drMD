@@ -1,0 +1,257 @@
+########################################################################
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs
+  outputDir: /home/esp/scriptDevelopment/drMD/03_test_outputs
+  
+########################################################################
+ligandInfo:
+  - ligandName: WPC
+    charge: 0
+    protons: True
+    toppar: False
+    mol2: False
+
+########################################################################
+hardwareInfo:
+  parallelCPU: 1
+  platform: CUDA
+  subprocessCpus: 1
+########################################################################
+miscInfo:
+  pH: 7.4
+  firstAidMaxRetries: 10
+  boxGeometry: cubic
+  writeMyMethodsSection: True
+  skipPdbTriage: True
+########################################################################
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: protein
+  - selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: all}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+########################################################################
+equilibriationRestraints: &equilibriationRestraints
+  - restraintType: position
+    parameters:
+      k: 2000
+    selection:
+      keyword: protein
+  - restraintType: position
+    selection: 
+      keyword: ligand  
+    parameters:
+      k: 2000
+  - restraintType: position
+    selection: 
+      keyword: custom  
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: all}
+    parameters:
+      k: 2000
+
+
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NA}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NB}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NC}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: ND}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: angle
+    parameters:
+      theta0: 180
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NA}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NC}
+  - restraintType: angle
+    parameters:
+      theta0: 180
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NB}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: ND}
+
+  - restraintType: torsion
+    parameters:
+      phi0: 0.0
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C18}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C30}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C26}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C23}
+
+WPC_restraints: &WPC_restraints
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NA}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NB}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NC}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: distance
+    parameters:
+      r0: 1.875
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: ND}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+  - restraintType: angle
+    parameters:
+      theta0: 180
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NA}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NC}
+  - restraintType: angle
+    parameters:
+      theta0: 180
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: NB}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: ND}
+
+  - restraintType: torsion
+    parameters:
+      phi0: 0.0
+      k: 2000
+    selection:
+      keyword: custom
+      customSelection:
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C18}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C30}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C26}
+       - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: C23}
+
+########################################################################
+simulationInfo:
+  - stepName: 01_energy_minimisation
+    simulationType: EM
+    temperature: 300
+    maxIterations: 2000
+    restraintInfo: *WPC_restraints
+########################################################################
+  - stepName: 02_NVT_pre-equilibraition
+    simulationType: NVT
+    duration: 100 ps
+    timestep: 4 fs
+    heavyProtons: True
+    temperature: 300
+    logInterval: 10 ps
+    restraintInfo: *equilibriationRestraints
+
+# ########################################################################
+  - stepName: 03_NPT_pre-equilibraition
+    simulationType: NPT
+    duration: 100 ps
+    timestep: 4 fs
+    heavyProtons: True
+    temperature: 300
+    logInterval: 10 ps
+    restraintInfo: *equilibriationRestraints
+
+########################################################################
+  - stepName: 04_NpT_slowIntergrator
+    simulationType: NpT
+    duration: 10 ps
+    timestep: 0.5 fs
+    temperature: 300
+    logInterval: 1 ps
+    restraintInfo: *WPC_restraints
+########################################################################
+  - stepName: 05_Production_MD
+    simulationType: NpT
+    duration: 5 ns
+    timestep: 4 fs
+    heavyProtons: True
+    temperature: 300
+    logInterval: 50 ps
+    restraintInfo: *WPC_restraints
+################################################
+postSimulationInfo:
+  clusterInfo:
+    stepNames: [05_Production_MD] 
+    nClusters: 25
+    clusterBy:
+    - selection:
+        keyword: protein
+    removeAtoms:
+      - selection:
+          keyword: water
+      - selection:
+          keyword: custom
+          customSelection:
+           - {CHAIN_ID: all, RES_NAME: all, RES_ID: all, ATOM_NAME: [Na+, Cl-]}
+
+
+ 

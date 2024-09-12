@@ -188,7 +188,7 @@ def print_config_error(error: Optional[str] = None) -> None:
           """
           +resetTextColor)
     if error is not None:
-      print(error)
+      print(str(error).strip("\""))
     exit(1)
 ###########################################################################################
 def print_pdb_error() -> None:

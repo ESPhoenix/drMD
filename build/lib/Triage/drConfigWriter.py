@@ -6,6 +6,7 @@ import yaml
 
 ## drMD LIBRARIES
 from Surgery import drPrep
+from UtilitiesCloset import drListInitiator
 
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
@@ -105,10 +106,11 @@ def make_proteinInfo(
     """
     
     ## GET PROTEIN AND ION ATOMS IN INPUT GEOMETRY
-    aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
-    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids) |
-                   pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) |
-                   pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
+    aminoAcidNames = drListInitiator.get_amino_acid_residue_names()
+    ionAtomNames = drListInitiator.get_ion_names()
+
+    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidNames) |
+                   pdbDf["ATOM_NAME"].str.upper().isin(ionAtomNames)]
     
     ## CHECK TO SEE IF PROTEIN HAS HYDROGENS
     isProteinProtonated = False
@@ -133,12 +135,11 @@ def make_ligandInfo(
         ligandInfo = batchConfig["ligandInfo"]
         return ligandInfo
     ## GET LIGAND ATOMS IN INPUT GEOMETRY 
-    aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
+    aminoAcidNames = drListInitiator.get_amino_acid_residue_names()
+    ionAtomNames = drListInitiator.get_ion_names()
 
-    ligandDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids) &
-                    ~pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) &
-                    ~pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
-
+    ligandDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidNames) &
+                    ~pdbDf["ATOM_NAME"].str.upper().isin(ionAtomNames)]
     ## GET NAMES OF LIGANDS
     ligNames = ligandDf["RES_NAME"].unique().tolist()
 
@@ -186,21 +187,3 @@ def make_ligandInfo(
         return ligandInfo
     
 ######################################################################################
-def init_residue_name_lists():
-    aminoAcids =   ['ALA', 'ARG', 'ASN', 'ASP', 'CYS',
-                    'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
-                    'LEU', 'LYS', 'MET', 'PHE', 'PRO',
-                    'SER', 'THR', 'TRP', 'TYR', 'VAL']
-    
-    
-    monovalentIons = ["LI", "NA", "K", "RB", "CS", "TL", "CU", "AG", "NH4", "H3O", "F", "CL", "BR", "I"]
-
-    multivalentIons = [
-        "BE2", "CU2", "NI2", "PT2", "ZN2", "CO2", "PD2", "AG2", "CR2", "FE2", 
-        "MG2", "V2", "MN2", "HG2", "CD2", "YB2", "CA2", "SN2", "PB2", "EU2", 
-        "SR2", "SM2", "BA2", "RA2", "AL3", "FE3", "CR3", "IN3", "TL3", "Y3", 
-        "LA3", "CE3", "PR3", "ND3", "SM3", "EU3", "GD3", "TB3", "DY3", "ER3", 
-        "TM3", "LU3", "HF4", "ZR4", "CE4", "U4", "PU4", "TH4"
-    ]
-
-    return aminoAcids, monovalentIons, multivalentIons

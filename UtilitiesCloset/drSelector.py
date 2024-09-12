@@ -3,6 +3,9 @@ import pandas as pd
 from typing import List
 import numpy as np
 
+## drMD LIBRARIES
+from UtilitiesCloset import drListInitiator
+
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
 
@@ -28,7 +31,10 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
 
     # Initialize lists of amino acid residue names, backbone atom names,
     # solvent residue names, and ion residue names
-    aminoAcidResNames, backboneAtomNames, solventResNames, ionResNames = init_name_lists()
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
+    backboneAtomNames = drListInitiator.get_backbone_atom_names()
+    solventResNames = drListInitiator.get_solvent_residue_names()
+    ionResidueNames = drListInitiator.get_ion_residue_names()
 
     # Initialize list of atom indexes
     atomIndexes: List[int] = []
@@ -52,13 +58,15 @@ def get_atom_indexes(selection: Dict, pdbFile: FilePath) -> List[int]:
         atomIndexes: List[int] = waterDf.index.tolist()
     elif selection["keyword"] == "ions":
         # Find indexes for ions
-        ionDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(ionResNames) &
+        ionDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(ionResidueNames) &
                                     ~pdbDf["RES_NAME"].isin([aminoAcidResNames])]
 
         atomIndexes: List[int] = ionDf.index.tolist()
     elif selection["keyword"] == "ligand":
         # Find indexes for all ligand / organics / oddball molecules
-        ligandDf: pd.DataFrame = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidResNames+solventResNames+ionResNames)]
+        ligandDf: pd.DataFrame = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidResNames) &
+                                        ~pdbDf["RES_NAME"].isin(solventResNames) & 
+                                        ~pdbDf["RES_NAME"].isin(ionResidueNames)]
         atomIndexes: List[int] =  ligandDf.index.tolist()
     elif selection["keyword"] == "custom":
         # Find indexes for whole residue selections
@@ -104,16 +112,5 @@ def slice_pdb_file(trajectorySelection: Dict, inputPdb: FilePath, outputPdb: Fil
     return outputPdb
 
 
-
-#######################################################################
-def init_name_lists() -> Tuple[List[str], List[str], List[str], List[str]]:
-    aminoAcidResNames: List = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
-            'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
-                'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
-                  'ASH', 'GLH', 'HIP', 'HIE', 'HID', 'CYX', 'CYM'] ## oddball protonations
-    backboneAtomNames: List = ["N","CA","C","O"]
-    solventResNames: List = ["HOH", "WAT"]
-    ionResNames: List = ["NA", "K", "LI", "RB", "CS", "MG", "CA", "ZN", "CD", "HG", "MN"]
-    return aminoAcidResNames, backboneAtomNames, solventResNames, ionResNames
 
 #######################################################################

@@ -1,0 +1,80 @@
+########################################################################
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs
+########################################################################
+hardwareInfo:
+  parallelCPU: 60
+  platform: NOTAPLATFORM
+  subprocessCpus: 2
+
+ligandInfo:
+  
+########################################################################
+miscInfo:
+  pH: 25
+  firstAidMaxRetries: RATS
+  boxGeometry: oblong
+  writeMyMethodsSection: eggs
+  skipPdbTriage: yesplease
+  trajectorySelections:
+  - selection:
+      keyword: broken
+  - selection:
+      keyword: custom
+      customSelection:
+      - {RES_NAME: "all", RES_ID:  "all", ATOM_NAME: "CA"}
+########################################################################
+equilibriationRestraints: &equilibriationRestraints
+    - restraintType: position
+      parameters:
+        k: 1000
+      selection:
+        keyword: protein
+
+    - restraintType: position
+      selection: 
+        keyword: ligand  
+      parameters:
+        k: 1000
+
+########################################################################
+simulationInfo:
+  - stepName: 01_energy_minimisation
+    simulationType: EM
+    maxIterations: 1000
+########################################################################
+  - stepName: 02_NVT_pre-equilibraition
+    simulationType: NVT
+    duration: 100
+    timestep: 4
+    heavyProtons: eggs
+    temperature: 300
+    logInterval: 10 ps
+    restraintInfo: *equilibriationRestraints
+
+# ########################################################################
+  - stepName: 1
+    simulationType: NPT
+    duration: 100 ps
+    timestep: 4 fs
+    heavyProtons: True
+    temperature: -20
+    logInterval: 10 ps
+    restraintInfo: None
+
+################################################
+postSimulationInfo:
+  clusterInfo:
+    stepNames: [05_Production_MD] 
+    nClusters: 25
+    clusterBy:
+    - selection:
+        keyword: protein
+    removeAtoms:
+      - selection:
+          keyword: water
+      - selection:
+          keyword: ions
+  endPointInfo:
+    stepNames: []
+

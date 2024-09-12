@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 ## drMD MODULES
-from UtilitiesCloset import drFixer, drSplash
+from UtilitiesCloset import drFixer, drSplash, drListInitiator
 from ExaminationRoom import drLogger
 
 ## PDB // DATAFRAME UTILS
@@ -55,7 +55,6 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
     Note:
         The function assumes that the necessary directories and files are present in the configuration dictionary.
     """
-
     ## read config for path info
     outDir: DirectoryPath = config["pathInfo"]["outputDir"]
     protName: str = config["proteinInfo"]["proteinName"]
@@ -64,13 +63,11 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
     os.makedirs(prepDir,exist_ok=True)
 
     set_up_logging(outDir, protName)
-
-
+  
     skipPrep, prepFiles = choose_to_skip_prep(config=config, prepDir=prepDir, protName=protName)
     if skipPrep:
         drLogger.log_info(f"-->{' '*4}Prep steps already complete for {protName}: Skipping ...",True)
         return prepFiles
-
 
     ######### MAIN PREP PROTOCOL #########
     if "ligandInfo" in config:
@@ -280,10 +277,24 @@ def split_input_pdb(inputPdb: FilePath, config: Dict, outDir: DirectoryPath) -> 
         ligDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"] == ligandName]
         pdbUtils.df2pdb(ligDf, p.join(ligPrepDir, f"{ligandName}.pdb"), chain=False)
         pdbDf.drop(pdbDf[pdbDf["RES_NAME"] == ligandName].index, inplace=True)
+
+    ionAtomNames = drListInitiator.get_ion_atom_names()
+    ionDf = pdbDf[pdbDf["ATOM_NAME"].isin(ionAtomNames)]
+    print(ionDf)
+    exit()
+
+    protDf = pdbDf[~pdbDf["ATOM_NAME"].isin(ionAtomNames)]
+
     # Write protein only to pdb file
     protPrepDir: DirectoryPath = p.join(outDir, "PROT")
     os.makedirs(protPrepDir, exist_ok=True)
-    pdbUtils.df2pdb(pdbDf, p.join(protPrepDir, "PROT.pdb"))
+    pdbUtils.df2pdb(protDf, p.join(protPrepDir, "PROT.pdb"))
+    ## if we have any ions,  write to pdb file
+    if ionDf.shape[0] > 0:
+        ionPrepDir: DirectoryPath = p.join(outDir, "IONS")
+        os.makedirs(ionPrepDir, exist_ok=True)
+        pdbUtils.df2pdb(ionDf, p.join(ionPrepDir, "IONS.pdb"))
+
 
 #############################  PROTONATION & PDB CREATION ###############################
 
@@ -636,12 +647,6 @@ def detect_disulphides(pdbFile: FilePath) -> List[str]:
     uniqueDisulphidePairs = {tuple(pair) for pair in disulphidePairs}
 
     return uniqueDisulphidePairs
-
-    
-
-
-
-
 
 
 #####################################################################################
