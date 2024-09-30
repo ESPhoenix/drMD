@@ -12,7 +12,7 @@ import matplotlib.colors as mcolors
 from concurrent.futures.process import BrokenProcessPool
 
 ## CUSTOM DR MD MODULES
-from Triage import drConfigTriage, drPdbTriage, drConfigWriter
+from Triage import drConfigTriage_new, drPdbTriage, drConfigWriter
 from Surgery import drOperator
 from ExaminationRoom import  drCleanup
 from UtilitiesCloset import drSplash, drMethodsWriter
@@ -39,14 +39,14 @@ def main(batchConfigYaml: Optional[FilePath] = None) -> None:
 
     ## if run from command line, use argpass to get batch config file
     if __name__ == "__main__":
-        batchConfigYaml: FilePath = drConfigTriage.get_config_input_arg()
+        batchConfigYaml: FilePath = drConfigTriage_new.get_config_input_arg()
     ## read bacth config file into a dictionary
     try:
-        batchConfig: dict = drConfigTriage.read_input_yaml(batchConfigYaml)
+        batchConfig: dict = drConfigTriage_new.read_input_yaml(batchConfigYaml)
     except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValueError) as e:
         drSplash.print_config_error(e)
 
-    configTriageLog  = drConfigTriage.validate_config(batchConfig)
+    configTriageLog  = drConfigTriage_new.validate_config(batchConfig)
 
     ## unpack batchConfig into variables for this function
     outDir: DirectoryPath = batchConfig["pathInfo"]["outputDir"]

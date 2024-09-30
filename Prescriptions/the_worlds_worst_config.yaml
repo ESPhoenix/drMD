@@ -3,11 +3,7 @@ pathInfo:
   inputDir: /home/esp/scriptDevelopment/drMD/01_inputs
 ########################################################################
 hardwareInfo:
-  parallelCPU: 60
-  platform: NOTAPLATFORM
-  subprocessCpus: 2
-
-ligandInfo:
+  name: cpu
   
 ########################################################################
 miscInfo:
@@ -22,7 +18,7 @@ miscInfo:
   - selection:
       keyword: custom
       customSelection:
-      - {RES_NAME: "all", RES_ID:  "all", ATOM_NAME: "CA"}
+      - {RES_NAME: "all", RES_ID:  "balls", ATOM_NAME: "CA"}
 ########################################################################
 equilibriationRestraints: &equilibriationRestraints
     - restraintType: position
@@ -33,7 +29,7 @@ equilibriationRestraints: &equilibriationRestraints
 
     - restraintType: position
       selection: 
-        keyword: ligand  
+        keyword: eggs  
       parameters:
         k: 1000
 
