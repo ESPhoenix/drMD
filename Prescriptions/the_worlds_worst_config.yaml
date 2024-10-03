@@ -1,10 +1,22 @@
 ########################################################################
 pathInfo:
-  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs
+  # inputDir: /home/esp/scriptDevelopment/drMD/01_inputs
+  # outputDir: SMEGMA
 ########################################################################
 hardwareInfo:
-  name: cpu
-  
+  platform: CUDA
+  subprocessCpus: 1
+  parallelCPU: 100
+
+ligandInfo:
+  - ligandName: FAD
+    toppar: No
+    mol2: yesplease
+    charge: -2
+  - ligandName: PLM
+    toppar: True
+    mol2: nothanks
+    charge: -2
 ########################################################################
 miscInfo:
   pH: 25
@@ -62,15 +74,16 @@ simulationInfo:
 postSimulationInfo:
   clusterInfo:
     stepNames: [05_Production_MD] 
-    nClusters: 25
+    nClusters: -1
     clusterBy:
     - selection:
         keyword: protein
     removeAtoms:
       - selection:
-          keyword: water
+          keyword: sausages
       - selection:
-          keyword: ions
+          keyword: custom
+          
   endPointInfo:
     stepNames: []
 

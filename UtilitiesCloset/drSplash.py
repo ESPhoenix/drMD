@@ -159,7 +159,7 @@ def print_first_aid_failed(errorOpenMM) -> None:
 
 
 ###########################################################################################
-def print_config_error(error: Optional[str] = None) -> None:
+def print_config_error(configDisorders) -> None:
     """
     Prints an error message indicating that the config file was not found.
 
@@ -167,6 +167,9 @@ def print_config_error(error: Optional[str] = None) -> None:
         None
     """
     redText = "\033[31m"
+    yellowText = "\033[33m"
+    orangeText = "\033[38;5;208m"
+    greenText = "\033[32m"
     resetTextColor = "\033[0m"
 
 
@@ -185,10 +188,37 @@ def print_config_error(error: Optional[str] = None) -> None:
 ░ ░         ░ ░           ░         ░       ░       ░  ░   ░        ░         ░ ░     ░     
 ░          
 ⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
-          """
-          +resetTextColor)
-    if error is not None:
-      print(str(error).strip("\""))
+          """)
+    print(f"{resetTextColor}The following disorders have been found in your config file:")    
+    print(f"{resetTextColor}Colour Key: | {greenText}Input Correct{resetTextColor} | {orangeText}Non Fatal, Default Used{resetTextColor} | {redText}Fatal Issue{resetTextColor} |")    
+
+
+    for infoName, infoDisorders in configDisorders.items():
+        if infoDisorders is None:
+            continue
+        print(f"For the config entry {yellowText}{infoName}{resetTextColor}, the following problems were found:")
+        for argName, argDisorder in infoDisorders.items():
+            if argDisorder is None:
+                print(f"\t{yellowText}{argName}: {greenText}Input Correct!{resetTextColor}")
+            elif isinstance(argDisorder, str):
+                if "default" in argDisorder.lower():
+                    print(f"\t{yellowText}{argName}: {orangeText}{argDisorder}{resetTextColor}")
+                else:
+                    print(f"\t{yellowText}{argName}: {redText}{argDisorder}{resetTextColor}")
+
+            elif isinstance(argDisorder, list):
+                print(f"\t{yellowText}{argName}: {redText}{argDisorder}{resetTextColor}")
+            elif isinstance(argDisorder, dict):
+                print(f"in sub-entry {yellowText}{argName}{resetTextColor}:")
+                for actualArgName, actualArgDisorder in argDisorder.items():
+                    if actualArgDisorder is None:
+                            print(f"\t{yellowText}{actualArgName}: {greenText}Input Correct!{resetTextColor}")
+                    elif isinstance(actualArgDisorder, str):
+                        print(f"\t{yellowText}{actualArgName}: {redText}{actualArgDisorder}{resetTextColor}")
+                    elif isinstance(actualArgDisorder, list):
+                        print(f"\t{yellowText}{actualArgName}: {redText}{actualArgDisorder}{resetTextColor}")
+
+    print(resetTextColor)
     exit(1)
 ###########################################################################################
 def print_pdb_error() -> None:

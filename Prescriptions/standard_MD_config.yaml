@@ -90,6 +90,5 @@ postSimulationInfo:
           keyword: "water"
       - selection:
           keyword: "ions"
-  endPointInfo:
-    stepNames: []
+
 
