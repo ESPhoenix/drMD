@@ -315,7 +315,7 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
                                 nSteps=totalSteps,
                                 reportInterval=reportInterval,
                                 simulation=simulation,
-                                dcdAtomSelections= config["loggingInfo"]["trajectorySelections"],
+                                dcdAtomSelections= config["miscInfo"]["trajectorySelections"],
                                 refPdb=refPdb
                                 )
 
