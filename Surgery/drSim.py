@@ -334,7 +334,7 @@ def run_molecular_dynamics(prmtop: app.AmberPrmtopFile,
 
     ## create a PDB file with the same atoms as the trajectory
     trajectoryPdb = p.join(simDir, "trajectory.pdb")
-    drSelector.slice_pdb_file(config["loggingInfo"]["trajectorySelections"], endPointPdb, trajectoryPdb)
+    drSelector.slice_pdb_file(config["miscInfo"]["trajectorySelections"], endPointPdb, trajectoryPdb)
     # save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
