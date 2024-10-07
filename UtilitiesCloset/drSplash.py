@@ -3,7 +3,7 @@ from subprocess import run
 import textwrap
 
 ##  CLEAN CODE
-from typing import Optional
+from typing import Optional, Union, List
 
 ###########################################################################################
 
@@ -43,6 +43,43 @@ d::::::ddddd::::::ddr:::::r            M::::::M               M::::::MDDD:::::DD
     """
     +resetTextColor)
 ###########################################################################################
+def print_botched(botchedSimulations: List[Union[None, dict]]) -> None:
+
+    redText = "\033[31m"
+    yellowText = "\033[33m"
+    resetTextColor = "\033[0m"
+
+
+    print(redText+
+          f"""
+⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
+                ▄▄▄▄    ▒█████  ▄▄▄█████▓ ▄████▄   ██░ ██ ▓█████ ▓█████▄  ▐██▌ 
+                ▓█████▄ ▒██▒  ██▒▓  ██▒ ▓▒▒██▀ ▀█  ▓██░ ██▒▓█   ▀ ▒██▀ ██▌ ▐██▌ 
+                ▒██▒ ▄██▒██░  ██▒▒ ▓██░ ▒░▒▓█    ▄ ▒██▀▀██░▒███   ░██   █▌ ▐██▌ 
+                ▒██░█▀  ▒██   ██░░ ▓██▓ ░ ▒▓▓▄ ▄██▒░▓█ ░██ ▒▓█  ▄ ░▓█▄   ▌ ▓██▒ 
+                ░▓█  ▀█▓░ ████▓▒░  ▒██▒ ░ ▒ ▓███▀ ░░▓█▒░██▓░▒████▒░▒████▓  ▒▄▄  
+                ░▒▓███▀▒░ ▒░▒░▒░   ▒ ░░   ░ ░▒ ▒  ░ ▒ ░░▒░▒░░ ▒░ ░ ▒▒▓  ▒  ░▀▀▒ 
+                ▒░▒   ░   ░ ▒ ▒░     ░      ░  ▒    ▒ ░▒░ ░ ░ ░  ░ ░ ▒  ▒  ░  ░ 
+                ░    ░ ░ ░ ░ ▒    ░      ░         ░  ░░ ░   ░    ░ ░  ░     ░ 
+                ░          ░ ░           ░ ░       ░  ░  ░   ░  ░   ░     ░    
+                    ░                   ░                        ░          
+⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
+          """+resetTextColor)
+    
+    deadSimulations = [sim for sim in botchedSimulations if sim is not None]
+    print(f"-->{' '*4}drMD failed to complete simulations for {redText}{str(len(deadSimulations))}{resetTextColor} out of {str(len(botchedSimulations))}")
+    print(f"-->{' '*4}Simluations on the following systems failed to complete: ")
+    for botchedSimulation in botchedSimulations:
+        if botchedSimulation is not None:
+            print(f"-->{' '*4}System: {yellowText}{botchedSimulation['pdbName']}{resetTextColor}")
+            print(f"-->{' '*4}Error: {redText}{botchedSimulation['errorMessage']}{resetTextColor}")
+
+
+
+
+
+###########################################################################################
+
 def print_prep_failed(errorMessage: str, stepName) -> None:
     redText = "\033[31m"
     yellowText = "\033[33m"

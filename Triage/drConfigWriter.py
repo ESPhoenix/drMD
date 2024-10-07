@@ -29,6 +29,7 @@ def make_per_protein_config(
     Returns:
         tuple[dict, Optional[dict], dict]: A tuple containing proteinInfo, ligandInfo, and hardwareInfo
     """    
+
     # Skip if not a PDB file
     fileData: List[str] = p.splitext(pdbFile)
     if fileData[1] != ".pdb":

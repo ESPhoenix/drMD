@@ -1,52 +1,47 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/scriptDevelopment/drMD/01_inputs/pd_proj"
-  outputDir: "/home/esp/scriptDevelopment/drMD/03_outputs"
+  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs/test_for_crash
+  outputDir: /home/esp/scriptDevelopment/drMD/03_outputs
   
 ########################################################################
 hardwareInfo:
-  parallelCPU: 5
-  platform: "CUDA"
+  parallelCPU: 16
+  platform: CUDA
   subprocessCpus: 1
-
-########################################################################
-nonCannonicalAminoAcidInfo:
-  - residueName: "C8X"
-  - residueName: "PD"
 
 ########################################################################
 miscInfo:
   pH: 7.4
-  firstAidMaxRetries: 10
-  boxGeometry: "cubic"
-  heavyProtons: True
+  boxGeometry: cubic
 
 ########################################################################
 loggingInfo:
   trajectorySelections:
   - selection:
-      keyword: "protein"
+      keyword: protein
+  - selection:  
+      keyword: ligand
 ########################################################################
 
 simulationInfo:
-  - stepName: "01_energy_minimisation"
-    simulationType: "EM"
+  - stepName: 01_energy_minimisation
+    simulationType: EM
     temperature: 300
-    maxIterations: 1000
+    maxIterations: -1
 
 ################################################
 
 # postSimulationInfo:
 #   endPointInfo:
-#     stepNames: ["01_energy_minimisation"]
+#     stepNames: [01_energy_minimisation]
 #     removeAtoms: 
 #     - selection:
-#         keyword: "ions"
+#         keyword: ions
 #     - selection:
-#         keyword: "ligand"
+#         keyword: ligand
 #     collate: True
 #   directoryCleanUpInfo:
 #     removeAllSimulationDirs: True
-#     # stepsToRemove: ["00_prep"]
+#     # stepsToRemove: [00_prep]
 
 

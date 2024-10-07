@@ -14,7 +14,7 @@ from concurrent.futures.process import BrokenProcessPool
 ## CUSTOM DR MD MODULES
 from Triage import drConfigTriage, drPdbTriage, drConfigWriter
 from Surgery import drOperator
-from ExaminationRoom import  drCleanup
+from ExaminationRoom import  drCleanup, drLogger
 from UtilitiesCloset import drSplash, drMethodsWriter
 
 ## CLEAN CODE
@@ -125,10 +125,10 @@ def process_pdb_file(pdbFile: FilePath, batchConfig: Dict):
     """
 
     ## create a per-protein config
-    runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)
 
     # Pass config YAML to drOperator to run a sequence of MD simulations
-    drOperator.drMD_protocol(runConfigYaml)
+    runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)
+    pass
 
 ###################################################################################################### 
 def run_serial(batchConfig: Dict) -> None:
@@ -145,7 +145,7 @@ def run_serial(batchConfig: Dict) -> None:
     Returns:
         None
     """
-
+    botchedSimulations = []
     ## unpack batchConfig to get pdbDir
     pdbDir: DirectoryPath = batchConfig["pathInfo"]["inputDir"]
     ## create a list of PDB files
@@ -153,7 +153,17 @@ def run_serial(batchConfig: Dict) -> None:
     # Iterate over each file in the PDB directory
     for pdbFile in pdbFiles:
         # Process the PDB file
-        process_pdb_file(pdbFile, batchConfig)
+        runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)
+        try:
+            drOperator.drMD_protocol(runConfigYaml)
+            botchedSimulations.append(None)
+        except Exception as e:
+            pdbName = p.splitext(p.basename(pdbFile))[0]
+            drLogger.log_info(f"drMD could not complete simulation for {pdbName}", True, True)
+            drLogger.log_info(f"Error: {str(e)}", True, True)
+            botchedSimulations.append({"pdbName": pdbName, "errorMessage": str(e)})
+
+            continue
     ## CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 
@@ -190,10 +200,13 @@ def run_parallel(batchConfig: Dict) -> None:
 
     try:
         ## run simulations in parallel
-        process_map(per_core_worker, batchedArgsWithPos, 
+        botchedSimulations = process_map(per_core_worker, batchedArgsWithPos, 
                     max_workers=parallelCpus)
     except BrokenProcessPool:
         print("BrokenProcessPool: Terminating remaining processes")
+
+    if any(botchedSimulations is not None for botchedSimulations in botchedSimulations):
+        drSplash.print_botched(botchedSimulations)
     # CLEAN UP
     drCleanup.clean_up_handler(batchConfig)
 ######################################################################################################
@@ -209,30 +222,36 @@ def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
     Returns:
         None
     """
-
+    botchedSimulation = None
     ## unpack batchedArgsWithPos into the batch of arguments for 
     batchedArgs, pos = batchedArgsWithPos
 
+    ## create a list of colors for the loading bar
     cmap = plt.get_cmap('plasma', 32)
     colors = [mcolors.rgb2hex(cmap(i)) for i in range(32)]
+    ## create a dummy progress bar to be used for printing logs
     if pos == -1:
         with tqdm(total=1, position=0, bar_format='{desc}', 
                   colour="#000000", leave=True) as dummy_progress:
             dummy_progress.set_description_str("Logs:")
             dummy_progress.refresh()
+    ## run simulations in parallel
     else:
         with tqdm(desc=f"Core {str(pos)}", total=len(batchedArgs), 
                 position=pos+1, colour=colors[pos % len(colors)], 
                 leave=False) as progress:
             for args in batchedArgs:
                 pdbFile, batch_config = args
+                runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchedArgs[0][1])
                 try:
-                    process_pdb_file(pdbFile, batch_config)
+                    drOperator.drMD_protocol(runConfigYaml)
                 except Exception as e:
-                    print(e)
+                    pdbName = p.splitext(p.basename(pdbFile))[0]
+                    botchedSimulation = {"pdbName": pdbName, "errorMessage": str(e)}
+                    continue
                 progress.update(1)
             progress.close()  
-
+    return botchedSimulation
 ######################################################################################################
 
 if __name__ == "__main__":

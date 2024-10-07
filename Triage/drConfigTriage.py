@@ -466,7 +466,7 @@ def check_postSimulationInfo(config: dict, noDisorders) -> Tuple[dict,bool]:
     ## check for postSimulationInfo in config
     postSimulationInfo = config.get("postSimulationInfo", None)
     if postSimulationInfo is None:
-        return None
+        return None, noDisorders
     
     endPointInfo = postSimulationInfo.get("endPointInfo", None)
     if endPointInfo is not None:
