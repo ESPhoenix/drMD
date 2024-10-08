@@ -27,7 +27,7 @@ from ExaminationRoom import drLogger
 from UtilitiesCloset import drSplicer, drSelector
 
 ## CLEAN CODE
-from typing import Union, Dict, Tuple, List
+from typing import Dict, Tuple, List
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
 
 ## PDB // DATAFRAME UTILS
@@ -147,12 +147,13 @@ def check_up_handler():
         @wraps(simulationFunction)
         def wrapper(*args, **kwargs):
             saveFile: FilePath = simulationFunction(*args, **kwargs)
-
-            vitalsFiles, simDir = find_vitals_files(simInfo=kwargs["sim"],
+            try:
+                vitalsFiles, simDir = find_vitals_files(simInfo=kwargs["sim"],
                                                      outDir=kwargs["outDir"], 
                                                      pdbFile=kwargs["refPdb"],
                                                      config=kwargs["config"])
-
+            except FileNotFoundError as e:
+                drLogger.log_info(f"Error running checkup: {e}", True)
             try:
                 check_vitals(simDir = simDir,
                             vitalsFiles = vitalsFiles)
@@ -184,11 +185,11 @@ def find_vitals_files(simInfo: Dict,
     if not p.isfile(vitalsReport):
         raise FileNotFoundError(f"->\tReporter file not found at {vitalsReport}")
     ## find progress reporter file
-    progressReport: Union[PathLike, str] = p.join(simDir, "progress_report.csv")
+    progressReport: FilePath = p.join(simDir, "progress_report.csv")
     if not p.isfile(progressReport):
         raise FileNotFoundError(f"->\tReporter file not found at {progressReport}")
     ## find trajectory file
-    trajectoryDcd: Union[PathLike, str] = p.join(simDir, "trajectory.dcd")
+    trajectoryDcd: FilePath = p.join(simDir, "trajectory.dcd")
     if not p.isfile(trajectoryDcd):
         raise FileNotFoundError(f"->\Trajectory file not found at {trajectoryDcd}")
     

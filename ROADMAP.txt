@@ -5,14 +5,14 @@
 [] need more stuff when simulations are running
 
 
-## drFirstAid
-[] if no checkpoint exists at all, run an EM from previous?
 
 ## Extra features
 [] more metaDynamics parameters
 
 ## drCheckup
-[] if this fails, continue with everything
+[x] if this fails, continue with everything
 [] redo PDF image sizes and locations
 [] Display relative energies for Potential, Kinetic and Total
 
+## drMethodsWriter
+[] metaDynamics 

@@ -776,7 +776,6 @@ def check_restraint_parameters(restraintType: str, parameters: dict) -> None:
 
 #########################################################################
 def check_selection(selection: dict) -> list:
-
     selectionDisorders = []
     ## check keyword
     subSelection = selection.get("selection", None)
@@ -790,7 +789,7 @@ def check_selection(selection: dict) -> list:
     if not isinstance(keyword, str):
         return [f"keyword must be a string, not {type(keyword)}"]
     
-    if not keyword in ["all", "protein", "ligand", "water", "ions", "custom"]:
+    if not keyword in ["all", "protein", "ligand", "water", "ions", "custom", "backbone"]:
         return [f"selection keywords incorrect see README.md for more details"]
     
     ## check custom selection syntax
@@ -850,9 +849,11 @@ def check_metadynamics_options(simulation: dict, stepName: str, disorders: dict,
         disorders["metaDynamicsInfo"] = "metaDynamicsInfo must be a dictionary"
         return disorders, False
     
+    print(metaDynamicsInfo)
     ## check height parameter
+    disorders["metaDynamicsInfo"] = {}
     height = metaDynamicsInfo.get("height", None)
-    if height is not None:
+    if height is  None:
         disorders["metaDynamicsInfo"]["height"] = "No height specified in metaDynamicsInfo"
         noDisorders = False
     else:
@@ -894,6 +895,7 @@ def check_metadynamics_options(simulation: dict, stepName: str, disorders: dict,
             disorders["metaDynamicsInfo"]["biases"] = "biases must contain at least one bias variable"
             noDisorders = False
         else:
+            disorders["metaDynamicsInfo"]["biases"] = {}
             for biasCount, bias in enumerate(biases):
                 if not isinstance(bias, dict):
                     disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "biases must be a list of biases (check README for more details)"
@@ -918,13 +920,15 @@ def check_metadynamics_options(simulation: dict, stepName: str, disorders: dict,
                         disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "selection must be a dictionary"
                         noDisorders = False
                     else:
-                        selectionDisorders = check_selection(biasSelection, stepName)
+                        selectionDisorders = check_selection({"selection": biasSelection})
+                        print(selectionDisorders)
                         if len(selectionDisorders) > 0:
                             disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = selectionDisorders
                             noDisorders = False
                         else:
                             disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = None
-                        
+
+    print(disorders["metaDynamicsInfo"])
     return disorders, noDisorders
 #########################################################################
 def check_nvt_npt_options(simulation: dict, stepName: str, disorders: dict, noDisorders: bool) -> Tuple[dict,bool]:

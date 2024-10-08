@@ -12,7 +12,7 @@ import  simtk.unit  as unit
 ## drMD LIBRARIES
 from Surgery import drSim, drRestraints, drFirstAid
 from ExaminationRoom import drLogger, drCheckup
-from UtilitiesCloset import drSelector
+from UtilitiesCloset import drSelector, drFixer
 
 ########################################################################################################
 ##TODO: allow for custom parameters to be passed from config file ---> bias force generation and metadynamics construction
@@ -28,7 +28,7 @@ def run_metadynamics(prmtop: app.Topology,
                             outDir: str,
                               platform: openmm.Platform,
                                 refPdb: str,
-                                config:dict) -> str:
+                                    config:dict) -> str:
     """
     Run a simulation at constant pressure (NpT) step with biases.
 
@@ -44,7 +44,7 @@ def run_metadynamics(prmtop: app.Topology,
     Returns:
         str: The path to the XML file containing the final state of the simulation.
 
-    This function runs a simulation at constant pressure (NpT) step with biases.
+    This function runs a metadynamics simulation at constant pressure (NpT) step with biases.
     It initializes the system, handles any constraints, adds a constant pressure force,
     sets up the integrator and system, loads the state from a checkpoint or XML file,
     sets up reporters, runs the simulation, saves the final geometry as a PDB file,
@@ -71,8 +71,10 @@ def run_metadynamics(prmtop: app.Topology,
     system: openmm.System = prmtop.createSystem(nonbondedMethod=nonbondedMethod,
                                                 nonbondedCutoff=nonbondedCutoff,
                                                 constraints=hBondconstraints)
+
     # Deal with restraints (clear all lurking restraints and constants)
     system: openmm.System = drRestraints.restraints_handler(system, prmtop, inpcrd, sim, saveFile, refPdb)
+
     # Add a Monte Carlo Barostat to maintain constant pressure
     barostat: openmm.MonteCarloBarostat = openmm.MonteCarloBarostat(1.0*unit.atmospheres, sim["temperature"])  # Set pressure and temperature
     system.addForce(barostat)
@@ -108,6 +110,8 @@ def run_metadynamics(prmtop: app.Topology,
                                      frequency=50,
                                      saveFrequency=50,
                                      biasDir=simDir)
+
+
     # Set up integrator
     integrator: openmm.LangevinMiddleIntegrator = openmm.LangevinMiddleIntegrator(sim["temperature"], 1/unit.picosecond, sim["timestep"])
     # Create new simulation
@@ -118,18 +122,32 @@ def run_metadynamics(prmtop: app.Topology,
     totalSteps: int = simulation.currentStep + sim["nSteps"]
     reportInterval: int = sim["logInterval"]
     simulation: app.Simulation = drSim.init_reporters(simDir=simDir,
-                                     nSteps=totalSteps,
-                                     reportInterval=reportInterval,
-                                       simulation=simulation)
+                                nSteps=totalSteps,
+                                reportInterval=reportInterval,
+                                simulation=simulation,
+                                dcdAtomSelections= config["miscInfo"]["trajectorySelections"],
+                                refPdb=refPdb)
+
     # Run metadynamics simulation
     meta.step(simulation, sim["nSteps"])
-    # Save simulation as XML
+ 
+    # find name to call outFiles
+    protName: str = p.basename(p.dirname(simDir))
+    # save result as pdb - reset chain and residue Ids
+    state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
+    endPointPdb: str = p.join(simDir, f"{protName}.pdb")
+    with open(endPointPdb, 'w') as output:
+        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
+    ## reset the chain and residue ids to original
+    drFixer.reset_chains_residues(refPdb, endPointPdb)
+
+    
+    ## create a PDB file with the same atoms as the trajectory
+    trajectoryPdb = p.join(simDir, "trajectory.pdb")
+    drSelector.slice_pdb_file(config["miscInfo"]["trajectorySelections"], endPointPdb, trajectoryPdb)
+    # save simulation as XML
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
-    # Save result as pdb
-    state: openmm.State = simulation.context.getState(getPositions=True, getEnergy=True)
-    with open(p.join(simDir, f"{stepName}.pdb"), 'w') as output:
-        app.pdbfile.PDBFile.writeFile(simulation.topology, state.getPositions(), output)
 
     # Return checkpoint file for continuing simulation
     return saveXml

@@ -620,7 +620,7 @@ def write_generic_simulation_methods(methodsFile: FilePath, simulationInfo: dict
             methods.write("the Monte-Carlo barostat was used to enforce a constant pressure of 1 atm. ")
         ## ParticleMeshEwald
         methods.write("In all simulations, long-range Coulombic interactions were modelled using the ")
-        methods.write(f"Particle-Mesh Ewald (PME) method [Ref. {cite("pme")}], with a 10 Å cutoff distance. ")
+        methods.write(f"Particle-Mesh Ewald (PME) method [Ref. {cite('pme')}], with a 10 Å cutoff distance. ")
         ## HBond constraints
         methods.write(f"In all simulations, constraints were applied to bonds between hydrogen atoms and heavy atoms using the SHAKE algorithm [Ref. {cite('shake')}]. ")
         ## water constraints
