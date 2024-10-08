@@ -368,11 +368,11 @@ def get_progression_word(stepIndex: int, maxSteps: int) -> str:
     if stepIndex == 0 and maxSteps == 1:
         return ""
     if stepIndex == 0:
-        return "Initially,"
+        return "Initially, "
     elif stepIndex == maxSteps - 1:
-        return "Finally,"
+        return "Finally, "
     else:
-        return "Next,"
+        return "Next, "
 ##########################################################################################
 def get_simulation_type_text(sim: Dict, progressionWord: str) -> str:
     """
@@ -390,18 +390,19 @@ def get_simulation_type_text(sim: Dict, progressionWord: str) -> str:
 
     ## read simulation type from simulation dictionary | choose appropriate methods text
     simulationType = sim["simulationType"]
+    print(progressionWord)
     if simulationType.upper() == "NPT":
         article = "A" if capitalise else "a"
-        return f"{article} simulation was performed using the *isothermal-isobaric* (NpT) ensemble"
+        return f"{progressionWord}{article} simulation was performed using the *isothermal-isobaric* (NpT) ensemble"
     elif simulationType.upper() == "NVT":
         article = "A" if capitalise else "a"
-        return f"{article} simulation was performed using the canonical (NVT) ensemble"
+        return f"{progressionWord}{article} simulation was performed using the canonical (NVT) ensemble"
     elif simulationType.upper() == "EM":
         article = "An" if capitalise else "an"
-        return f"{article} energy mimimisation step was performed using the steepest descent method"
+        return f"{progressionWord}{article} energy mimimisation step was performed using the steepest descent method"
     elif simulationType == "META":
         article = "A" if capitalise else "a"
-        return f"{article} metadynamics simulation was performed"
+        return f"{progressionWord}{article} metadynamics simulation was performed"
     
 ##########################################################################################
 def get_restraints_methods_text(sim: Dict) -> str:

@@ -849,7 +849,6 @@ def check_metadynamics_options(simulation: dict, stepName: str, disorders: dict,
         disorders["metaDynamicsInfo"] = "metaDynamicsInfo must be a dictionary"
         return disorders, False
     
-    print(metaDynamicsInfo)
     ## check height parameter
     disorders["metaDynamicsInfo"] = {}
     height = metaDynamicsInfo.get("height", None)
@@ -921,14 +920,12 @@ def check_metadynamics_options(simulation: dict, stepName: str, disorders: dict,
                         noDisorders = False
                     else:
                         selectionDisorders = check_selection({"selection": biasSelection})
-                        print(selectionDisorders)
                         if len(selectionDisorders) > 0:
                             disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = selectionDisorders
                             noDisorders = False
                         else:
                             disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = None
 
-    print(disorders["metaDynamicsInfo"])
     return disorders, noDisorders
 #########################################################################
 def check_nvt_npt_options(simulation: dict, stepName: str, disorders: dict, noDisorders: bool) -> Tuple[dict,bool]:
