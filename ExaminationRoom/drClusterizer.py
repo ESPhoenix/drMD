@@ -33,6 +33,9 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
 
     ## define and creare a cluster directory
     clusterDir: DirectoryPath = p.join(outDir,"00_clustered_pdbs")
+    if p.exists(clusterDir):
+        drLogger.log_info(f"Cluster directory already exists: {clusterDir}. Skipping...", True)
+        return None
     os.makedirs(clusterDir, exist_ok=True)
 
     ## list of dirs created by drMD that we don't want to cluster
@@ -51,7 +54,7 @@ def clustering_manager(pathInfo: Dict, clusterInfo: Dict) -> List[FilePath]:
     allClusterPdbs: list[FilePath] = []
     ## Run clustering on each specified directory
     for dirToCluster in dirsToCluster:
-        drLogger.log_info(f"-->{' '*4}Clustering trajectory for system:{p.basename(p.dirname(dirToCluster))} and step:  {p.basename(dirToCluster)}", True)
+        drLogger.log_info(f"Clustering trajectory for system:{p.basename(p.dirname(dirToCluster))} and step:  {p.basename(dirToCluster)}", True)
         clusterPdbs: List[FilePath] = rmsd_clustering_protocol(dirToCluster, clusterInfo, clusterDir)
         ## add cluster pdbs to list 
         allClusterPdbs.extend(clusterPdbs)
@@ -77,7 +80,7 @@ def rmsd_clustering_protocol(inDir: DirectoryPath, clusterInfo: Dict[str, Union[
     stepName: str = p.basename(inDir)
     protName: str = p.basename(p.dirname(inDir))
 
-    drLogger.log_info(f"-->{' '*4}Clustering trajectory for system: {protName} and step: {stepName}", True)
+    drLogger.log_info(f"Clustering trajectory for system: {protName} and step: {stepName}", True)
 
     thisClusterDir: DirectoryPath = p.join(clusterDir, protName, stepName)
     os.makedirs(thisClusterDir, exist_ok=True)

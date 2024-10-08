@@ -41,8 +41,6 @@ def drMD_protocol(configYaml: FilePath) -> None:
     # Prepare the protocol
     solvatedPdb, inputCoords, amberParams = drPrep.prep_protocol(config)
 
-
-
     # Run the simulation
     run_simulation(config = config,
                     outDir = outDir,
@@ -94,10 +92,10 @@ def run_simulation(config: dict, outDir: str, inputCoords: str, amberParams: str
         # Skip or resume simulation
         if skipResumeSim == "skip":
             stepName: str = sim["stepName"]
-            drLogger.log_info(f"-->{' '*4}Skipping {stepName} for run: {protName}", True)
+            drLogger.log_info(f"Skipping {stepName} for run: {protName}", True)
             continue
         if skipResumeSim == "resume":
-            drLogger.log_info(f"-->{' '*4}Resuming {stepName} from checkpoint file for run: {protName}", True)
+            drLogger.log_info(f"Resuming {stepName} from checkpoint file for run: {protName}", True)
             rename_out_files(simDir)    
 
         # Run simulation

@@ -1,7 +1,8 @@
 
 
-
-
+## drLogger
+[] for drPrep, need more flags to label what's going on
+[] need more stuff when simulations are running
 
 
 ## drFirstAid
@@ -14,10 +15,4 @@
 [] if this fails, continue with everything
 [] redo PDF image sizes and locations
 [] Display relative energies for Potential, Kinetic and Total
-
-
-## auto defaults for missing config entries
-
-##drPrep
-[] LYN is written as a HETATM, messing with PDB order
 

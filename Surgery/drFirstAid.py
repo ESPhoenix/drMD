@@ -73,7 +73,7 @@ def firstAid_handler(firstAid_function: callable):
                     ## in this case, some firstAid steps have been run
                     if retries > 0:
                         ## let user know whats going on
-                        drLogger.log_info(f"-->{' '*4}Success after {retries} tries.", True)
+                        drLogger.log_info(f"Success after {retries} tries.", True)
                         ## merge partial reports and trajectories
                         runOutDir: Union[PathLike, str] = kwargs["outDir"]
                         simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
@@ -92,7 +92,7 @@ def firstAid_handler(firstAid_function: callable):
             else:
                 ## If we have got here, the firstAid has failed
                 ## let user know and merge output reporters and trajectories
-                drLogger.log_info(f"-->{' '*4}Max retries reached. Stopping.", True, True)
+                drLogger.log_info(f"Max retries reached. Stopping.", True, True)
                 drSplash.print_first_aid_failed(errorOpenMM)
                 exit(1)
         return wrapper
@@ -104,7 +104,7 @@ def  run_first_aid_protocol(retries: int, maxRetries: int, *args, **kwargs):
     if retries == 1:
         drSplash.print_performing_first_aid()
 
-    drLogger.log_info(f"-->{' '*4}Attempting simulation firstAid, try {retries} of {maxRetries}", True)
+    drLogger.log_info(f"Attempting simulation firstAid, try {retries} of {maxRetries}", True)
     ## find simulation output directory
     runOutDir: Union[PathLike, str] = kwargs["outDir"]
     simDir: Union[PathLike, str] = p.join(runOutDir, kwargs["sim"]["stepName"])
@@ -225,7 +225,7 @@ def pre_firstAid_processing(simDir: Union[PathLike, str],
     ## look for checkpoint file of exploded simulation
     explodedCheckpoint = p.join(simDir, "checkpoint.chk")
     if not p.isfile(explodedCheckpoint):
-        raise FileNotFoundError(f"-->{' '*4}Checkpoint file not found at {explodedCheckpoint}")
+        raise FileNotFoundError(f"Checkpoint file not found at {explodedCheckpoint}")
     
     ## make a firstAid directory - this will be where each firstAid step is performed
     firstAidDir = p.join(simDir, "firstAid")

@@ -92,7 +92,7 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
     """
     logging.info(f"\n\n")
     if any(commonPdbProblems.values()):
-        logging.info(f"-->{' '*4}The following common problems were found in the PDB files:")
+        logging.info(f"The following common problems were found in the PDB files:")
         if commonPdbProblems["isMultipleConformers"]:
             logging.info(f"\n  * Multiple conformers found for sidechains of residues *")
             logging.info(f"\t> This often occurs in X-ray structures when electron density is found for multiple conformers")
@@ -121,13 +121,13 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
             logging.info(f"\t> You can create your own parameters for organometallic ligand")
             logging.info(f"\t> and supply them in the inputs directory")
     else:
-        logging.info(f"-->{' '*4}No common problems found in the PDB files.")
+        logging.info(f"No common problems found in the PDB files.")
 
     if any(commonPdbProblems.values()):
         drSplash.print_pdb_error()
         drLogger.log_info(f"\n\n")
-        drLogger.log_info(f"-->{' '*4}Problems with the PDB files will cause parameterisation to fail", True, True)
-        drLogger.log_info(f"-->{' '*4}Consult the following log file for more details:", True, True)
+        drLogger.log_info(f"Problems with the PDB files will cause parameterisation to fail", True, True)
+        drLogger.log_info(f"Consult the following log file for more details:", True, True)
         drLogger.log_info(f"\t{pdbTriageLog}", True, True)
         exit(1)
 
@@ -154,7 +154,7 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
         Dict[str,bool]: A dictionary containing the common problems found in the PDB file.
     """
     pdbName: str = p.basename(pdbFile)
-    logging.info(f"\n-->{' '*4}Checking PDB file {pdbName} for common problems...")
+    logging.info(f"\nChecking PDB file {pdbName} for common problems...")
     
     ## load pdb file as a dataframe
     pdbDf: pd.DataFrame = pdbUtils.pdb2df(pdbFile)

@@ -10,6 +10,9 @@ import inflect
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
 
+## drMD MODULES
+from ExaminationRoom import drLogger
+
 ##  CLEAN CODE
 from typing import Dict, Callable, List, Tuple, Set, Union
 from UtilitiesCloset.drCustomClasses import FilePath, DirectoryPath
@@ -40,6 +43,10 @@ def methods_writer_protocol(batchConfig: Dict, configDir: DirectoryPath, outDir:
     os.makedirs(autoMethodsDir, exist_ok=True)
     ## create methods file
     methodsFile: FilePath = p.join(autoMethodsDir, "drMD_AutoMethods.md")
+
+    ## log what we are doing
+    drLogger.log_info(f"writing automatic methods section to {methodsFile}", True)
+
     ## write a header to the methods file
     with open(methodsFile, "w") as f:
         f.write("# Molecular Dynamics Protocol\n\n")
@@ -54,6 +61,8 @@ def methods_writer_protocol(batchConfig: Dict, configDir: DirectoryPath, outDir:
     write_protein_preparation_methods(configDicts, methodsFile)
     ## write solvation related methods
     write_solvation_charge_balance_methods(batchConfig, configDicts, methodsFile)
+    ## write forcefield related methods
+    write_forecefields_methods(methodsFile)
     ## write simulation related methods
     simulationInfo: dict = configDicts[0]["simulationInfo"]
     write_simulation_methods(methodsFile, simulationInfo)
@@ -199,6 +208,7 @@ def write_protein_preparation_methods(configDicts: List[dict], methodsFile: File
             methods.write("This process also automatically creates disulfide bonds as appropriate. ")
             methods.write(f"\n\n**WARNING** drMD did not protonate proteins {protonatedText}. ")
             methods.write("You will need to fill in this section manually. ")
+        
 
         ## line break at the end of this section
         methods.write("\n")
@@ -243,10 +253,11 @@ def write_solvation_charge_balance_methods(batchConfig: Dict, configDicts: List[
     with open(methodsFile, "a") as methods:
         methods.write("## Solvation and Charge Balencing\n\n")
         ## info on solvation box
-        methods.write(f"All proteins were placed in a {boxGeometry} solvation box with a 10 Å buffer between")
+        methods.write(f"All proteins were placed in {inflect.engine().an(boxGeometry)} {boxGeometry} solvation box with a 10 Å buffer between")
         methods.write(f" the protein and the nearest edge of the box. ")
+        methods.write("The system was treated using periodic boundary conditions. ")
         ## average water count
-        methods.write(f"Approximately {approxWaterCount} TIP3P water molecules were added to this box. ")
+        methods.write(f"Approximately {approxWaterCount} TIP3P water molecules were added to the solvation box. ")
         ## info on counter ions
         methods.write(f"Sodium and Chloride ions were added to the box to balance the charge of the system.\n")
         methods.write(f"A table showing the counts of counter ions is provided below:\n\n")
@@ -354,6 +365,8 @@ def get_progression_word(stepIndex: int, maxSteps: int) -> str:
     Returns:
         word: (str) The progression word
     """
+    if stepIndex == 0 and maxSteps == 1:
+        return ""
     if stepIndex == 0:
         return "Initially,"
     elif stepIndex == maxSteps - 1:
@@ -361,7 +374,7 @@ def get_progression_word(stepIndex: int, maxSteps: int) -> str:
     else:
         return "Next,"
 ##########################################################################################
-def get_simulation_type_text(sim: Dict) -> str:
+def get_simulation_type_text(sim: Dict, progressionWord: str) -> str:
     """
     Helper Function that converts simulation type to methods text.
 
@@ -371,16 +384,24 @@ def get_simulation_type_text(sim: Dict) -> str:
     Returns:
         text: (str) Methods text
     """
+    capitalise = False
+    if len(progressionWord) == 0:
+        capitalise = True
+
     ## read simulation type from simulation dictionary | choose appropriate methods text
     simulationType = sim["simulationType"]
     if simulationType.upper() == "NPT":
-        return "a simulation was performed using the *isothermal-isobaric* (NpT) ensemble"
+        article = "A" if capitalise else "a"
+        return f"{article} simulation was performed using the *isothermal-isobaric* (NpT) ensemble"
     elif simulationType.upper() == "NVT":
-        return "a simulation was performed using the canonical (NVT) ensemble"
+        article = "A" if capitalise else "a"
+        return f"{article} simulation was performed using the canonical (NVT) ensemble"
     elif simulationType.upper() == "EM":
-        return "an energy mimimisation step was performed using the steepest descent method"
+        article = "An" if capitalise else "an"
+        return f"{article} energy mimimisation step was performed using the steepest descent method"
     elif simulationType == "META":
-        return "A metadynamics simulation was performed"
+        article = "A" if capitalise else "a"
+        return f"{article} metadynamics simulation was performed"
     
 ##########################################################################################
 def get_restraints_methods_text(sim: Dict) -> str:
@@ -541,12 +562,12 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
 
     with open(methodsFile, "a") as methods:
         ## progression word
-        methods.write(f"{get_progression_word(stepIndex, maxSteps)} ")
+        progressionWord = get_progression_word(stepIndex, maxSteps)
         ## simulation type
-        methods.write(f"{get_simulation_type_text(sim)}.\n")
+        methods.write(f"{get_simulation_type_text(sim, progressionWord)}.\n")
         ## deal with EM and maxIterations
         if sim["simulationType"] == "EM":
-            if sim["maxIterations"] == "-1":
+            if sim["maxIterations"] == -1:
                 methods.write(f"This energy minimisation step was performed until it reached convergence. ")
             else:
                 methods.write(f"This energy minimisation step was performed for {sim['maxIterations']} steps, ")
@@ -555,7 +576,7 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
         else:
             methods.write(f"This simulation was performed for {sim['duration']} ") 
             if "temperature" in sim:
-                methods.write(f" at {sim['temperature']} K") 
+                methods.write(f" at {sim['temperature']} K. ") 
             elif "temperatureRange" in sim:
                 methods.write(f"The temperature of this simulation was stepped through the range ")
                 methods.write(f"{format_list([str(temp) + ' K' for temp in sim['temperatureRange']])} in even time increments. ")
@@ -565,7 +586,7 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
             if heavyProtons:
                 methods.write(f"This simulations was performed using a mass of 4.03036 amu for hydrogen atoms. ")
                 methods.write(f"The mass added to each hydrogen atom was subtracted from the mass of the heavy atom it was bonded to. ")
-                methods.write(f"This combined with the constraints placed upon bonds between heavy and hydrogen atoms, ")
+                methods.write(f"This, combined with the constraints placed upon bonds between heavy and hydrogen atoms, ")
                 methods.write(f"allowed the simulation to be performed using a timestep of {sim['timestep']} [Ref. {cite('heavyProtons')}]. ")
             else:
                 methods.write(f"This simulation was performed using a timestep of {sim['timestep']}. ")
@@ -574,7 +595,7 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
         ## line break at the end of the section
         methods.write("\n\n")
 ##########################################################################################
-def write_generic_simulation_methods(methodsFile: FilePath):
+def write_generic_simulation_methods(methodsFile: FilePath, simulationInfo: dict) -> None:
     """
     Writes methods section generic to all simulations run by drMD
 
@@ -587,17 +608,23 @@ def write_generic_simulation_methods(methodsFile: FilePath):
 
     with open(methodsFile, "a") as methods:
         methods.write(f"All simulations were performed using the OpenMM simulation toolkit [Ref. {cite('openmm')}]. ")
-        ## LangevinMiddleIntegrator
-        methods.write(f"All simulations were performed using the Langevin Middle Integrator [Ref. {cite('langevinMiddleIntegrator')}] ")
-        methods.write("this was used to enforce a constant temperature in each simulation. ")
-        ## MonteCarloBarostat
-        methods.write("For simulations run under the *isothermal-isobaric* (NpT) ensemble, ")
-        methods.write("the Monte-Carlo barostat was used to enforce a constant pressure of 1 atm. ")
+        ## Check for NVT and/or NPT
+        simluationTypes = [step["simulationType"].upper() for step in simulationInfo]
+        if "NVT" in simluationTypes or "NPT" in simluationTypes:
+            ## LangevinMiddleIntegrator
+            methods.write(f"All simulations were performed using the Langevin Middle Integrator [Ref. {cite('langevinMiddleIntegrator')}] ")
+            methods.write("which was used to enforce constant temperature conditions in each simulation. ")
+        if "NPT" in simluationTypes:
+            ## MonteCarloBarostat
+            methods.write("For simulations run under the *isothermal-isobaric* (NpT) ensemble, ")
+            methods.write("the Monte-Carlo barostat was used to enforce a constant pressure of 1 atm. ")
         ## ParticleMeshEwald
         methods.write("In all simulations, long-range Coulombic interactions were modelled using the ")
-        methods.write("Particle-Mesh Ewald (PME) method, with a 10 Å cutoff distance. ")
+        methods.write(f"Particle-Mesh Ewald (PME) method [Ref. {cite("pme")}], with a 10 Å cutoff distance. ")
         ## HBond constraints
-        methods.write("In all simulations, constraints were applied to bonds between hydrogen atoms and heavy atoms. ")
+        methods.write(f"In all simulations, constraints were applied to bonds between hydrogen atoms and heavy atoms using the SHAKE algorithm [Ref. {cite('shake')}]. ")
+        ## water constraints
+        methods.write(f"In all simulations, bonds lengths and angles of water molecules were constrained using the SETTLE algorithm [Ref. {cite('settle')}]. ")
         
 ##########################################################################################
 def write_forecefields_methods(methodsFile):
@@ -611,9 +638,11 @@ def write_forecefields_methods(methodsFile):
         None    
     """
     with open(methodsFile, "a") as methods:
-        methods.write(f"All protein residues were parameterised using the AMBER ff19SB forcefield [Ref {cite('ff19SB')}]. \
-                      All water molecules parameterised using the TIP3P model [Ref. {cite('tip3pParams')}]. \
-        Any ions in our system were treated using parameteres calculated to complement the TIP3P water model [Ref. {cite('ionParams')}]. \n\n")
+        methods.write("## Forcefield Information\n\n")
+        methods.write(f"All protein residues were parameterised using the AMBER ff19SB and forcefield [Ref. {cite('ff19SB')}]. ")
+        methods.write(f" These parameters were prepared using tleap from the Ambertools package [Ref. {cite('ambertools')}]. ")
+        methods.write(f"Simulations were performed in explicit solvent. All water molecules parameterised using the TIP3P model [Ref. {cite('tip3pParams')}]. ")
+        methods.write(f"Any ions in our system were treated using parameteres calculated to complement the TIP3P water model [Ref. {cite('ionParams')}]. \n\n")
 ##########################################################################################
 def  write_simulation_methods(methodsFile: FilePath, simulationInfo: dict):
     """
@@ -627,7 +656,7 @@ def  write_simulation_methods(methodsFile: FilePath, simulationInfo: dict):
     for stepIndex, sim in enumerate(simulationInfo):
         write_per_step_simulation_methods(methodsFile, sim, stepIndex, len(simulationInfo))
     ## write the generic simulation methods
-    write_generic_simulation_methods(methodsFile)
+    write_generic_simulation_methods(methodsFile, simulationInfo)
 ##########################################################################################
 def cite(key: str) -> str:
     """
@@ -651,9 +680,13 @@ def cite(key: str) -> str:
         "obabel": ["10.1186/1758-2946-3-33"],
         "antechamber": ["10.1002/jcc.20035", "10.1016/j.jmgm.2005.12.005"],
         "parmchk": ["10.1002/jcc.20035", "10.1016/j.jmgm.2005.12.005"],
+        "ambertools" :["10.1021/acs.jcim.3c01153"],
         ## simulation step citations
         "langevinMiddleIntegrator": ["10.1021/acs.jpca.9b02771"],
         "heavyProtons": ["10.1002/(SICI)1096-987X(199906)20:8<786::AID-JCC5>3.0.CO;2-B"],
+        "shake": ["10.1002/1096-987X(20010415)22:5<501::AID-JCC1021>3.0.CO;2-V"],
+        "settle": ["10.1002/jcc.540130805"],
+        "pme":["10.1063/1.464397"],
         ## parameter citations
         "ionParams": ["10.1021/ct500918t", "10.1021/ct400146w"],
         "tip3pParams": ["/10.1063/1.472061"],

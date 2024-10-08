@@ -80,8 +80,18 @@ def main(batchConfigYaml: Optional[FilePath] = None) -> None:
 
     ## write a methods section if desired
     writeMyMethodsSection = batchConfig["miscInfo"].get("writeMyMethodsSection", False)
+
+    ## set up logging for post simulation processes
+    drLogger.setup_logging(p.join(batchConfig["pathInfo"]["outputDir"], "00_drMD_logs", "postSimulation.log"))
+    ## write methods section if desired
     if writeMyMethodsSection:
         drMethodsWriter.methods_writer_protocol(batchConfig, yamlDir, outDir)
+    ## perform post simulation operations
+    drCleanup.clean_up_handler(batchConfig)
+
+    drLogger.log_info("Simulations Complete!", True)
+    ## close logging for post simulation processes
+    drLogger.close_logging()
 
     ## unset envorment variables for OpenMP and OpenMM
     manage_cpu_usage_for_subprocesses("OFF")
@@ -110,25 +120,7 @@ def manage_cpu_usage_for_subprocesses(mode: str, subprocessCpus: Optional[int] =
     else:
         raise ValueError("mode must be 'ON' or 'OFF'")
 
-#####################################################################################################
-def process_pdb_file(pdbFile: FilePath, batchConfig: Dict):
-    """
-    Process a PDB file and run a sequence of MD simulations.
 
-    Args:
-        pdbFile (str): name of the PDB file to process
-        pdbDir (str): input directory with PDB files
-        outDir (str): output directory for simulation results
-        yamlDir (str): directory to write YAML configuration files
-        simInfo (dict): simulation information
-        batchConfig (dict): batch configuration information
-    """
-
-    ## create a per-protein config
-
-    # Pass config YAML to drOperator to run a sequence of MD simulations
-    runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)
-    pass
 
 ###################################################################################################### 
 def run_serial(batchConfig: Dict) -> None:
@@ -159,13 +151,9 @@ def run_serial(batchConfig: Dict) -> None:
             botchedSimulations.append(None)
         except Exception as e:
             pdbName = p.splitext(p.basename(pdbFile))[0]
-            drLogger.log_info(f"drMD could not complete simulation for {pdbName}", True, True)
-            drLogger.log_info(f"Error: {str(e)}", True, True)
             botchedSimulations.append({"pdbName": pdbName, "errorMessage": str(e)})
-
             continue
-    ## CLEAN UP
-    drCleanup.clean_up_handler(batchConfig)
+
 
 
 ######################################################################################################
@@ -190,7 +178,7 @@ def run_parallel(batchConfig: Dict) -> None:
     parallelCpus: int = batchConfig["hardwareInfo"]["parallelCPU"]
 
     # Get list of PDB files in the directory
-    pdbFiles: list[str] = [p.join(pdbDir, pdbFile) for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"]
+    pdbFiles: list[str] = sorted([p.join(pdbDir, pdbFile) for pdbFile in os.listdir(pdbDir) if p.splitext(pdbFile)[1] == ".pdb"])
     ## construct inputArgs for multiprocessing
     inputArgs: list[tuple] = [(pdbFile, batchConfig) for pdbFile in pdbFiles]
     ## create batched inputs
@@ -200,15 +188,17 @@ def run_parallel(batchConfig: Dict) -> None:
 
     try:
         ## run simulations in parallel
-        botchedSimulations = process_map(per_core_worker, batchedArgsWithPos, 
+        simulationReports = process_map(per_core_worker, batchedArgsWithPos, 
                     max_workers=parallelCpus)
     except BrokenProcessPool:
         print("BrokenProcessPool: Terminating remaining processes")
 
-    if any(botchedSimulations is not None for botchedSimulations in botchedSimulations):
-        drSplash.print_botched(botchedSimulations)
-    # CLEAN UP
-    drCleanup.clean_up_handler(batchConfig)
+    simulationReport = []
+    for report in simulationReports:
+        simulationReport.extend(report)
+
+    if any(report["errorMessage"] is not None for report in simulationReport):
+         drSplash.print_botched(simulationReport)
 ######################################################################################################
 def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
     """
@@ -222,7 +212,7 @@ def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
     Returns:
         None
     """
-    botchedSimulation = None
+    perWorkerSimulationReport: list[Dict] = []
     ## unpack batchedArgsWithPos into the batch of arguments for 
     batchedArgs, pos = batchedArgsWithPos
 
@@ -241,17 +231,18 @@ def per_core_worker(batchedArgsWithPos: Tuple[Dict, int]) -> None:
                 position=pos+1, colour=colors[pos % len(colors)], 
                 leave=False) as progress:
             for args in batchedArgs:
-                pdbFile, batch_config = args
-                runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchedArgs[0][1])
+                pdbFile, batchConfig = args
+                pdbName = p.splitext(p.basename(pdbFile))[0]
+                runConfigYaml: FilePath = drConfigWriter.make_per_protein_config(pdbFile, batchConfig)
                 try:
                     drOperator.drMD_protocol(runConfigYaml)
+                    perWorkerSimulationReport.append({"pdbName": pdbName, "errorMessage": None})
                 except Exception as e:
-                    pdbName = p.splitext(p.basename(pdbFile))[0]
-                    botchedSimulation = {"pdbName": pdbName, "errorMessage": str(e)}
+                    perWorkerSimulationReport.append({"pdbName": pdbName, "errorMessage": str(e)})
                     continue
                 progress.update(1)
             progress.close()  
-    return botchedSimulation
+    return perWorkerSimulationReport
 ######################################################################################################
 
 if __name__ == "__main__":

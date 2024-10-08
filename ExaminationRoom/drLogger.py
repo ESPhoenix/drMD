@@ -49,10 +49,12 @@ def setup_logging(logFile):
     # Add the file handler to the root logger
     rootLogger.addHandler(fileHandler)
 #################################################################################################
-def log_info(message, printToTerminal=False, persist=False):
+def log_info(message: str, printToTerminal: bool = False, persist: bool = False):
     """
     Log an info message to the log file and optionally print to the terminal.
     """
+
+    message = f"-->{' '*4}{message}"
     # Log to the file
     logging.info(message)
     
@@ -134,7 +136,7 @@ def monitor_progress_decorator(checkInterval: int=3):
                     progressPercent, timeRemaining, averageSpeed = read_simulation_progress(
                         progressReporterCsv)
                     ## print to terminal and log file
-                    log_info(f"-->{' '*4}Running {stepName} Step for: "
+                    log_info(f"Running {stepName} Step for: "
                              f"{protName} | Progress: {progressPercent} | "
                              f"Time Remaining: {timeRemaining} | "
                              f"Average Speed: {averageSpeed} ns/day ", True)

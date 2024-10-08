@@ -95,7 +95,7 @@ def inspect_restraints(system):
             for j in range(force.getNumBonds()):
                 particleA, particleB, bondParameters = force.getBondParameters(j)
 
-                drLogger.log_info(f"-->{' '*4}Bond {j}: particles ({particleA}, {particleB}), length {bondParameters[1] * 10} Å, force constant {bondParameters[0]}")
+                drLogger.log_info(f"Bond {j}: particles ({particleA}, {particleB}), length {bondParameters[1] * 10} Å, force constant {bondParameters[0]}")
         
         elif isinstance(force, openmm.CustomAngleForce):
             for j in range(force.getNumAngles()):

@@ -68,7 +68,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
     skipPrep, prepFiles = choose_to_skip_prep(config=config, prepDir=prepDir, protName=protName)
     if skipPrep:
-        drLogger.log_info(f"-->{' '*4}Prep steps already complete for {protName}: Skipping ...",True)
+        drLogger.log_info(f"Prep steps already complete for {protName}: Skipping ...",True)
         return prepFiles
 
 
@@ -89,7 +89,7 @@ def prep_protocol(config: dict) -> Tuple[str, str, str]:
 
 
     
-    drLogger.log_info(f"-->{' '*4}Prep steps complete for {protName}!",True)
+    drLogger.log_info(f"Prep steps complete for {protName}!",True)
     drLogger.close_logging()
 
     return solvatedPdb, inputCoords, amberParams
@@ -100,7 +100,7 @@ def no_ligand_prep_protocol(config: dict, protName: str, prepDir: DirectoryPath)
     ## MERGE PROTEIN PDBS
     outName: str = config["pathInfo"]["outputName"]
     ## MAKE AMBER PARAMETER FILES WITH TLEAP
-    drLogger.log_info(f"-->{' '*4}Solvating, Charge Balencing and Creating parameters for {protName}...")
+    drLogger.log_info(f"Solvating, Charge Balencing and Creating parameters for {protName}...")
 
     inputCoords, amberParams, solvatedPdb = make_amber_params(outDir = p.join(prepDir,"PROT"),
                                                     pdbFile= protPdb,
@@ -187,7 +187,7 @@ def set_up_logging(outDir, protName):
     os.makedirs(logDir, exist_ok=True)
     prepLog: FilePath = p.join(logDir,f"{protName}_prep.log")
     drLogger.setup_logging(prepLog)
-    drLogger.log_info(f"-->{' '*4}Running Prep protocol for {protName}...",True)
+    drLogger.log_info(f"Running Prep protocol for {protName}...",True)
 #####################################################################################
 def find_ligand_charge(ligDf: pd.DataFrame,
                         ligName: str,
@@ -207,7 +207,7 @@ def find_ligand_charge(ligDf: pd.DataFrame,
     """
     logDir = p.join(p.dirname(outDir), "00_drMD_logs")
     drLogger.setup_logging(p.join(logDir, "02_ligand_pka_predictions.log"))
-    drLogger.log_info(f"-->{' '*4}Running propka to predict ligand charges for {ligName} at pH {str(pH)}...", True)
+    drLogger.log_info(f"Running propka to predict ligand charges for {ligName} at pH {str(pH)}...", True)
     # Change working directory to the output directory
     ## propka3 needs this
     os.chdir(outDir)
@@ -224,7 +224,7 @@ def find_ligand_charge(ligDf: pd.DataFrame,
     # Run propka to predict charges on the ligand
     proPkaCommand: str = f"propka3 {tmpPdb}"
 
-    run_with_log(proPkaCommand, "ligand PKA prediction", None)
+    run_with_log(proPkaCommand, "ligand PKA prediction with propka", None)
     
     # Read the propka output to extract charge at the specified pH
     proPkaFile: FilePath = f"{ligName}.pka"
@@ -337,7 +337,7 @@ def ligand_protonation(
 
         # Protonate the ligand using Open Babel
         obabelCommand: str = f"obabel {ligPdb} -O {ligPdb_H} -h"
-        run_with_log(obabelCommand, "Ligand protonation", ligPdb_H)
+        run_with_log(obabelCommand, "Ligand protonation with openbabel", ligPdb_H)
 
         ligandPdbs.append(ligPdb_H)
         return ligPdb_H, ligandPdbs
@@ -387,7 +387,7 @@ def ligand_mol2(
             f"antechamber -i {ligPdb} -fi pdb -o {ligMol2} -fo mol2 -c bcc -s 2 -nc {charge}"
         )
         # Run antechamber and log the command
-        run_with_log(antechamberCommand, "Ligand charge calculation", ligMol2)
+        run_with_log(antechamberCommand, "Ligand charge calculation with antechamber", ligMol2)
         # Copy to ligParamDir for future use
         copy(ligMol2, p.join(ligandParamDir, f"{ligandName}.mol2"))
     
@@ -435,7 +435,7 @@ def ligand_toppar(ligand: dict,
         # Create a new frcmod file using parmchk2
         ligFrcmod: FilePath = p.join(ligPrepDir, f"{ligandName}.frcmod")
         parmchk2Command: str = f"parmchk2 -i {ligMol2} -f mol2 -o {ligFrcmod}"
-        run_with_log(parmchk2Command, "Ligand parameter generation", ligFrcmod)
+        run_with_log(parmchk2Command, "Ligand parameter generation with parmchk2", ligFrcmod)
         copy(ligFrcmod, p.join(ligParamDir, f"{ligandName}.frcmod"))
 
     # Add frcmod path to ligFileDict
@@ -473,7 +473,7 @@ def prepare_ligand_parameters(config: Dict) -> Tuple[List[str], Dict[str, Dict[s
         ## get ligand name
         ligandName: str = ligand["ligandName"]
         ## write to log
-        drLogger.log_info(f"-->{' '*4}Preparing ligand {ligandName}...",True)
+        drLogger.log_info(f"Preparing ligand {ligandName}...",True)
         # find files and directories
         ligPrepDir: DirectoryPath = p.join(outDir,"00_prep",ligandName)
         os.chdir(ligPrepDir)
@@ -610,7 +610,7 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
                            "--with-ph", str(float(pH)),
                              protPdb, protPqr]
     
-    run_with_log(pdb2pqrCommand, "Protein protonation", protPqr)
+    run_with_log(pdb2pqrCommand, "Protein protonation with pdb2pqr and propka", protPqr)
     ## fix the betafactor and occupancy cols to zero
     protPqr = pdbUtils.pdb2df(protPqr)
     protPqr["OCCUPANCY"] = 0
@@ -682,7 +682,7 @@ def make_amber_params(
             parameter files and a pdb file
     """
 
-    drLogger.log_info(f"-->{' '*4}Preparing parameters for system: {outName}...",True)
+    drLogger.log_info(f"Preparing parameters for system: {outName}...",True)
     # Change the working directory to the output directory
     os.chdir(outDir)
 
@@ -745,7 +745,7 @@ def make_amber_params(
     tleapOutput: FilePath = p.join(outDir, "TLEAP.out")
     amberParams: FilePath = p.join(outDir, f"{outName}.prmtop")
     tleapCommand: str = f"tleap -f {tleapInput} > {tleapOutput}"
-    run_with_log(tleapCommand, "System Parameterisation", amberParams)
+    run_with_log(tleapCommand, "System Parameterisation with TLEAP", amberParams)
 
     # Reset chain and residue IDs in Amber PDB file
     solvatedPdb: FilePath = p.join(outDir, solvatedPdb)
@@ -769,6 +769,9 @@ def run_with_log(
     Returns:
         None
     """
+    ## log preparation step
+    drLogger.log_info(f"Running: {stepName}")
+
     ## split command into list
     if isinstance(command, str):
         command = command.split()
@@ -795,9 +798,10 @@ def run_with_log(
     
     # Check if the expected output file exists
     if expectedOutput is None or p.isfile(expectedOutput):
+        drLogger.log_info(f"{stepName} Completed Successfully")
         return
     else:
-        raise FileNotFoundError(f"Expected output:\n{' '*4} {expectedOutput}\n{' '*4}{' '*4} not found.")
+        raise FileNotFoundError(f"Expected output:\n{' '*4}{expectedOutput}\n{' '*4}{' '*4} not found for {stepName}.")
 
 
 #####################################################################################

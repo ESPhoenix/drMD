@@ -57,12 +57,13 @@ def cluster_handler(batchConfig: Dict) -> None:
     if not "clusterInfo" in postSimulationInfo:
         return
     ## let user know what's going on
-    drLogger.log_info(f"-->{' '*4}Performing clustering on MD trajectories...", True )
+    drLogger.log_info(f"Performing clustering on MD trajectories...", True )
     ## get clusterInfo dict
     clusterInfo: Dict = postSimulationInfo["clusterInfo"]
     ## run clustering
     allClusterPdbs: List[FilePath] = drClusterizer.clustering_manager(pathInfo, clusterInfo)
-
+    if not allClusterPdbs:
+        return
     ## postprocess cluster PDB files
     ## remove atoms from cluster PDBS files as instructed
     removeAtoms = clusterInfo.get("removeAtoms", False)
@@ -113,25 +114,22 @@ def directory_cleanup_handler(batchConfig: dict) -> None:
     
     """
     ## unpack batchConfig
-    postSimulationInfo = batchConfig["postSimulationInfo"]
-    ## skip no directoryCleanUpInfo key in postSimulationInfo exists
-    if not "directoryCleanUpInfo" in postSimulationInfo:
+    postSimulationInfo = batchConfig.get("postSimulationInfo", False)
+    if not postSimulationInfo:
         return
-    ## get directoryCleanUpInfo dict
-    directoryCleanupInfo: Dict = postSimulationInfo["directoryCleanUpInfo"]
 
     ## if instructed, delete all simulation directories 
     ## NOTE that this means only collated directories will be retained
     ## NOTE this will save a lot of storage, but you will loose all of your trajectory files
-    if  "removeAllSimulationDirs" in directoryCleanupInfo:
-        if directoryCleanupInfo["removeAllSimulationDirs"]:
-            remove_siulation_directories(batchConfig)
-            return
+    removeAllSimulationDirs = postSimulationInfo.get("removeAllSimulationDirs", False)
+    if removeAllSimulationDirs:
+        remove_siulation_directories(batchConfig)
+        return
     ## remove any specified step directories
     ## NOTE this can be useful to delete prep / equiibriation directories to save storage space
-    if "stepsToRemove" in directoryCleanupInfo:
-        stepsToRemove = directoryCleanupInfo["stepsToRemove"]
-        remove_step_directories(batchConfig, stepsToRemove)
+    removeStepDirs = postSimulationInfo.get("removeStepDirs", False)
+    if removeStepDirs:
+        remove_step_directories(batchConfig, removeStepDirs)
 
 ######################################################################################################
 def remove_step_directories(batchConfig: dict, stepsToRemove: list) -> None:
@@ -145,7 +143,7 @@ def remove_step_directories(batchConfig: dict, stepsToRemove: list) -> None:
         None
     """
     ## let user know what we are doing
-    drLogger.log_info(f"-->{' '*4}Removing specified simulation directories", True)
+    drLogger.log_info(f"Removing specified simulation directories", True)
 
     ## unpack batchConfig
     inputDir: DirectoryPath= batchConfig["pathInfo"]["inputDir"]
@@ -173,7 +171,7 @@ def remove_siulation_directories(batchConfig: dict) -> None:
         None
     """
     ## let user know what we are doing
-    drLogger.log_info(f"-->{' '*4}Removing all simulation directories", True)
+    drLogger.log_info(f"Removing all simulation directories", True)
 
     ## unpack batchConfig
     inputDir = batchConfig["pathInfo"]["inputDir"]
@@ -198,7 +196,7 @@ def collate_pdbs(pdbFiles: List[FilePath], pathInfo: Dict) -> None:
         None
     """
     ## let user know what we are doing
-    drLogger.log_info(f"-->{' '*4}Collating {len(pdbFiles)} PDB files into per-step directories", True)
+    drLogger.log_info(f"Collating {len(pdbFiles)} PDB files into per-step directories", True)
 
     ## for each pdb file, move it to its per-step directory
     for pdbFile in pdbFiles:
@@ -222,16 +220,16 @@ def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict) -> List[FilePath]:
     
     """
     ## let user know what we are doing
-    drLogger.log_info(f"-->{' '*4}Getting endpoint PDB files", True)
+    drLogger.log_info(f"Getting endpoint PDB files", True)
 
     ## unpack pathInfo
     outDir: DirectoryPath = pathInfo["outputDir"]
     ## create list of directories that are made by drMD - we don't want to look inside these
-    notRunDirs: List[str] = ["00_configs", "01_ligand_parameters", "00_collated_pdbs", "00_drMD_logs"]
+    notRunDirs: List[str] = ["00_configs", "01_ligand_parameters", "00_collated_pdbs", "00_drMD_logs", "00_AutoMethods"]
     ## create a list of all run directories
     runDirs: List[DirectoryPath] = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
     ## create a list of step directories that we want to look for endpoint pdb files in 
-    stepDirs: List[DirectoryPath] = [p.join(runDir,stepDir) for runDir in runDirs for stepDir in endPointInfo["stepNames"]]
+    stepDirs: List[DirectoryPath] = [p.join(runDir,stepDir) for runDir in runDirs for stepDir in endPointInfo["stepNames"] if p.isdir(p.join(runDir,stepDir))]
     ## create a list of endpoint pdb files
     endpointPdbs: List[FilePath] = [p.join(stepDir,stepPdb) for stepDir in stepDirs 
                                     for stepPdb in os.listdir(stepDir)
@@ -252,7 +250,7 @@ def remove_atoms_from_pdbs(
         None
     """
 
-    drLogger.log_info(f"-->{' '*4}Removing atoms from clustering pdbs...", True)
+    drLogger.log_info(f"Removing atoms from pdb files...", True)
 
     removeAtomsSelections = [sele["selection"] for sele in removeAtoms]
 

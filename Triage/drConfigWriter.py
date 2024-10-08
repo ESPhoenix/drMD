@@ -74,7 +74,6 @@ def make_per_protein_config(
         "proteinInfo": proteinInfo,
         "simulationInfo": batchConfig["simulationInfo"],
         "miscInfo": batchConfig["miscInfo"],
-        "loggingInfo": batchConfig["loggingInfo"]
 
     }
 

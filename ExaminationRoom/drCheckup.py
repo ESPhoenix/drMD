@@ -56,7 +56,7 @@ def check_vitals(simDir: DirectoryPath,
         simDir (DirectoryPath): The directory of the simulation
         vitalsFiles (Dict[str, FilePath]): A dictionary of the vitals files
     """
-    drLogger.log_info(f"-->{' '*4}Checking vitals...")
+    drLogger.log_info(f"Checking vitals...")
     ## read OpenMM reporters into dataframes
     vitalsDf: pd.DataFrame = pd.read_csv(vitalsFiles["vitals"])
     progressDf: pd.DataFrame = pd.read_csv(vitalsFiles["progress"])
@@ -140,7 +140,7 @@ def create_vitals_pdf(simDir: DirectoryPath):
         base_url = simDir # Set the base URL to the current working directory
         HTML(string=rendered_html, base_url=base_url).write_pdf(outPdf, stylesheets=[CSS(string='@page { margin: 0; }')])
     except Exception as e:
-        drLogger.log_info(f"-->{' '*4}Error generating vitals report: {e}")
+        drLogger.log_info(f"Error generating vitals report: {e}")
 ######################################################################
 def check_up_handler():
     def decorator(simulationFunction):
@@ -157,7 +157,7 @@ def check_up_handler():
                 check_vitals(simDir = simDir,
                             vitalsFiles = vitalsFiles)
             except Exception as e:
-                drLogger.log_info(f"-->{' '*4}Error running checkup: {e}", True)
+                drLogger.log_info(f"Error running checkup: {e}", True)
             return saveFile
         return wrapper
     return decorator
