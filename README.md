@@ -401,6 +401,8 @@ Within the **metaDynamicsInfo** dictionary, you must provide the following param
 
   - **biasFactor**:           *(int)* This is the bias factor  parameter used in the Metadynamics simulation
 
+  - **frequency**:           *(int)* How often (in time steps) gaussians will be added to the bias potential
+
   - **biases**:               *(list of dicts)* This is a list of dictionaries containing information about each biasVariable.
 
 
@@ -410,8 +412,13 @@ Within each dictionary in **biases** you must provide the following parameters:
 
 > Accepted arguments for **biasVar** are **"RMSD"**, **"torsion"** **"distance"** and **"angle"**
 
-- **selection**:  *(dict)*  This is a dictionary containing information on the selection of atoms that the biasVariable will be applied to.
-              The selection syntax is identical to that used for the restraints. (described above)
+- **minValue**:     *(float)* This is the minimum value of the biasVariable.
+
+- **maxValue**:     *(float)* This is the maximum value of the biasVariable.
+
+- **biasWidth**:   *(float)* This determines the width of gaussians added to the bias potential
+
+- **selection**:  *(dict)*  This is a dictionary containing information on the selection of atoms that the biasVariable will be applied to. The selection syntax is identical to that used for the restraints. (described above)
 
 > :medical_symbol:
 > Depending on the type of bias variable, different numbers of atoms must be selected:
@@ -429,8 +436,12 @@ Example MetaDynamics syntax:
     metaDynamicsInfo:
       height: 2
       biasFactor: 5
+      frequency: 50
       biases: 
         - biasVar: "RMSD"
+          minValue: 0
+          maxValue: 10
+          biasWidth: 1
           selection: 
             keyword: "backbone"
         - biasVar: "torsion"

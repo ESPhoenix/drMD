@@ -2,6 +2,7 @@
 import os
 from os import path as p
 import numpy as np
+import pandas as pd
 
 ## OPENMM LIBRARIES
 import openmm.app as app
@@ -15,8 +16,6 @@ from ExaminationRoom import drLogger, drCheckup
 from UtilitiesCloset import drSelector, drFixer
 
 ########################################################################################################
-##TODO: allow for custom parameters to be passed from config file ---> bias force generation and metadynamics construction
-
 ########################################################################################################
 @drLogger.monitor_progress_decorator()
 @drFirstAid.firstAid_handler(drFirstAid.run_firstAid_energy_minimisation)
@@ -141,7 +140,6 @@ def run_metadynamics(prmtop: app.Topology,
     ## reset the chain and residue ids to original
     drFixer.reset_chains_residues(refPdb, endPointPdb)
 
-    
     ## create a PDB file with the same atoms as the trajectory
     trajectoryPdb = p.join(simDir, "trajectory.pdb")
     drSelector.slice_pdb_file(config["miscInfo"]["trajectorySelections"], endPointPdb, trajectoryPdb)
@@ -149,8 +147,14 @@ def run_metadynamics(prmtop: app.Topology,
     saveXml: str = p.join(simDir, f"{stepName}.xml")
     simulation.saveState(saveXml)
 
+    ## get free energy and write to csv
+    metadynamicsFreeEnergy = meta.getFreeEnergy()
+    freeEnergyCsv = p.join(simDir, "freeEnergy.csv")
+    np.savetxt(freeEnergyCsv, metadynamicsFreeEnergy, delimiter=",", header="Bias Variable Free Energy")
+
     # Return checkpoint file for continuing simulation
     return saveXml
+########################################################################################################
 ########################################################################################################
 def get_atom_coords_for_metadynamics(prmtop: app.Topology, inpcrd: any) -> list:
     """
@@ -211,9 +215,9 @@ def gen_angle_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: lis
                           atomIndexes[2])
     
     angleBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(force = angleForce,
-                                                     minValue = 0 * unit.degrees,
-                                                     maxValue = 180 * unit.degrees,
-                                                     biasWidth = 1 * unit.degrees,
+                                                    minValue = bias["minValue"] * unit.degrees,
+                                                    maxValue = bias["maxValue"] * unit.degrees,
+                                                    biasWidth = bias["biasWidth"] * unit.degrees,
                                                      periodic = False)
     return angleBiasVariable
 
@@ -252,10 +256,10 @@ def gen_dihedral_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: 
 
     # Create a dihedral bias variable
     dihedralBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(force = dihedralForce,
-                                                     minValue = -179 * unit.degrees,
-                                                     maxValue = 179 * unit.degrees,
-                                                     biasWidth = 1 * unit.degrees,
-                                                     periodic = True)
+                                                    minValue = bias["minValue"] * unit.degrees,
+                                                    maxValue = bias["maxValue"] * unit.degrees,
+                                                    biasWidth = bias["biasWidth"] * unit.degrees,
+                                                    periodic = True)
     
     return dihedralBiasVariable
 
@@ -288,10 +292,10 @@ def gen_distance_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: 
                              atomIndexes[1])
     
     distanceBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(force = distanceForce,
-                                                     minValue = 0 * unit.angstrom,
-                                                     maxValue = 100 * unit.angstrom,
-                                                     biasWidth = 1 * unit.angstrom,
-                                                     periodic = False)
+                                                    minValue = bias["minValue"] * unit.angstrom,
+                                                    maxValue = bias["maxValue"] * unit.angstrom,
+                                                    biasWidth = bias["biasWidth"] * unit.angstrom,
+                                                    periodic = False)
     
     return distanceBiasVariable
 
@@ -321,9 +325,9 @@ def gen_rmsd_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: list
     # Create a RMSD bias variable
     rmsdBiasVariable: metadynamics.BiasVariable = metadynamics.BiasVariable(
         force=rmsdForce,
-        minValue=10 * unit.angstrom,
-        maxValue=100 * unit.angstrom,
-        biasWidth=1 * unit.angstrom,
+        minValue = bias["minValue"] * unit.angstrom,
+        maxValue = bias["maxValue"] * unit.angstrom,
+        biasWidth = bias["biasWidth"] * unit.angstrom,
         periodic=False)
 
     return rmsdBiasVariable
@@ -331,6 +335,3 @@ def gen_rmsd_bias_variable(bias: dict, atomCoords: np.ndarray, atomIndexes: list
 
 
 ########################################################################################################
-##TODO implement funnel potential
-# def add_funnel_potential(system, ):
-#     """https://github.com/jeff231li/funnel_potential"""

@@ -475,7 +475,7 @@ def check_postSimulationInfo(config: dict, noDisorders) -> Tuple[dict,bool]:
 
     clusterInfo = postSimulationInfo.get("clusterInfo", None)
     if clusterInfo is not None:
-        postSimulationInfoDisorders["clusterInfo"] = check_clusterInfo(clusterInfo, noDisorders)
+        postSimulationInfoDisorders["clusterInfo"], noDisorders = check_clusterInfo(clusterInfo, noDisorders)
 
     return postSimulationInfoDisorders, noDisorders
 
@@ -883,48 +883,86 @@ def check_metadynamics_options(simulation: dict, stepName: str, disorders: dict,
     
     ## check biases parameter
     biases = metaDynamicsInfo.get("biases", None)
+    ## make sure biases is present in metaDynamicsInfo
     if biases is None:
         disorders["metaDynamicsInfo"]["biases"] = "No biases specified in metaDynamicsInfo"
         noDisorders = False
     else:
+        ## make sure biases is a list
         if not isinstance(biases, list):
             disorders["metaDynamicsInfo"]["biases"] = "biases must be a list of biases (check README for more details)"
             noDisorders = False
+        ## make sure biases is not empty
         elif len(biases) == 0:
             disorders["metaDynamicsInfo"]["biases"] = "biases must contain at least one bias variable"
             noDisorders = False
         else:
+            ## check through each bias
             disorders["metaDynamicsInfo"]["biases"] = {}
             for biasCount, bias in enumerate(biases):
+                disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = []
+                ## make sure bias is a dictionary
                 if not isinstance(bias, dict):
-                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "biases must be a list of biases (check README for more details)"
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("biases must be a list of biases (check README for more details)")
                     noDisorders = False
+                ## check for biasVar entry in bias
                 biasVar = bias.get("biasVar", None)
                 if biasVar is None:
-                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "No biasVar specified in bias"
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("No biasVar specified in bias")
                     noDisorders = False
+                ## make sure biasVar is a string with an allowed value
                 else:
                     if not isinstance(biasVar, str):
-                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "biasVar must be 'rmsd', 'torsion', 'distance', or 'angle'"
+                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("biasVar must be 'rmsd', 'torsion', 'distance', or 'angle'")
                         noDisorders = False
                     elif not biasVar.lower() in ["rmsd", "torsion", "distance", "angle"]:
-                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "biasVar must be 'rmsd', 'torsion', 'distance', or 'angle'"
+                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("biasVar must be 'rmsd', 'torsion', 'distance', or 'angle'")
                         noDisorders = False
-                biasSelection = bias.get("selection", None)
-                if biasSelection is None:
-                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "No selection specified in bias"
+                ## check for minValue in bias
+                minValue = bias.get("minValue", None)
+                if minValue is None:
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("No minValue specified in bias")
                     noDisorders = False
                 else:
+                    if not isinstance(minValue, (int, float)):
+                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("minValue must be a number")
+                        noDisorders = False
+                ## check for maxValue in bias
+                maxValue = bias.get("maxValue", None)
+                if maxValue is None:
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("No maxValue specified in bias")
+                    noDisorders = False
+                else:
+                    if not isinstance(maxValue, (int, float)):
+                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("maxValue must be a number")
+                        noDisorders = False
+                ## check for bias in bias
+                biasWidth = bias.get("biasWidth", None)
+                if biasWidth is None:
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("No biasWidth specified in bias")
+                    noDisorders = False
+                else:
+                    if not isinstance(biasWidth, (int, float)):
+                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("biasWidth must be a number")
+                        noDisorders = False
+                ## check fir biasSelection in bias
+                biasSelection = bias.get("selection", None)
+                if biasSelection is None:
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("No selection specified in bias")
+                    noDisorders = False
+                else:
+                    ## make sure selection is a dictionary
                     if not isinstance(biasSelection, dict):
-                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = "selection must be a dictionary"
+                        disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].append("selection must be a dictionary")
                         noDisorders = False
                     else:
+                        ## check selection is correctly formatted
                         selectionDisorders = check_selection({"selection": biasSelection})
                         if len(selectionDisorders) > 0:
-                            disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = selectionDisorders
+                            disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"].extend(selectionDisorders)
                             noDisorders = False
-                        else:
-                            disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = None
+                if len(disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"]) == 0:
+                    disorders["metaDynamicsInfo"]["biases"][f"bias_{biasCount}"] = None
 
     return disorders, noDisorders
 #########################################################################

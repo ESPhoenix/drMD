@@ -126,7 +126,7 @@ def write_ligand_parameterisation_methods(configDicts: List[dict], methodsFile: 
         return 
     
     ## open methods file and append to it
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
         ## when we have ligand, but none have been processed by drMD, write a warning to fill this in manually
         methods.write("## Ligand Preparation and Parameterisation\n\n")
         if len(obabelProtonatedLigands) > 0 and len(antechamberChargesLigands) > 0 and len(parmchkParamsLigands) > 0:
@@ -250,7 +250,7 @@ def write_solvation_charge_balance_methods(batchConfig: Dict, configDicts: List[
     ## get an approximate count of water molecules added to the box
     approxWaterCount, counterIonCounts = get_solvation_atom_counts(configDicts, batchConfig)
     ## write solvation and charge balence methods
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
         methods.write("## Solvation and Charge Balencing\n\n")
         ## info on solvation box
         methods.write(f"All proteins were placed in {inflect.engine().an(boxGeometry)} {boxGeometry} solvation box with a 10 Å buffer between")
@@ -390,7 +390,6 @@ def get_simulation_type_text(sim: Dict, progressionWord: str) -> str:
 
     ## read simulation type from simulation dictionary | choose appropriate methods text
     simulationType = sim["simulationType"]
-    print(progressionWord)
     if simulationType.upper() == "NPT":
         article = "A" if capitalise else "a"
         return f"{progressionWord}{article} simulation was performed using the *isothermal-isobaric* (NpT) ensemble"
@@ -561,7 +560,7 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
         None
     """
 
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
         ## progression word
         progressionWord = get_progression_word(stepIndex, maxSteps)
         ## simulation type
@@ -591,10 +590,51 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
                 methods.write(f"allowed the simulation to be performed using a timestep of {sim['timestep']} [Ref. {cite('heavyProtons')}]. ")
             else:
                 methods.write(f"This simulation was performed using a timestep of {sim['timestep']}. ")
+        if sim["simulationType"] == "META":
+            write_metadynamics_simulation_methods(methodsFile, sim)
+
         ## deal with restraints
         methods.write(f"{get_restraints_methods_text(sim)}\n")
         ## line break at the end of the section
         methods.write("\n\n")
+##########################################################################################
+def write_metadynamics_simulation_methods(methodsFile: FilePath, sim: dict) -> None:
+    """
+    Writes the methods for a metadynamics simulation
+
+    Args:
+        methodsFile: (FilePath) Path to methods file
+        sim: (dict) Simulation dictionary
+
+    Returns:
+        None
+    """
+    metaDynamicsInfo = sim["metaDynamicsInfo"]
+    biases = metaDynamicsInfo["biases"]
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
+        methods.write(f"This metadynamics simulation was performed using the well-tempered metadynamics method [Ref. {cite('metadynamics')}]. ")
+        methods.write(f"This simulation was performed using a height parameter of {metaDynamicsInfo['height']}, ")
+        methods.write(f"a biasFactor parameter of {metaDynamicsInfo['biasFactor']}, ")
+        methods.write(f"a frequency parameter of {metaDynamicsInfo['frequency']}. ")
+
+        if len(biases) > 1:
+            methods.write(f"The following bias variables were used in this simulation: ")
+        for bias in biases:
+            if bias["biasVar"].upper() in ["RMSD", "DISTANCE"]:
+                unit = "Å"
+            elif bias["biasVar"].upper() in ["ANGLE", "TORSION"]:
+                unit = "°"
+  
+            biasSelection = bias["selection"]
+            methods.write(f"This simulation used a {bias['biasVar']} bias variable ")
+            methods.write(f"with a maximum value of {bias['maxValue']} {unit } and ")
+            methods.write(f"a minimum value of {bias['minValue']} {unit}. ")
+            methods.write(f"Gaussians with a width parameter of {bias['biasWidth']} {unit} were used to perturb the bias variable. ")
+            methods.write(f"This bias variable was applied to {selection_to_text(biasSelection)}. ")
+
+
+
+
 ##########################################################################################
 def write_generic_simulation_methods(methodsFile: FilePath, simulationInfo: dict) -> None:
     """
@@ -607,7 +647,7 @@ def write_generic_simulation_methods(methodsFile: FilePath, simulationInfo: dict
         None
     """
 
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
         methods.write(f"All simulations were performed using the OpenMM simulation toolkit [Ref. {cite('openmm')}]. ")
         ## Check for NVT and/or NPT
         simluationTypes = [step["simulationType"].upper() for step in simulationInfo]
@@ -638,7 +678,7 @@ def write_forecefields_methods(methodsFile):
     Returns:
         None    
     """
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
         methods.write("## Forcefield Information\n\n")
         methods.write(f"All protein residues were parameterised using the AMBER ff19SB and forcefield [Ref. {cite('ff19SB')}]. ")
         methods.write(f" These parameters were prepared using tleap from the Ambertools package [Ref. {cite('ambertools')}]. ")
@@ -651,7 +691,7 @@ def  write_simulation_methods(methodsFile: FilePath, simulationInfo: dict):
 
     """
     ## write a title for the section
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
         methods.write("## Simulation Protocols\n\n")
     ## write the per-step simulation methods
     for stepIndex, sim in enumerate(simulationInfo):
@@ -688,6 +728,7 @@ def cite(key: str) -> str:
         "shake": ["10.1002/1096-987X(20010415)22:5<501::AID-JCC1021>3.0.CO;2-V"],
         "settle": ["10.1002/jcc.540130805"],
         "pme":["10.1063/1.464397"],
+        "metadynamics": ["10.1103/PhysRevLett.100.020603"],
         ## parameter citations
         "ionParams": ["10.1021/ct500918t", "10.1021/ct400146w"],
         "tip3pParams": ["/10.1063/1.472061"],

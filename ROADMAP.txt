@@ -13,6 +13,18 @@
 [x] if this fails, continue with everything
 [] redo PDF image sizes and locations
 [] Display relative energies for Potential, Kinetic and Total
+[] better convergance checker
 
 ## drMethodsWriter
 [] metaDynamics 
+
+
+## drMeta
+[] frequency config -> drMeta
+[] free energy output at the end
+[] More options for forces
+    [] minValue
+    [] maxValue
+    [] biasWidth
+
+
