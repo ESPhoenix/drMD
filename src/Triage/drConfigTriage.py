@@ -477,6 +477,13 @@ def check_postSimulationInfo(config: dict, noDisorders) -> Tuple[dict,bool]:
     if clusterInfo is not None:
         postSimulationInfoDisorders["clusterInfo"], noDisorders = check_clusterInfo(clusterInfo, noDisorders)
 
+
+    collateVitalsReports = postSimulationInfo.get("collateVitalsReports", None)
+    if collateVitalsReports is not None:
+        if not isinstance(collateVitalsReports, bool):
+            postSimulationInfoDisorders["collateVitalsReports"] = "collateVitalsReports must be a boolean"
+            noDisorders = False
+
     return postSimulationInfoDisorders, noDisorders
 
 
