@@ -85,7 +85,10 @@ def main(batchConfigYaml: Optional[FilePath] = None) -> None:
     drLogger.setup_logging(p.join(batchConfig["pathInfo"]["outputDir"], "00_drMD_logs", "postSimulation.log"))
     ## write methods section if desired
     if writeMyMethodsSection:
-        drMethodsWriter.methods_writer_protocol(batchConfig, yamlDir, outDir)
+        try:
+            drMethodsWriter.methods_writer_protocol(batchConfig, yamlDir, outDir)
+        except Exception as e:
+            drLogger.log_info(f"Error writing my methods section: {e}", True, True)
     ## perform post simulation operations
     drCleanup.clean_up_handler(batchConfig)
 
