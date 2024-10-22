@@ -85,34 +85,33 @@ def check_vitals(simDir: DirectoryPath,
                                                 trajectoryPdb = vitalsFiles["pdb"])
     
     ## join the dataframes 
-    vitalsDf = pd.concat([rmsdDf, vitalsDf],axis=1)
+    vitalsDf: pd.DataFrame = pd.concat([rmsdDf, vitalsDf],axis=1)
 
-    smoothedDf = smooth_data(vitalsDf)
+    smoothedDf: pd.DataFrame = smooth_data(vitalsDf)
 
     ## chunk dataframes into 1 ns blocks
-    chunkedDfs = chunk_dataframe_by_timestep(smoothedDf, 1000)
+    chunkedDfs: pd.DataFrame = chunk_dataframe_by_timestep(smoothedDf, 1000)
     ## check for convergance for each chunk
     propertiesConvergedInfo, plottingData = check_convergance_chunks(chunkedDfs)
     ## decide whether a property has converged
-    converganceDiagnosis = diagnose_convergance(propertiesConvergedInfo)
+    converganceDiagnosis: Dict[str, str] = diagnose_convergance(propertiesConvergedInfo)
     ## plot all traces with line-of-best-fit for each property
     plot_traces(vitalsDf, plottingData, converganceDiagnosis, simDir)
 
-    timeDataDf = extract_time_data(vitalsDf, progressDf)
-    timeDataPng = plot_time_data(timeDataDf, simDir)
-
+    timeDataDf: pd.DataFrame = extract_time_data(vitalsDf, progressDf)
+    timeDataPng: FilePath = plot_time_data(timeDataDf, simDir)
 
     ## get systemName and stepName from dir
-    stepName = p.basename(simDir)
-    systemName = p.basename(p.dirname(simDir))
-    
+    stepName: str = p.basename(simDir)
+    systemName: str = p.basename(p.dirname(simDir))
+
+    ## plot system info
     plot_system_info(systemName, stepName, simDir)
 
+    ## create vitals pdf
     create_vitals_pdf(simDir)
 
-
-    ## tidy up reporters to avoid clutter (dont do this while testing!)
-    # if not __name__ == "__main__":
+    ## tidy up reporters to avoid clutter
     tidy_up(simDir)
 ###############################################################################################
 ###############################################################################################
@@ -125,27 +124,26 @@ def create_vitals_pdf(simDir):
         simDir (DirectoryPath): The directory of the simulation
     """
     ## get the instruments directory path
-    instrumentsDir = p.dirname(__file__)
+    instrumentsDir: DirectoryPath = p.dirname(__file__)
     env: Environment = Environment(loader=FileSystemLoader(instrumentsDir))
     template = env.get_template("vitals_template.html")
     
     # Render the template with any context variables you need
     context = {
-        # Add your context variables here
     }
     rendered_html = template.render(context)
     
     # Generate the PDF with error handling
     outPdf = p.join(simDir, "vitals_report.pdf")
     try:
-        base_url = simDir  # Set the base URL to the current working directory
+        baseUrl = simDir  # Set the base URL to the current working directory
         css = CSS(string='''
             @page {
                 size: A4 landscape;
                 margin: 0;
             }
         ''')
-        HTML(string=rendered_html, base_url=base_url).write_pdf(outPdf, stylesheets=[css])
+        HTML(string=rendered_html, base_url=baseUrl).write_pdf(outPdf, stylesheets=[css])
     except Exception as e:
         raise e
 
@@ -162,12 +160,12 @@ def smooth_data(vitalsDf: pd.DataFrame, windowSize = 1000) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The smoothed dataframe
     """
-
-    dataColumnNames = ["Total Energy (kJ/mole)", "Potential Energy (kJ/mole)", "Kinetic Energy (kJ/mole)",
+    ## initialise data column names
+    dataColumnNames: list = ["Total Energy (kJ/mole)", "Potential Energy (kJ/mole)", "Kinetic Energy (kJ/mole)",
                     "Temperature (K)", "Box Volume (nm^3)", "Density (g/mL)", "Backbone RMSD (Angstrom)"]
-    
+    ## copy the dataframe
     smoothedDf = vitalsDf.copy()
-
+    ## smooth the data
     for columnName in dataColumnNames:
         smoothedDf[columnName] = smoothedDf[columnName].rolling(window=windowSize, min_periods=1).median()
 
@@ -236,20 +234,31 @@ def plot_system_info(systemName: str, stepName: str, outDir):
     plt.close()
 
     return savePng
-
-
-
+###############################################################################################
 def diagnose_convergance(propertiesConvergedInfo) -> Dict[str, str]:
-    
-    converganceDiagnosis = {}
+    """
+    Decides whether properties of the simulation have converged
+    Creates a dict of ticks, crosses and "converged in last N ns"
 
+    Args:
+        propertiesConvergedInfo (dict): A dictionary of the properties that have converged
+
+    Returns:
+        converganceDiagnosis (dict): A dictionary of the properties that have converged
+    """
+
+    ## init an empty dictionary
+    converganceDiagnosis: dict = {}
+
+    ## check if all properties converged
     for columnName in propertiesConvergedInfo:
-        ## check for all converged
+        ## check for all converged - give this a tick ✔
         if all(converged for converged in propertiesConvergedInfo[columnName].values()):
             converganceDiagnosis[columnName] = "✔"
-        ## check for all not converged
+        ## check for all not converged - give this a cross ✘
         elif all(not converged for converged in propertiesConvergedInfo[columnName].values()):
             converganceDiagnosis[columnName] = "✘"
+        ## for a property that has not converged, check if it has converged in the last N nanoseconds
         else:
             n = len(propertiesConvergedInfo[columnName].values())
             while True:
@@ -263,10 +272,23 @@ def diagnose_convergance(propertiesConvergedInfo) -> Dict[str, str]:
 
     return converganceDiagnosis
 
+###############################################################################################
+def check_convergance_chunks(chunkedDfs: list) -> Tuple[dict,dict]:
+    """
+    Loops through each dataframe in chunkedDfs and checks if the properties have converged
 
-def check_convergance_chunks(chunkedDfs):
+    Args:
+        chunkedDfs (list): A list of dataframes
 
-    columnToleranceInfo = {
+    Returns:
+        converganceDiagnosis (dict): A dictionary of the properties that have converged
+        plottingData (dict): A dictionary of the plotting data
+    """
+
+
+    ## initiate a dict of gradiant tolerances for simulation properties
+    ##TODO: maybe tweak these...
+    columnToleranceInfo: dict = {
                 "Potential Energy (kJ/mole)": {"gradientTol": 1000, "unit": "kJ/mole"},
                 "Kinetic Energy (kJ/mole)": {"gradientTol": 1000, "unit": "kJ/mole"},
                 "Total Energy (kJ/mole)": {"gradientTol": 1000, "unit": "kJ/mole"},
@@ -276,33 +298,56 @@ def check_convergance_chunks(chunkedDfs):
                 "Backbone RMSD (Angstrom)": {"gradientTol": 1, "unit": "A"},
                   }
 
-
-    propertiesConvergedInfo = {}
-    plottingData = {}
+    ## init some empty dicts to store data
+    propertiesConvergedInfo: dict = {}
+    plottingData: dict = {}
+    ## look through each property
     for columnName in columnToleranceInfo:
+        ## make a new entries to store data
         propertiesConvergedInfo[columnName] = {}
         plottingData[columnName] = {}
+        ## loop through chunked dataframes
         for chunkIndex, chunkedDf in enumerate(chunkedDfs):
+            ## calculate the line of best fit
             slope, intercept, r_squared = calculate_line_of_best_fit(chunkedDf["Time (ps)"], chunkedDf[columnName])
+            ## add results to the plotting data dictionary
             plottingData[columnName][chunkIndex] = {"dy/dx": slope,
                                                      "intercept": intercept,
                                                        "r_squared": r_squared,
                                                        "Time (ps)": chunkedDf["Time (ps)"]}
-
+            ## get slope per nanosecond
             slopePerNs = slope * 1000
+            ## check if the slope is within the tolerance
             if slopePerNs > columnToleranceInfo[columnName]["gradientTol"]:
                 chunkConverged = False
             else:
                 chunkConverged = True
+            ## add result to the propertiesConvergedInfo dictionary
             propertiesConvergedInfo[columnName][chunkIndex] = chunkConverged
 
     return propertiesConvergedInfo, plottingData
+###############################################################################################
+def chunk_dataframe_by_timestep(vitalsDf: pd.DataFrame, timeChunkSize: int = 1000) -> list[pd.DataFrame]:
+    """
+    Chops a dataframe into chunks based on time columns (use 1 ns chunks as default)
 
-def chunk_dataframe_by_timestep(vitalsDf, timeChunkSize=1000):
+    Args:
+        vitalsDf (pd.DataFrame): The vitals dataframe
+        timeChunkSize (int, optional): The size of the time chunk. Defaults to 1000.
+
+    Returns:
+        chunkedDfs (list[pd.DataFrame]): A list of dataframes
+    
+    """
+
+
+    ## init an empty list to store the chunked dataframes
     chunkedDfs = []
+    ## copy timeChunkSize to timeChunkIncrement
     timeChunkIncrement = timeChunkSize
+    ## init a counter to keep track chunk location
     lastTimeChunk = 0
-
+    ## chop dataframe into chunks
     while True:
         chunkDf = vitalsDf[(vitalsDf["Time (ps)"] <= timeChunkSize) & (vitalsDf["Time (ps)"] > lastTimeChunk)]
         if len(chunkDf) == 0:
@@ -312,10 +357,23 @@ def chunk_dataframe_by_timestep(vitalsDf, timeChunkSize=1000):
         timeChunkSize += timeChunkIncrement
     return chunkedDfs
 
-
-
+###############################################################################################
 def calculate_line_of_best_fit(x, y):
+    """
+    Calculates the line of best fit for a set of x and y values
+
+    Args:
+        x (list): The x values
+        y (list): The y values
+
+    Returns:
+        slope (float): The slope of the line of best fit
+        intercept (float): The intercept of the line of best fit
+        r_squared (float): The r squared value
+    """
+    ## calculate the line of best fit
     slope, intercept, r_value, p_value, std_err = linregress(x, y)
+    ## calculate r squared
     r_squared = r_value**2
     return slope, intercept, r_squared
 
@@ -330,7 +388,7 @@ def tidy_up(simDir: DirectoryPath):
         simDir (DirectoryPath): The directory of the simulation
     """
     ## make a new directory to tidy up reporters and png files
-    tidyDir = p.join(simDir, "00_reporters_and_plots")
+    tidyDir: DirectoryPath = p.join(simDir, "00_reporters_and_plots")
     os.makedirs(tidyDir, exist_ok=True)
     ## move all reporters and png files to the new directory
     for file in os.listdir(simDir):
@@ -340,6 +398,12 @@ def tidy_up(simDir: DirectoryPath):
     plt.close("all")
 ######################################################################
 def check_up_handler():
+    """
+    Decorator for the check_up function
+
+    Returns:
+        decorator (function): The decorated function
+    """
     def decorator(simulationFunction):
         @wraps(simulationFunction)
         def wrapper(*args, **kwargs):
@@ -364,6 +428,20 @@ def find_vitals_files(simInfo: Dict,
                        outDir: DirectoryPath,
                        pdbFile: FilePath,
                        config: Dict) -> Tuple[Dict[str, FilePath], DirectoryPath]:
+    """
+    Looks through the simulation directory to find the vitals reporter files
+
+    Args:
+        simInfo (Dict): The simulation info
+        outDir (DirectoryPath): The output directory
+        pdbFile (FilePath): The reference pdb file
+        config (Dict): The config dictionary
+
+    Returns:
+        vitalsFiles (Dict[str, FilePath]): A dictionary of the vitals files
+        simDir (DirectoryPath): The simulation directory        
+    
+    """
     
     ## get the simulation directory
     simDir: DirectoryPath= p.join(outDir, simInfo["stepName"])
@@ -399,78 +477,6 @@ def find_vitals_files(simInfo: Dict,
     vitalsFiles = {"vitals": vitalsReport, "progress": progressReport, "trajectory": trajectoryDcd, "pdb": pdbFile}
     
     return vitalsFiles, simDir
-
-######################################################################
-def cusum_test(series: pd.Series, threshold: float=0.05):
-    """
-    Performs the Cumulative Sum Test
-
-    Args:
-        series (pd.Series): The series to test
-        threshold (float, optional): The threshold for the test. Defaults to 0.05.
-    """
-    ## remove any inf and -inf values
-    seriesClean = series.replace([np.inf, -np.inf], np.nan).dropna()
-    ## check to see if series is long enough to perform the test
-    if len(seriesClean) < 2:
-        return False
-    ## perform the test
-    cumSumSeries = np.cumsum(seriesClean - seriesClean.mean())
-
-    return np.max(np.abs(cumSumSeries)) < threshold
-
-######################################################################
-def check_convergance(df: pd.DataFrame, columns: list, windowSize: int = 3) -> pd.DataFrame:
-    """
-    Checks for convergence in the dataframe
-
-    Args:
-        df (pd.DataFrame): The dataframe to check
-        columns (list): The columns to check
-        windowSize (int, optional): The window size for the rolling average. Defaults to 5.
-
-    Returns:
-        pd.DataFrame: The dataframe with the convergence status
-    """
-
-    # define the conversion tolerances TODO: make these a bit more scientific
-    conversionTolerances = {
-        "Potential Energy (kJ/mole)" : 3000, 
-        "Kinetic Energy (kJ/mole)": 3000,
-        "Total Energy (kJ/mole)": 3000,
-        "Temperature (K)": 5,
-        "Box Volume (nm^3)" : 1,
-        "Density (g/mL)" : 1,
-        "Backbone RMSD (Ang)" : 3                     
-
-    }
-
-
-    ## create a dictionary to store the results
-    convergedDict = {}
-    ## loop through the columns in our dataframe
-
-    for column in columns:
-        ## skip if column length is 1 (we can't do any checks on that!)
-        if len(column) == 1:
-            continue
-        ## get the rolling average
-        runningAverage = df[column].rolling(window=windowSize).mean()
-        ## check for convergence using cumsum test
-        isConverged = cusum_test(runningAverage, threshold=conversionTolerances[column])
-        ## update the dictionary
-        entryLabel = column.split("(")[0].split()[0]
-        convergedDict.update({entryLabel:isConverged})
-    ## convert results to dataframe
-    convergedData = [(key, value) for key, value in convergedDict.items()]
-    convergedDf = pd.DataFrame(convergedData, columns=["Property", "Converged"])    
-
-    return convergedDf
-
-
-
-
-
 ######################################################################
 def convert_seconds(seconds: int) -> str:
     """
@@ -482,7 +488,6 @@ def convert_seconds(seconds: int) -> str:
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     return "{:02}:{:02}:{:02}".format(int(hours), int(minutes), int(seconds))
-
 ######################################################################
 def extract_time_data(vitalsDf: pd.DataFrame, progressDf: pd.DataFrame) -> pd.DataFrame:
     """
@@ -574,124 +579,21 @@ def plot_time_data(timeDf: pd.DataFrame, outDir: str):
     plt.close()
 
     return savePng
-
-
-######################################################################
-
-# def plot_vitals(vitalsDf: pd.DataFrame,
-#                  outDir: FilePath,
-#                    yData:pd.Series,
-#                      tag: str) -> None:
-#     """
-#     Plots vitals energy or properties into a 1x3 subplot of line graphs
-    
-#     Args:
-#         vitalsDf (pd.DataFrame): The vitals dataframe
-#         outDir (FilePath): The output directory
-#         yData (pd.Series): The y data
-#         tag (str): The tag
-#     """
-#     # Convert cm to inches
-#     widthInch: float = 29.7 / 2.54
-#     heightInch: float = 10 / 2.54
-    
-#     # Set up the figure and axis
-#     fig, axes = plt.subplots(nrows=1, ncols=len(yData), figsize=(widthInch, heightInch), constrained_layout=True)
-#     fig.patch.set_facecolor('#1a1a1a')  # Much darker grey
-#     brightGreen: str = '#00FF00'  # Brighter green
-#     fig.suptitle(f'Simulation {tag} vs Time', fontsize=12, y=1.05, color=brightGreen)  # Adjust y to move the title up
-    
-#     # Ensure axes is iterable even if there's only one plot
-#     if len(yData) == 1:
-#         axes = [axes]
-    
-#     for i, ax in enumerate(axes):
-#         lineColor = brightGreen
-#         ax.set_facecolor('#1a1a1a')  # Much darker grey
-#         ax.set_xlabel('Time (ps)', fontsize=10, color=brightGreen)
-#         ax.set_ylabel(yData[i], color=brightGreen, fontsize=10, labelpad=5)
-#         ax.plot(vitalsDf['Time (ps)'], vitalsDf[yData[i]], label=yData[i],
-#                 linestyle='-', color=lineColor, linewidth=1)
-#         ax.tick_params(axis='y', labelcolor=brightGreen, labelsize=8)
-#         ax.tick_params(axis='x', labelcolor=brightGreen, labelsize=8)
-#         for label in ax.get_xticklabels():
-#             label.set_fontsize(8)
-#             label.set_color(brightGreen)
-#         for label in ax.get_yticklabels():
-#             label.set_fontsize(8)
-#             label.set_color(brightGreen)
-#         ax.grid(True, linestyle='--', alpha=0.7, color=brightGreen,
-#                 linewidth=0.5, which='both')
-#         ax.minorticks_on()  # Enable minor ticks
-#         ax.grid(which='minor', linestyle=':', linewidth=0.5, color=brightGreen)
-#         legend = ax.legend(loc='best', fontsize=8, facecolor='#1a1a1a', edgecolor=brightGreen)
-#         for text in legend.get_texts():
-#             text.set_color(brightGreen)
-    
-#     # Save the plot as a PNG image
-#     savePng = p.join(outDir, f"Vitals_{tag}.png")
-#     plt.savefig(savePng, bbox_inches="tight", facecolor='#1a1a1a')
-#     plt.close(fig)
-#     return savePng
-
-
-######################################################################
-
-# def plot_rmsd(rmsdDf: pd.DataFrame,
-#                outDir: DirectoryPath,
-#                    tag: str) -> FilePath:
-#     """
-#     Plots rmsd trace as a line graph
-
-#     Args:
-#         rmsdDf (pd.DataFrame): The rmsd dataframe
-#         outDir (DirectoryPath): The output directory
-#         tag (str): The tag
-
-#     Returns:
-#         FilePath: The path to the plot  
-#     """
-
-#     # Set up the figure and axis
-#     fig, ax = plt.subplots(figsize=(3.54, 3.54))
-#     fig.patch.set_facecolor('#1a1a1a')  # Much darker grey
-#     brightGreen: str = '#00FF00'  # Brighter green
-#     brightRed: str = '#FF0000'  # Brighter red
-#     fig.suptitle(f'Simulation {tag} vs Time', fontsize=12, y=0.98, color=brightGreen)
-    
-#     ax.set_facecolor('#1a1a1a')  # Much darker grey
-#     ax.set_xlabel('Timestep (ps)', fontsize=10, color=brightGreen)
-#     ax.set_ylabel('Backbone RMSD', color=brightGreen, fontsize=10, labelpad=15)
-
-#     ax.plot(rmsdDf['Timestep (ps)'], rmsdDf["Backbone RMSD"],
-#             linestyle='-', color=brightRed, linewidth=1)
-#     ax.tick_params(axis='y', labelcolor=brightGreen, labelsize=8)
-#     ax.tick_params(axis='x', labelcolor=brightGreen, labelsize=8)
-#     for label in ax.get_xticklabels():
-#         label.set_fontsize(8)
-#         label.set_color(brightGreen)
-#     for label in ax.get_yticklabels():
-#         label.set_fontsize(8)
-#         label.set_color(brightGreen)
-#     ax.grid(True, linestyle='--', alpha=0.7, color=brightGreen,
-#             linewidth=0.5, which='both')
-#     ax.minorticks_on()  # Enable minor ticks
-#     ax.grid(which='minor', linestyle=':', linewidth=0.5, color=brightGreen)
-    
-    
-#     # Adjust layout to make room for the legend
-#     plt.tight_layout(rect=[0, 0, 1, 0.95])
-#     # save
-#     savePng = p.join(outDir, f"Vitals_{tag}.png")
-#     plt.savefig(savePng, bbox_inches="tight", facecolor='#1a1a1a')
-#     plt.close()
-#     return savePng
-
-
 #########################################################################################################
 def calculate_rmsd_mda(trajectoryDcd: FilePath, trajectoryPdb: FilePath) -> pd.DataFrame:
+    """
+    Uses MDAnalysis to calculate backbone RMSD
 
-    universe = mda.Universe(trajectoryPdb, trajectoryDcd)
+    Args:
+        trajectoryDcd (FilePath): The trajectory DCD file
+        trajectoryPdb (FilePath): The trajectory PDB file
+
+    Returns:
+        rmsdDf (pd.DataFrame): The RMSD dataframe
+    """
+
+
+    universe: mda.Universe = mda.Universe(trajectoryPdb, trajectoryDcd)
 
     rmsdCalculation = mda.analysis.rms.RMSD(universe, select="backbone")
 
@@ -705,56 +607,22 @@ def calculate_rmsd_mda(trajectoryDcd: FilePath, trajectoryPdb: FilePath) -> pd.D
     rmsdDf['Backbone RMSD (Angstrom)'] = rmsdDf['Backbone RMSD (Angstrom)'].round(2)
 
     return rmsdDf
-
-
-
-######################################################################
-def calculate_rmsd(trajectoryDcd: FilePath, pdbFile: FilePath, trajectorySelections: List[Dict], outDir: DirectoryPath) -> pd.DataFrame:
+#########################################################################################################
+def plot_traces(vitalsDf: pd.DataFrame, plottingData: dict, convergedDiagnosis: dict, outDir: DirectoryPath) -> FilePath:
     """
-    Calculate RMSD of a trajectory against its first frame, excluding water and ions.
+    Creates the traces plot for the vitals report
 
     Args:
-    traj_file (str): Path to the trajectory file.
-    top_file (str): Path to the topology file (e.g., PDB file).
-    atom_indices (list, optional): List of atom indices to consider for RMSD calculation.
+        vitalsDf (pd.DataFrame): The vitals dataframe
+        plottingData (dict): The plotting data
+        convergedDiagnosis (dict): The converged diagnosis
+        outDir (DirectoryPath): The output directory
 
     Returns:
-    pd.DataFrame: DataFrame containing frame indices and corresponding RMSD values.
-    """
-
-    dcdAtomSelection: List = []
-    for selection in trajectorySelections:
-        dcdAtomSelection.extend(drSelector.get_atom_indexes(selection["selection"], pdbFile))
-
-
-    pdbDf = pdbUtils.pdb2df(pdbFile)
-    dcdDf = pdbDf.iloc[dcdAtomSelection]
-
-    subsetPdb = p.join(outDir, "trajectory.pdb")
-    pdbUtils.df2pdb(dcdDf, subsetPdb)
-
-    # Load the trajectory with the topology file
-    traj = md.load(trajectoryDcd, top=subsetPdb)
-    # Select atoms that are not water or ions
-    non_water_ions = traj.topology.select('not (resname HOH or resname WAT or resname NA or resname CL)')
-
-    # Use the first frame as the reference
-    ref = traj[0]
-
-    # Align the trajectory to the first frame using the selected atoms
-    traj.superpose(ref, atom_indices=non_water_ions)
-
-    # Calculate RMSD using the selected atoms
-    rmsdValues = md.rmsd(traj, ref, atom_indices=non_water_ions)
-
-    # Create a DataFrame
-    rmsdDf = pd.DataFrame({'Frame': range(len(rmsdValues)), 'RMSD': rmsdValues})
-    ## clean up temporary pdb file
-    return rmsdDf
-
-
-def plot_traces(vitalsDf: pd.DataFrame, plottingData: dict, convergedDiagnosis: dict, outDir: DirectoryPath) -> FilePath:
+        savePng (FilePath): The path to the saved plot
     
+    """
+    ## init some colors to be used
     darkGrey: str = '#1a1a1a'
     white :str = '#FFFFFF'
 
@@ -768,40 +636,46 @@ def plot_traces(vitalsDf: pd.DataFrame, plottingData: dict, convergedDiagnosis: 
         "brightOrange": '#FFA500',
     }
 
+    # Set up plot size and convert cm to inches (26 x 26 cm)
     plt.figure(figsize=(26 / 2.54, 26 / 2.54))
+    ## create the plot with 7 rows and 2 columns
     fig, axes = plt.subplots(7, 2, gridspec_kw={'width_ratios': [3, 1]})
+    ## set the background color
     fig.patch.set_facecolor(darkGrey)
 
-
+    # Adjust spacing between subplots
     plt.subplots_adjust(hspace=0.7, wspace=-0.2)
 
+    # Plot the traces
     for i, (ax, columnName, traceColor) in enumerate(zip(axes[:, 0], plottingData, traceColors.values())):
+        ## set the background color for each subplot
         ax.set_facecolor(darkGrey)
-
+        ## make a glowing line around the trace
         for n in range(1, 6):
             ax.plot(vitalsDf["Time (ps)"], vitalsDf[columnName], linestyle='-', color=traceColor, linewidth=1+n, alpha=0.1)
 
+        ## plot the trace
         ax.plot(vitalsDf["Time (ps)"], vitalsDf[columnName], linestyle='-', color=traceColor, linewidth=1)
-        
+        ## set the title, put it in the correct place
         ax.set_title(columnName, fontsize=8, color=traceColor, loc="left", x=0.035, y=0.9)
-
+        ## deal with the x axis number of ticks
         ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3))
+        ## set the x axis range 
         x_min = vitalsDf["Time (ps)"].min()
         x_max = vitalsDf["Time (ps)"].max()
         x_range = x_max - x_min
-        padding = x_range * 0.05  # Adjust the padding as needed
-
+        padding = x_range * 0.05  
         ax.set_xlim(x_min - padding, x_max + padding)
 
         ## plot x axis for last plot
         if i == 6:
             ax.spines['bottom'].set_color(white)
-            ax.spines['bottom'].set_position(('outward', 10))  # Adjust the value as needed
+            ax.spines['bottom'].set_position(('outward', 10))  
             ax.set_facecolor(darkGrey)
             ax.set_xlabel("Time (ps)", fontsize=8, color=white)
             ax.tick_params(axis='x', colors=white)
             # Set x-ticks to include the first and last data points
-            ax.set_xticks(np.linspace(x_min, x_max))  # Adjust num as needed
+            ax.set_xticks(np.linspace(x_min, x_max))  
             # Set x-ticks to integer
             ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
@@ -821,13 +695,15 @@ def plot_traces(vitalsDf: pd.DataFrame, plottingData: dict, convergedDiagnosis: 
         ax.tick_params(axis='y', colors=traceColor)
         ax.spines['right'].set_color(traceColor)
 
-
+        ## set labels color and fontsize
         for label in ax.get_yticklabels():
             label.set_fontsize(8)
             label.set_color(traceColor)
 
+        ## plot best fit lines on top of the main trace
         bestFitLines = plottingData[columnName]
         for _, bestFitLine in bestFitLines.items():
+            ## use slope and intercept to plot the best fit line
             bestFitTrace = bestFitLine["dy/dx"] * bestFitLine["Time (ps)"] + bestFitLine["intercept"]
             ax.plot(bestFitLine["Time (ps)"], bestFitTrace, linestyle="--", color=white, linewidth=0.5)
 

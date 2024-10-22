@@ -5,33 +5,10 @@
 [] need more stuff when simulations are running
 
 
-
-## Extra features
-[] more metaDynamics parameters
-
-## drCheckup
-[x] if this fails, continue with everything
-[] redo PDF image sizes and locations
-[] Display relative energies for Potential, Kinetic and Total
-[] better convergance checker
-
-## drMethodsWriter
-[] metaDynamics 
-
-
-## drMeta
-[] frequency config -> drMeta
-[] free energy output at the end
-[] More options for forces
-    [] minValue
-    [] maxValue
-    [] biasWidth
-
-
 ## hotfixes
-[] throw error when ligands are in the same chain as protein
-[] drMethodsWriter try except
-[] "all" not in configChecker for removeAtoms
-[] collate simulation vitals reports
+[x] throw error when ligands are in the same chain as protein
+[x] drMethodsWriter try except
+[x] "all" not in configChecker for removeAtoms
+[x] collate simulation vitals reports
 [] collect all of the pdfs for citation
-[] skip em in skip_resume_siumulate
+[x] skip em in skip_resume_siumulate

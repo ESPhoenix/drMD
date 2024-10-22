@@ -73,7 +73,7 @@ def collate_vitals_reports(batchConfig: Dict) -> None:
     outDir: DirectoryPath = pathInfo["outputDir"]
 
     ## create make a new dir to put vitals report into
-    vitalsDir = p.join(outDir, "00_vitals_reports")
+    vitalsDir: DirectoryPath = p.join(outDir, "00_vitals_reports")
     os.makedirs(vitalsDir, exist_ok=True)
 
     notRunDirs = init_not_run_dirs()
@@ -99,7 +99,7 @@ def cluster_handler(batchConfig: Dict) -> None:
 
     Args:
         batchConfig (dict): The batch configuration dictionary.
-
+s
     Returns:
         None
     
@@ -279,7 +279,7 @@ def get_endpoint_pdbs(endPointInfo: Dict, pathInfo: Dict) -> List[FilePath]:
     ## unpack pathInfo
     outDir: DirectoryPath = pathInfo["outputDir"]
     ## create list of directories that are made by drMD - we don't want to look inside these
-    notRunDirs: List[str] = ["00_configs", "01_ligand_parameters", "00_collated_pdbs", "00_drMD_logs", "00_AutoMethods"]
+    notRunDirs = init_not_run_dirs()
     ## create a list of all run directories
     runDirs: List[DirectoryPath] = [p.join(outDir, dir) for dir in os.listdir(outDir) if not dir in notRunDirs]
     ## create a list of step directories that we want to look for endpoint pdb files in 
