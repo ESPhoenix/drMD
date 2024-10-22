@@ -16,8 +16,9 @@ def print_drMD_logo() -> None:
     """
     run(["clear"])
     tealColor = "\033[38;5;37m" 
+    boldText = "\033[1m"
     resetTextColor = "\033[0m"
-    print(tealColor+
+    print(tealColor+boldText+
           """
 ⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕⚕
             dddddddd                                                                       
@@ -310,7 +311,18 @@ def print_pdb_error() -> None:
 
 if __name__ == "__main__":
     print_drMD_logo()
-    print_config_error()
     print_pdb_error()
     print_performing_first_aid()
+
+    print_config_error({
+        "pathInfo": {
+            "inputDir": "inputDir must be a path to a directory containing .pdb files",
+            "outputDir": None
+            },
+        "hardwareInfo": {
+            "parallelCPU": "parallelCPU must be an int greater than 1",
+            "platform": "platform must be CUDA, OpenCL, or CPU",
+            "subprocessCpus": "no entry found, using a default of 1"
+        }
+    })
   

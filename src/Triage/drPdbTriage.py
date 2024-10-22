@@ -120,6 +120,9 @@ def report_problems(commonPdbProblems: Dict[str, bool], pdbTriageLog: FilePath) 
             logging.info(f"\t> This will cause parameterisation of your system to fail")
             logging.info(f"\t> You can create your own parameters for organometallic ligand")
             logging.info(f"\t> and supply them in the inputs directory")
+        if commonPdbProblems["isSharedChains"]:
+            logging.info(f"\n  * Chains with both protein and ligand residues detected *")
+            logging.info(f"\t> This will cause parameterisation of your system to fail")
     else:
         logging.info(f"No common problems found in the PDB files.")
 
@@ -174,6 +177,8 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
     ## check for organimetallic ligand
     isOrganimetallicLigands, organimetallicLigands = check_for_organometallic_ligand(pdbDf)
 
+    isSharedChains, sharedChains = check_for_shared_chains(pdbDf, config)
+
     ## report any problems found in pdb file
     if isMultipleConformers:
         logging.info(f"  * Multiple conformers found in {pdbName} for the following residues: *")
@@ -195,19 +200,51 @@ def pdb_triage_protocol(pdbFile: FilePath, inputDir: DirectoryPath, config: dict
         logging.info(f"  * Organimetallic ligand found in {pdbName} for the following residues: *")
         for key, value in organimetallicLigands.items():
             logging.info(f"\t\t{key}: {value}")
+    if isSharedChains:
+        logging.info(f"  * Shared chains found in {pdbName} for the following chains: *")
+        for key, value in sharedChains.items():
+            logging.info(f"\t\t{key}: {value}")
+
 
     problemsDict: Dict[str,bool] = {
         "isMultipleConformers": isMultipleConformers,
         "isBrokenChains": isBrokenChains,
         "isMissingSidechains": isMissingSidechains,
         "isNonCanonicalAminoAcids": isNonCanonicalAminoAcids,
-        "isOrganimetallicLigands": isOrganimetallicLigands
+        "isOrganimetallicLigands": isOrganimetallicLigands,
+        "isSharedChains": isSharedChains
     }
 
     if not any(problemsDict.values()):
         logging.info(f"  * No common problems found in the PDB file *")
 
     return problemsDict
+
+def check_for_shared_chains(pdbDf: pd.DataFrame, config: dict) -> tuple[bool, Optional[Dict[str, int]]]:
+    """
+    Check to see if ligand and proteins are in the same chain
+
+    Args:   
+        pdbDf (pd.DataFrame): The pdb dataframe.
+
+    Returns:
+        isSharedChains  (bool): A boolean indicating if ligand and proteins are in the same chain
+        sharedChains (Optional[Dict[str, int]]): A dictionary with the residue IDs of the shared chains and the number of non-organic atoms in each
+    """
+    isSharedChains = False
+    aminoAcidResNames, _, _, _ = initialise_lists()
+    sharedChains: Dict = {}
+    for chainId, chainDf in pdbDf.groupby(f"CHAIN_ID"):
+        chainResidues = chainDf["RES_ID"].tolist()
+        chainProteinResidues = chainDf[chainDf["RES_NAME"].isin(aminoAcidResNames)].RES_ID.tolist()
+        chainLigandResidues = chainDf[~chainDf["RES_NAME"].isin(aminoAcidResNames)].RES_ID.tolist()
+        if len(chainProteinResidues) > 0 and len(chainLigandResidues) > 0:
+            isSharedChains = True
+            sharedChains[chainId] = "Chain has both protein and ligand residues"
+   
+    return isSharedChains, sharedChains or None
+
+
 
 #################################################################################################
 def check_for_organometallic_ligand(pdbDf: pd.DataFrame, uaaInfo: Optional[Dict] = None) -> tuple[bool, Optional[Dict[str, int]]]:

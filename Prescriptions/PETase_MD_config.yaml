@@ -1,18 +1,16 @@
 ########################################################################
 pathInfo:
   inputDir: /home/esp/scriptDevelopment/drMD/01_inputs/PET_proj
-  outputDir: /home/esp/scriptDevelopment/drMD/04_PET_proj_outputs
+  outputDir: /home/esp/scriptDevelopment/drAnalysis/PETase_MD_for_drMD_paper/04_PET_proj_outputs
   
 ########################################################################
 miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
-  boxGeometry: oactahedral
-  skipPdbTriage: false
-  firstAidMaxRetries: 100
+  boxGeometry: octahedral
+  skipPdbTriage: False
+  firstAidMaxRetries: 0
   writeMyMethodsSection: True
-########################################################################
-loggingInfo:
   trajectorySelections:
   - selection:
       keyword: protein
@@ -28,8 +26,8 @@ simulationInfo:
 ## EM STEPS ##################################
   - stepName: 011_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 1000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -40,8 +38,8 @@ simulationInfo:
   ##
   - stepName: 012_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -52,8 +50,8 @@ simulationInfo:
   ##
   - stepName: 013_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -64,8 +62,8 @@ simulationInfo:
   ##
   - stepName: 014_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -76,8 +74,8 @@ simulationInfo:
   ##
   - stepName: 015_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -88,8 +86,8 @@ simulationInfo:
   ##
   - stepName: 015_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -100,8 +98,8 @@ simulationInfo:
   ##
   - stepName: 016_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
     restraintInfo:
     - restraintType: position
       parameters:
@@ -112,8 +110,8 @@ simulationInfo:
   ##
   - stepName: 017_energy_minimisation
     simulationType: EM
-    temperature: 0
-    maxIterations: 10000
+    temperature: 300
+    maxIterations: -1
 ## EQUILIBRATION STEPS #######################
   - stepName: 021_NVT_warmup
     simulationType: NVT
@@ -165,3 +163,4 @@ simulationInfo:
     timestep: 4 fs
     temperature: 300
     logInterval: 10 ps
+

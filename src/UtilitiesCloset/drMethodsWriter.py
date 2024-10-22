@@ -398,7 +398,7 @@ def get_simulation_type_text(sim: Dict, progressionWord: str) -> str:
         return f"{progressionWord}{article} simulation was performed using the canonical (NVT) ensemble"
     elif simulationType.upper() == "EM":
         article = "An" if capitalise else "an"
-        return f"{progressionWord}{article} energy mimimisation step was performed using the steepest descent method"
+        return f"{progressionWord}{article} energy minimisation step was performed using the steepest descent method"
     elif simulationType == "META":
         article = "A" if capitalise else "a"
         return f"{progressionWord}{article} metadynamics simulation was performed"
@@ -464,7 +464,10 @@ def selection_to_text(selection: Dict) -> str:
     keyword = selection["keyword"]
     ## for keyword selections, we can just return the keyword as part of the text
     if not keyword == "custom":
-        return f"all {keyword} atoms in the system"  
+        if keyword == "all":
+            return "all atoms in the system"
+        else:
+            return f"all {keyword} atoms in the system"  
 
     ## for custom selections, we need to generate the text
     text = "the following atoms: "
@@ -521,7 +524,7 @@ def get_restraint_target(restraint: str) -> str:
     restraintType: str = restraint["restraintType"]
 
     if restraintType == "position":
-        return ""
+        return " "
     elif restraintType == "distance":
         return f" and an equilibrium distance of {restraint['parameters']['r0']} Å"
     elif restraintType == "angle":
@@ -590,6 +593,8 @@ def write_per_step_simulation_methods(methodsFile: FilePath, sim: dict, stepInde
                 methods.write(f"allowed the simulation to be performed using a timestep of {sim['timestep']} [Ref. {cite('heavyProtons')}]. ")
             else:
                 methods.write(f"This simulation was performed using a timestep of {sim['timestep']}. ")
+
+        ## deal with metadynamics   
         if sim["simulationType"] == "META":
             write_metadynamics_simulation_methods(methodsFile, sim)
 

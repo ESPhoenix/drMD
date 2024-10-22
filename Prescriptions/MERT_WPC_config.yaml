@@ -32,7 +32,7 @@ loggingInfo:
       keyword: custom
       customSelection:
        - {CHAIN_ID: C, RES_NAME: WPC, RES_ID: all, ATOM_NAME: all}
-       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}
+       - {CHAIN_ID: C, RES_NAME: FE2, RES_ID: all, ATOM_NAME: FE2}S
 ########################################################################
 equilibriationRestraints: &equilibriationRestraints
   - restraintType: position
@@ -249,9 +249,8 @@ postSimulationInfo:
       - selection:
           keyword: water
       - selection:
-          keyword: custom
-          customSelection:
-           - {CHAIN_ID: all, RES_NAME: all, RES_ID: all, ATOM_NAME: [Na+, Cl-]}
+          keyword: ions
+
 
 
  

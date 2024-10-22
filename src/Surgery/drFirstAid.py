@@ -66,6 +66,8 @@ def firstAid_handler(firstAid_function: callable):
             retries: int = 0
             ## keep running firstAid simulations until max retries is reached or the simulation succeeds
             maxRetries: int = kwargs["config"]["miscInfo"]["firstAidMaxRetries"]
+            if maxRetries == 0:
+                return
             while retries < maxRetries:
                 ## try to run the simulation - if this runs without errors, the rest of this function is skipped
                 try:

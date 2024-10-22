@@ -28,3 +28,10 @@
     [] biasWidth
 
 
+## hotfixes
+[] throw error when ligands are in the same chain as protein
+[] drMethodsWriter try except
+[] "all" not in configChecker for removeAtoms
+[] collate simulation vitals reports
+[] collect all of the pdfs for citation
+[] skip em in skip_resume_siumulate
