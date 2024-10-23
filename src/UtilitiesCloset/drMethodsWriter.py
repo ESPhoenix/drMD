@@ -67,38 +67,36 @@ def methods_writer_protocol(batchConfig: Dict, configDir: DirectoryPath, outDir:
     ## write simulation related methods
     simulationInfo: dict = configDicts[0]["simulationInfo"]
     write_simulation_methods(methodsFile, simulationInfo)
-    write_gpu_methods(methodsFile)
+    write_hardware_methods(methodsFile, configDicts[0])
 
 ##########################################################################################
 
-# def write_hardware_methods(methodsFile: FilePath, config: Dict) -> None:
-#     """
-#     Writes methods section talking about GPU usage, generic to all simulations run by drMD
+def write_hardware_methods(methodsFile: FilePath, config: Dict) -> None:
+    """
+    Writes methods section talking about GPU usage, generic to all simulations run by drMD
     
-#     Args:
-#         methodsFile: (FilePath) Path to methods file
+    Args:
+        methodsFile: (FilePath) Path to methods file
 
-#     Returns:
-#         None    
-#     """
-#     gpuData = GPUtil.getGPUs()
+    Returns:
+        None    
+    """
+    gpuData = GPUtil.getGPUs()
 
-#     hardwareInfo: dict = config["hardwareInfo"]
-#     nCpus = hardwareInfo["parallelCpus"] * hardwareInfo["subprocessCpus"]
+    hardwareInfo: dict = config["hardwareInfo"]
+    nCpus = hardwareInfo["parallelCpus"] * hardwareInfo["subprocessCpus"]
 
+    with open(methodsFile, "a") as methods:
+        if not gpuData:
+            methods.write(f"Simulations were performed without GPU acceleration using {nCpus} CPUs.\n\n")
 
-#     with open(methodsFile, "a") as methods:
-#         if not gpuData:
-#             methods.write(f"Simulations were performed without GPU acceleration using {nCpus} CPUs.\n\n")
+        elif len(gpuData) == 1:
+            methods.write(f"Simulations were performed on a {gpuData[0].name} using {nCpus} CPUs.\n\n")
+        elif len(gpuData) > 1:
+            gpuNameList = format_list([gpu.name for gpu in gpuData])
+            methods.write(f"Simulations were performed on the following GPUs: {gpuNameList} using {nCpus}\n\n")
 
-#         elif len(gpuData) == 1:
-#             methods.write(f"Simulations were performed on a {gpuData[0].name} using {nCpus} CPUs.\n\n")
-#         elif len(gpuData) > 1:
-#             gpuNameList = format_list([gpu.name for gpu in gpuData])
-
-#             methods.write(f"Simulations were performed on the following GPUs: {gpuNameList} using {nCpus}\n\n\")
-
-
+##########################################################################################
 def get_config_dicts(configDir: DirectoryPath) -> List[Dict]:
     """
     Reads through config files in configDir and returns a list of config dicts.

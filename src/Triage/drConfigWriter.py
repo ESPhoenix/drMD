@@ -6,7 +6,7 @@ import yaml
 
 ## drMD LIBRARIES
 from Surgery import drPrep
-
+from UtilitiesCloset import drListInitiator
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
 
@@ -105,10 +105,11 @@ def make_proteinInfo(
     """
     
     ## GET PROTEIN AND ION ATOMS IN INPUT GEOMETRY
-    aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
-    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcids) |
-                   pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) |
-                   pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
+    aminoAcidNames = drListInitiator.get_amino_acid_residue_names()
+    ionNames = drListInitiator.get_ion_residue_names()
+
+    protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidNames) |
+                   pdbDf["ATOM_NAME"].str.upper().isin(ionNames)]
     
     ## CHECK TO SEE IF PROTEIN HAS HYDROGENS
     isProteinProtonated = False
@@ -133,11 +134,12 @@ def make_ligandInfo(
         ligandInfo = batchConfig["ligandInfo"]
         return ligandInfo
     ## GET LIGAND ATOMS IN INPUT GEOMETRY 
-    aminoAcids, monovalentIons, multivalentIons = init_residue_name_lists()
+    ## GET PROTEIN AND ION ATOMS IN INPUT GEOMETRY
+    aminoAcidNames = drListInitiator.get_amino_acid_residue_names()
+    ionNames = drListInitiator.get_ion_residue_names()
 
-    ligandDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcids) &
-                    ~pdbDf["ATOM_NAME"].str.upper().isin(monovalentIons) &
-                    ~pdbDf["ATOM_NAME"].str.upper().isin(multivalentIons)]
+    ligandDf = pdbDf[~pdbDf["RES_NAME"].isin(aminoAcidNames) &
+                   ~pdbDf["ATOM_NAME"].str.upper().isin(ionNames)]
 
     ## GET NAMES OF LIGANDS
     ligNames = ligandDf["RES_NAME"].unique().tolist()

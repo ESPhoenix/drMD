@@ -5,7 +5,7 @@ pathInfo:
   
 ########################################################################
 hardwareInfo:
-  parallelCPU: 8
+  parallelCPU: 1
   platform: CUDA
   subprocessCpus: 1
 
