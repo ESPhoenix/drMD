@@ -6,6 +6,7 @@ import yaml
 from glob import glob
 import numpy as np
 import inflect
+import gputil
 
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
@@ -66,7 +67,31 @@ def methods_writer_protocol(batchConfig: Dict, configDir: DirectoryPath, outDir:
     ## write simulation related methods
     simulationInfo: dict = configDicts[0]["simulationInfo"]
     write_simulation_methods(methodsFile, simulationInfo)
+    write_gpu_methods(methodsFile)
+
 ##########################################################################################
+
+# def write_gpu_methods(methodsFile: FilePath):
+#     """
+#     Writes methods section talking about GPU usage, generic to all simulations run by drMD
+    
+#     Args:
+#         methodsFile: (FilePath) Path to methods file
+
+#     Returns:
+#         None    
+#     """
+#     gpuData = gputil.getGPUs()
+
+
+
+
+#     with open(methodsFile, "a") as methods:
+#         if not gpuData:
+#             methods.write("Simulations were")
+
+#         methods.write("## GPU Usage\n\n")
+#         methods.write("All simulations were run on a Tesla T4 GPU. \n\n")
 
 def get_config_dicts(configDir: DirectoryPath) -> List[Dict]:
     """

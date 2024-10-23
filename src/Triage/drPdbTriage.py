@@ -513,7 +513,9 @@ def initialise_lists() -> Tuple[Set[str], Set[str], Set[str], Dict[str, int]]:
         "GLN", "GLU", "GLY", "HIS", "ILE",
         "LEU", "LYS", "MET", "PHE", "PRO",
         "SER", "THR", "TRP", "TYR", "VAL",
-        "HID", "HIE", "HIP", "CYX", "CYM"
+        "HID", "HIE", "HIP", "CYX", "CYM",
+        "ASH", "GLH", "LYN", "NME", "NHE",
+        "ACE", "NME"
     }
     
     # Set of monovalent ion atom names
