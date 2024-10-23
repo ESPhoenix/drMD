@@ -9,7 +9,8 @@ def get_amino_acid_residue_names() -> List[str]:
     return  {'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN',
             'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS',
             'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL',
-            'ASH', 'GLH', 'HIP', 'HIE', 'HID', 'CYX', 'CYM', 'LYN'} ## oddball protonations
+            'ASH', 'GLH', 'HIP', 'HIE', 'HID', 'CYX', 'CYM', 'LYN',   ## oddball protonations
+            'ACE','NME','NHE'}              ## caps
 ##################################################################################
 def get_ion_residue_names() -> List[str]:
     """ 
