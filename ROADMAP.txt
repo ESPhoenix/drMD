@@ -1,14 +1,5 @@
+## PIP
+[] set up PIP for version 1.0.0
 
-
-## drLogger
-[] for drPrep, need more flags to label what's going on
-[] need more stuff when simulations are running
-
-
-## hotfixes
-[x] throw error when ligands are in the same chain as protein
-[x] drMethodsWriter try except
-[x] "all" not in configChecker for removeAtoms
-[x] collate simulation vitals reports
-[] collect all of the pdfs for citation
-[x] skip em in skip_resume_siumulate
+## tests
+[] look through and see what needs to be done!

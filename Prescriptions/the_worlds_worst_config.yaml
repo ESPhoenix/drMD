@@ -1,7 +1,7 @@
 ########################################################################
 pathInfo:
   # inputDir: /home/esp/scriptDevelopment/drMD/01_inputs
-  # outputDir: SMEGMA
+  # outputDir: NOTaDIR
 ########################################################################
 hardwareInfo:
   platform: CUDA

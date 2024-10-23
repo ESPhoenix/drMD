@@ -13,3 +13,4 @@ propka
 jinja2
 inflect
 pdb2pqr
+mdanalysis
