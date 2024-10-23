@@ -86,6 +86,21 @@ def make_per_protein_config(
 
     return configYaml
 ######################################################################################
+def detect_protons(pdbDf: pd.DataFrame) -> bool:
+
+    def ele_from_atom_name(atomName: str) -> str:
+        if any(letter.islower() for letter in atomName):
+            return atomName[:2]
+        else:
+            return atomName[0]
+
+    eleCounts: pd.Series = pdbDf["ATOM_NAME"].apply(ele_from_atom_name).value_counts()
+    if "H" in eleCounts:
+        return True
+    else:
+        return False
+
+
 
 def make_proteinInfo(
     pdbDf: pd.DataFrame,
@@ -112,14 +127,11 @@ def make_proteinInfo(
                    pdbDf["ATOM_NAME"].str.upper().isin(ionNames)]
     
     ## CHECK TO SEE IF PROTEIN HAS HYDROGENS
-    isProteinProtonated: bool = False
-    if (protDf["ELEMENT"] == "H").any():
-        isProteinProtonated = True
-    else:
-        isProteinProtonated = False
+    isProteinProtonated: bool = detect_protons(protDf)
     ## CREATE proteinInfo
     proteinInfo: dict = {"proteinName":  protName,
                     "protons": isProteinProtonated}   
+    
     
     return proteinInfo
 ######################################################################################
@@ -168,8 +180,8 @@ def make_ligandInfo(
             thisLigandDf: pd.DataFrame = ligandDf[ligandDf["RES_NAME"] == ligName]
             # detect protons in ligand
             isLigandProtonated: bool = False
-            if (thisLigandDf["ELEMENT"] == "H").any():
-                isLigandProtonated = True
+
+            isLigandProtonated = detect_protons(thisLigandDf)
             # check for mol2 file in input pdb directory
             ligMol2: FilePath = p.join(pdbDir, f"{ligName}.mol2")
             isLigandMol2: bool = False
