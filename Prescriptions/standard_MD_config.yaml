@@ -1,21 +1,8 @@
 ########################################################################
 pathInfo:
-  inputDir: "/home/esp/proteinDesign/cvFAP_modification/02_Molecular_Dynamics/01_inputs"
-  outputDir: "/home/esp/proteinDesign/cvFAP_modification/02_Molecular_Dynamics/02_outputs"
-########################################################################
-
-ligandInfo:
-- ligandName: "FAD"
-  protons: True
-  mol2: False
-  toppar: False
-  charge: -2
+  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs/test_standard
+  outputDir: "/home/esp/scriptDevelopment/drMD/03_standard_outputs"
   
-- ligandName: "PLM"
-  protons: True
-  mol2: False
-  toppar: False
-  charge: -1
 ########################################################################
 hardwareInfo:
   parallelCPU: 1
@@ -26,19 +13,19 @@ miscInfo:
   pH: 7.4
   firstAidMaxRetries: 10
   boxGeometry: "cubic"
-
-########################################################################
-loggingInfo:
+  writeMyMethodsSection: True
+  skipPdbTriage: False
   trajectorySelections:
   - selection:
       keyword: "protein"
   - selection:
       keyword: "ligand"
+
 ########################################################################
 equilibriationRestraints: &equilibriationRestraints
     - restraintType: "position"
       parameters:
-        k: 10000
+        k: 1000
       selection:
         keyword: "protein"
 
@@ -53,7 +40,7 @@ simulationInfo:
   - stepName: "01_energy_minimisation"
     simulationType: "EM"
     temperature: 300
-    maxIterations: 1000
+    maxIterations: -1
 ########################################################################
   - stepName: "02_NVT_pre-equilibraition"
     simulationType: "NVT"
@@ -98,9 +85,9 @@ postSimulationInfo:
     - selection:
         keyword: "protein"
     removeAtoms:
-    - selection:
-        keyword: "water"
-    - selection:
-        keyword: "ions"
-    collate: True
+      - selection:
+          keyword: "water"
+      - selection:
+          keyword: "ions"
+  collateVitalsReports: True
 

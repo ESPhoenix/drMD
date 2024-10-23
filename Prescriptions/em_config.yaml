@@ -1,0 +1,45 @@
+########################################################################
+pathInfo:
+  inputDir: /home/esp/scriptDevelopment/drMD/01_inputs/test_em
+  outputDir: /home/esp/scriptDevelopment/drMD/03_em_outputs
+  
+########################################################################
+hardwareInfo:
+  parallelCPU: 8
+  platform: CUDA
+  subprocessCpus: 1
+
+########################################################################
+miscInfo:
+  pH: 7.4
+  boxGeometry: cubic
+
+########################################################################
+loggingInfo:
+  trajectorySelections:
+  - selection:
+      keyword: protein
+  - selection:  
+      keyword: ligand
+########################################################################
+
+simulationInfo:
+  - stepName: 01_energy_minimisation
+    simulationType: EM
+    temperature: 300
+    maxIterations: -1
+
+################################################
+
+postSimulationInfo:
+  endPointInfo:
+    stepNames: [01_energy_minimisation]
+    removeAtoms: 
+    - selection:
+        keyword: ions
+    - selection:
+        keyword: water
+  removeAllSimulationDirs: True
+
+
+
