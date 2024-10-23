@@ -3,3 +3,7 @@
 
 ## tests
 [] look through and see what needs to be done!
+
+
+## drPdbChecker
+[] move list init to drListInitiator
