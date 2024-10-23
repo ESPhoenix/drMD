@@ -447,7 +447,7 @@ Example MetaDynamics syntax:
         - biasVar: "torsion"
           selection: 
             keyword: "custom"
-          selectionSyntax:
+            customSelection:
             - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 1, ATOM_NAME: "CA"}
             - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 2, ATOM_NAME: "CA"}
             - {CHAIN_ID: "A", RES_NAME: "ALA", RES_ID: 3, ATOM_NAME: "CA"}
