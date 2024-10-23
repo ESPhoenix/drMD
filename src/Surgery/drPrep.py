@@ -603,7 +603,6 @@ def prepare_protein_structure(config: Dict, outDir: DirectoryPath) -> FilePath:
     pH: int = str(float(config["miscInfo"]["pH"]))
     protPqr = p.join(protPrepDir, "PROT.pqr")
     pdb2pqrCommand: str = ["pdb2pqr",
-                       "--ff", "AMBER",
                          "--ffout", "AMBER",
                          "--titration-state-method", "propka",
                           "--keep-chain",

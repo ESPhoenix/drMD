@@ -7,7 +7,7 @@ from collections import Counter
 
 ## drMD LIBRARIES
 from ExaminationRoom import drLogger
-from UtilitiesCloset import drSplash
+from UtilitiesCloset import drSplash, drListInitiator
 
 ## PDB // DATAFRAME UTILS
 from pdbUtils import pdbUtils
@@ -232,7 +232,7 @@ def check_for_shared_chains(pdbDf: pd.DataFrame, config: dict) -> tuple[bool, Op
         sharedChains (Optional[Dict[str, int]]): A dictionary with the residue IDs of the shared chains and the number of non-organic atoms in each
     """
     isSharedChains = False
-    aminoAcidResNames, _, _, _ = initialise_lists()
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
     sharedChains: Dict = {}
     for chainId, chainDf in pdbDf.groupby(f"CHAIN_ID"):
         chainResidues = chainDf["RES_ID"].tolist()
@@ -259,7 +259,7 @@ def check_for_organometallic_ligand(pdbDf: pd.DataFrame, uaaInfo: Optional[Dict]
         and a dictionary with the residue IDs of the organometallic ligand and the number of non-organic atoms in each.
     """
     # Initialize lists
-    aminoAcidResNames, _, _, _ = initialise_lists()
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
     organicElements = {"C", "N", "H", "O", "S", "P", "F", "CL",
                         "BR", "I", "SE", "B", "SI"}
 
@@ -308,13 +308,7 @@ def check_for_non_canonical_amino_acids(pdbDf: pd.DataFrame, inputDir: Directory
         and a dictionary with the residue IDs of the non-canonical amino acids and a message indicating what files are missing.
     """
     # Initialize lists
-    aminoAcidResNames, _, _, _ = initialise_lists()
-
-
-    uaaInfo = config.get("nonCanonicalAminoAcids", False)
-    if uaaInfo:
-        for uaa in uaaInfo:
-            aminoAcidResNames.add(uaa["residueName"])
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
 
     backboneAtoms: set  = {"N", "CA", "C", "O"}
 
@@ -360,7 +354,8 @@ def check_for_missing_sidechains(pdbDf: pd.DataFrame) -> tuple[bool, Optional[Di
     ## initialise a set of backbond atom names and terminal oxygen name
     backboneAtoms: set = {"N", "C", "O", "CA", "OXT"}
     ## get amino acid names and dictionary containing heavy atom counts for each residue
-    aminoAcidResNames, _, _, heavySideChainAtomCounts = initialise_lists()
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
+    heavySideChainAtomCounts = drListInitiator.get_residue_heavy_atom_counts()
     ## get only the protein part of the pdb dataframe
     protDf = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidResNames)]
     ## initialise an empty dict to store missing sidechains
@@ -394,7 +389,7 @@ def check_for_broken_chains(pdbDf: pd.DataFrame) -> tuple[bool, Optional[Dict[st
         Tuple[bool, Optional[Dict[str, List[str]]]: A tuple containing a boolean indicating if broken chains were found,
         and a dictionary with chain IDs as keys and a list of broken residues or a specific message as values.
     """
-    aminoAcidResNames, _, _, _ = initialise_lists()
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
 
     # Filter only the protein part of the dataframe
     protDf: pd.DataFrame = pdbDf[pdbDf["RES_NAME"].isin(aminoAcidResNames)]
@@ -463,7 +458,7 @@ def check_for_multiple_conformers(pdbDf: pd.DataFrame) -> tuple[bool, Optional[D
         and a dictionary with the residue IDs of the residues with multiple conformers and a list of the duplicated atoms.
     """
     # Initialize lists
-    aminoAcidResNames, _, _, _ = initialise_lists()
+    aminoAcidResNames = drListInitiator.get_amino_acid_residue_names()
     
     # Dictionary to store residue IDs and duplicated atoms
     multipleConformers: Dict = {}
@@ -496,67 +491,8 @@ def check_for_multiple_conformers(pdbDf: pd.DataFrame) -> tuple[bool, Optional[D
 
 
 
-#################################################################################################
-def initialise_lists() -> Tuple[Set[str], Set[str], Set[str], Dict[str, int]]:
-    """
-    Initialise lists of amino acid residue names, monovalent and multivalent ion atom names,
-    and the number of heavy side chain atoms for each amino acid residue.
 
-    Returns:
-        Tuple[Set[str], Set[str], Set[str], Dict[str, int]]: A tuple containing sets of amino acid residue names,
-        monovalent and multivalent ion atom names, and a dictionary with the residue names as keys and the
-        number of heavy side chain atoms as values.
-    """
-    # Set of amino acid residue names
-    aminoAcidResNames: Set[str] = {
-        "ALA", "ARG", "ASN", "ASP", "CYS",
-        "GLN", "GLU", "GLY", "HIS", "ILE",
-        "LEU", "LYS", "MET", "PHE", "PRO",
-        "SER", "THR", "TRP", "TYR", "VAL",
-        "HID", "HIE", "HIP", "CYX", "CYM",
-        "ASH", "GLH", "LYN", "NME", "NHE",
-        "ACE", "NME"
-    }
-    
-    # Set of monovalent ion atom names
-    monovalentIonAtomNames: Set[str] = {
-        "LI", "NA", "K", "RB", "CS", "TL", "CU", "AG", "NH4", "H3O", "F", "CL", "BR", "I"
-    }
 
-    # Set of multivalent ion atom names
-    multivalentIonAtomNames: Set[str] = {
-        "BE2", "CU2", "NI2", "PT2", "ZN2", "CO2", "PD2", "AG2", "CR2", "FE2",
-        "MG2", "V2", "MN2", "HG2", "CD2", "YB2", "CA2", "SN2", "PB2", "EU2",
-        "SR2", "SM2", "BA2", "RA2", "AL3", "FE3", "CR3", "IN3", "TL3", "Y3",
-        "LA3", "CE3", "PR3", "ND3", "SM3", "EU3", "GD3", "TB3", "DY3", "ER3",
-        "TM3", "LU3", "HF4", "ZR4", "CE4", "U4", "PU4", "TH4"
-    }
-
-    # Dictionary with the number of heavy side chain atoms for each amino acid residue
-    heavySideChainAtomCounts: Dict[str, int] = {
-        "ALA": 1,  # Alanine (CH3)
-        "ARG": 7,  # Arginine (C3H6N3)
-        "ASN": 4,  # Asparagine (C2H4ON)
-        "ASP": 4,  # Aspartic acid (C2H4O2)
-        "CYS": 2,  # Cysteine (CH2S)
-        "GLN": 5,  # Glutamine (C3H6ON)
-        "GLU": 5,  # Glutamic acid (C3H6O2)
-        "GLY": 0,  # Glycine (no side chain)
-        "HIS": 6,  # Histidine (C4H5N2)
-        "ILE": 4,  # Isoleucine (C4H9)
-        "LEU": 4,  # Leucine (C4H9)
-        "LYS": 5,  # Lysine (C4H8N)
-        "MET": 4,  # Methionine (C3H7S)
-        "PHE": 7,  # Phenylalanine (C7H7)
-        "PRO": 3,  # Proline (C3H6)
-        "SER": 2,  # Serine (CH2O)
-        "THR": 3,  # Threonine (C2H5O)
-        "TRP": 10, # Tryptophan (C9H8N)
-        "TYR": 8,  # Tyrosine (C7H7O)
-        "VAL": 3   # Valine (C3H7)
-    }
-    
-    return aminoAcidResNames, monovalentIonAtomNames, multivalentIonAtomNames, heavySideChainAtomCounts
 #################################################################################
 if __name__ == "__main__":
     ### for testing
