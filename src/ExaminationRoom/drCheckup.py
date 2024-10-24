@@ -413,11 +413,11 @@ def check_up_handler():
                                                      outDir=kwargs["outDir"], 
                                                      pdbFile=kwargs["refPdb"],
                                                      config=kwargs["config"])
-            except FileNotFoundError as e:
-                drLogger.log_info(f"Error running checkup: {e}", True, True)
-            try:
+
                 check_vitals(simDir = simDir,
                             vitalsFiles = vitalsFiles)
+            except FileNotFoundError as e:
+                drLogger.log_info(f"Error running checkup: File not found: {e}", True, True)
             except Exception as e:
                 drLogger.log_info(f"Error running checkup: {e}", True,True)
             return saveFile

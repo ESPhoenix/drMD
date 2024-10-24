@@ -91,7 +91,7 @@ def run_metadynamics(prmtop: app.Topology,
         if bias["biasVar"].upper() == "RMSD":
             biasVariable: metadynamics.BiasVariable = gen_rmsd_bias_variable(bias, atomCoords, atomIndexes)
             biasVariables.append(biasVariable)
-        elif bias["biasVar"].upper() == "DIHEDRAL":
+        elif bias["biasVar"].upper() == "TORSION":
             biasVariable: metadynamics.BiasVariable = gen_dihedral_bias_variable(bias, atomCoords, atomIndexes)
             biasVariables.append(biasVariable)
         elif bias["biasVar"].upper() == "DISTANCE":

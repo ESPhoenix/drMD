@@ -720,10 +720,12 @@ def make_amber_params(
                 if p.isfile(ligLib):
                     f.write(f"loadoff {ligLib}\n")
 
+
         # Load the protein structure
         f.write(f"mol = loadpdb {pdbFile}\n")
 
         # Solvate the protein and add ions
+
         f.write(f"{solvateKeyword} mol TIP3PBOX 10.0\n")
         f.write("addions mol Na+ 0\n")
         f.write("addions mol Cl- 0\n")

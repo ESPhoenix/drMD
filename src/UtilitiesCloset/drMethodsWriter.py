@@ -84,9 +84,10 @@ def write_hardware_methods(methodsFile: FilePath, config: Dict) -> None:
     gpuData = GPUtil.getGPUs()
 
     hardwareInfo: dict = config["hardwareInfo"]
-    nCpus = hardwareInfo["parallelCpus"] * hardwareInfo["subprocessCpus"]
+    nCpus = hardwareInfo["parallelCPU"] * hardwareInfo["subprocessCpus"]
 
-    with open(methodsFile, "a") as methods:
+    with open(methodsFile, "a", encoding = "utf-8") as methods:
+        methods.write("\n## Hardware Information\n\n")
         if not gpuData:
             methods.write(f"Simulations were performed without GPU acceleration using {nCpus} CPUs.\n\n")
 

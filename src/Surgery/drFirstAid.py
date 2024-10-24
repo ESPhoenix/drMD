@@ -87,8 +87,7 @@ def firstAid_handler(firstAid_function: callable):
                     return saveFile
                 ## if our simulation crashes due to a numeriacal error or an OpenMM exception
                 ## run firstAid protocol to try and recover
-                except (OpenMMException, ValueError) as e:
-                    errorOpenMM = e
+                except (OpenMMException) as errorOpenMM:
                     saveFile, retries = run_first_aid_protocol(retries, maxRetries, *args, **kwargs)
 
             else:
